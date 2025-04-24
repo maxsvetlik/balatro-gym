@@ -203,6 +203,16 @@ class PlayingCard(HasChips):
     def get_chips(self) -> int:
         return self._base_chips + self._added_chips
 
+    def get_mult(self) -> int:
+        if isinstance(self.enhancement, HasMult):
+            return self.enhancement.get_mult()
+        return 0
+
+    def get_multiplication(self) -> int:
+        if isinstance(self.enhancement, HasMultiplier):
+            return int(self.enhancement.get_multiplication())
+        return 1
+
     def set_enhancement(self, enhancement: Optional[Enhancement]) -> None:
         self._enhancement = enhancement
 

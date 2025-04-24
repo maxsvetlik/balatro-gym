@@ -126,7 +126,8 @@ class PlanetCard:
 @dataclasses.dataclass
 class BlindState:
     hand: Sequence[PlayingCard]
-    round_score: int
+    required_score: int
+    current_score: int
     num_hands_remaining: int
     num_discareds_reamining: int
 
@@ -163,13 +164,21 @@ class JokerBase:
     def get_money(self, state: BlindState) -> int:
         return 0
 
-    def get_mult(self, state: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_card(self, card: PlayingCard, state: BlindState) -> int:
         return 0
 
-    def get_x(self, state: BlindState) -> float:
+    def get_mult_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        return 0
+
+    def get_multiplication(
+        self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType
+    ) -> float:
         return 1.0
 
-    def get_chips(self, state: BlindState) -> int:
+    def get_chips_card(self, card: PlayingCard, state: BlindState) -> int:
+        return 0
+
+    def get_chips_hand(self, state: BlindState, scored_hand: PokerHandType) -> int:
         return 0
 
 

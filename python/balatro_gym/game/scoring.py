@@ -1,10 +1,25 @@
 from collections import Counter
 from typing import Sequence
-from balatro_gym.interfaces import BoardState, PokerHandType
-from balatro_gym.cards.interfaces import PlayingCard, Rank
+from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
+from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
+from balatro_gym.cards.joker import JokerBase
 
 
-def score_hand(hand: Sequence[PlayingCard], state: BoardState) -> float:
+def _process_joker_card(
+    joker: JokerBase,
+    card: PlayingCard,
+    hand_type: PokerHandType,
+    board_state: BoardState,
+    blind_state: BlindState,
+) -> tuple[int, float]:
+    chips_sum = 0
+    mult_sum = 0.0
+    chips_sum += joker.get_chips_card(card, blind_state)
+    mult_sum += joker.get_mult_card(card, blind_state)
+    return chips_sum, mult_sum
+
+
+def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state: BlindState) -> float:
     """
     Scoring goes something like this:
 
@@ -34,8 +49,36 @@ def score_hand(hand: Sequence[PlayingCard], state: BoardState) -> float:
                     3) add multiplication | scored_hand
                     4) subtract multiplication | round
     """
+    cards, hand_type = get_poker_hand(hand)
+    hand_val = hand_type.value
+    chips_sum = hand_val.chips
+    mult_sum: float = hand_val.mult
+    money_sum = 0
 
-    return 0.0
+    for card in cards:
+        num_card_retriggers = 2 if isinstance(card.seal, RedSeal) else 1
+        chips_sum += card.get_chips() * num_card_retriggers
+        mult_sum += card.get_mult() * num_card_retriggers
+        mult_sum *= card.get_multiplication() * num_card_retriggers
+        if isinstance(card.enhancement, LuckyCard):
+            money_sum += card.enhancement.get_scored_money()  # TODO this should be influenced by jokers
+        # TODO if card is glass, process the possible destruction
+
+        for joker in board_state.jokers:
+            # TODO track retriggers on jokers
+            chips, mult = _process_joker_card(joker, card, hand_type, board_state, blind_state)
+            chips_sum += chips
+            mult_sum += mult
+        for unplayed_card in blind_state.hand:
+            num_card_retriggers = 2 if isinstance(unplayed_card.seal, RedSeal) else 1
+            mult_sum *= unplayed_card.get_multiplication() * num_card_retriggers
+        for joker in board_state.jokers:
+            chips_sum += joker.get_chips_hand(blind_state, hand_type)
+            mult_sum += joker.get_mult_hand(cards, blind_state, hand_type)
+            mult_sum *= joker.get_multiplication(cards, blind_state, hand_type)
+            money_sum += joker.get_money(blind_state)
+            # TODO update joker. E.g. num hands played influences chips
+    return chips_sum * mult_sum
 
 
 ###### These are broken out for testability
@@ -91,7 +134,7 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
     flush = _get_flush(hand)
     straight = _get_straight(hand)
     is_full = _is_full_house(counts)
-    is_royal = _is_royal(hand)
+    _ = _is_royal(hand)
     max_set = _extract_largest_set(hand, counts)
 
     if flush and straight:

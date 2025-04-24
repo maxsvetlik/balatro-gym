@@ -97,6 +97,7 @@ class RunObservation:
     # shop_state: ShopState
     blind_state: Optional[BlindState]
     action_counter: int
+    done: bool
 
 
 GameActionTypes = Union[HandAction, BoardAction]
@@ -130,7 +131,7 @@ class Run:
     def _end_ante(self) -> None:
         # Call at the end of the ante
         self._board_state.deck.reset()
-        # TODO
+        self._blind_state = None
 
     def _process_board_action(self, action: GameAction) -> None:
         if action.action_type == BoardAction.START_ANTE:
@@ -140,7 +141,7 @@ class Run:
             else:
                 return None
 
-    def _process_hand_action(self, action: GameAction) -> None:
+    def _process_hand_action(self, action: GameAction) -> bool:
         if self._game_state is GameState.IN_ANTE:
             assert self._blind_state is not None
             if action.action_type == HandAction.DISCARD:
@@ -148,26 +149,36 @@ class Run:
                 new_cards = self._board_state.deck.deal(len(discards))
                 self._blind_state.hand = discard(self._blind_state.hand, discards, new_cards)
             if action == HandAction.SCORE_HAND:
-                scored_hand = score_hand(action.selected_playing, self._board_state)
-                # TODO MAX finish this
-                # add score to blind info
-                # check if ante is won or if ante is done
+                hand_score = score_hand(action.selected_playing, self._board_state, self._blind_state)
+                self._blind_state.current_score += int(hand_score)
+
+                if self._blind_state.required_score <= self._blind_state.current_score:
+                    # Ante is won. End ante and transition to next state
+                    self._end_ante()
+                    self._game_state = GameState.IN_BLIND_SELECT
+                    return False
+
+                if self._blind_state.num_hands_remaining == 0:
+                    # Game loss
+                    return True
+        return False
 
     def _setup_ante(self) -> None:
         self._board_state.ante_num += 1
         initial_hand = self._board_state.deck.deal(self._board_state.hand_size)
         req_score = get_blind_required_score(self._board_state.ante_num)
         self._blind_state = BlindState(
-            initial_hand, req_score, self._board_state.num_hands, self._board_state.num_discards
+            initial_hand, req_score, 0, self._board_state.num_hands, self._board_state.num_discards
         )
 
     def step(self, action: Optional[GameAction]) -> RunObservation:
+        done = False
         if action is not None and len(action.selected_playing) > 0:
             if self._blind_state is None:
                 self._setup_ante()
             if isinstance(action, HandAction):
-                self._process_hand_action(action)
+                done = self._process_hand_action(action)
             else:
                 self._process_board_action(action)
         self._action_counter += 1
-        return RunObservation(self._game_state, self._board_state, self._blind_state, self._action_counter)
+        return RunObservation(self._game_state, self._board_state, self._blind_state, self._action_counter, done)
