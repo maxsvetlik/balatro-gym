@@ -228,12 +228,16 @@ class PlayingCard(HasChips):
     def is_face_card(self) -> bool:
         return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK]
 
+    def __print__(self) -> str:
+        return f"{self._base_chips} of {self._rank.value}"
+
 
 class Deck(HasReset):
     _cards_remaining: Sequence[PlayingCard]
     _cards_played: Sequence[PlayingCard]
 
     def __init__(self, cards: Sequence[PlayingCard]) -> None:
+        self._cards_played = []
         self._cards = cards
 
     def reset(self) -> None:

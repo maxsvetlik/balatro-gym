@@ -136,6 +136,9 @@ class ConsummableState(HasReset):
     num_slots: int
     consummables: Sequence[ConsummableCardBase]
 
+    def __init__(self) -> None:
+        self.reset()
+
     def reset(self) -> None:
         self.num_slots = DEFAULT_NUM_CONSUMMABLE
         self.consummables = []
@@ -200,8 +203,11 @@ class BoardState(HasReset):
     round_blinds: Sequence[BlindInfo]
     """Contains the three blinds for the round."""
 
+    def __init__(self) -> None:
+        self.reset()
+
     def reset(self) -> None:
-        self.consummable.reset()
+        self.consummable = ConsummableState()
         self.deck = Deck(STANDARD_DECK)
         self.money = DEFAULT_START_MONEY
         self.jokers = []
@@ -212,3 +218,5 @@ class BoardState(HasReset):
         self.hand_size = 8
         self.vouchers = []
         self.poker_hands = []
+        self.completed_blinds = []
+        self.round_blinds = []

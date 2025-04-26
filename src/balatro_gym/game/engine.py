@@ -118,13 +118,29 @@ class Run:
     _action_counter: int
 
     def __init__(self) -> None:
-        pass
+        self.game_reset()
+
+    @property
+    def game_state(self) -> GameState:
+        return self.game_state
+
+    @property
+    def board_state(self) -> BoardState:
+        return self._board_state
+
+    @property
+    def blind_state(self) -> Optional[BlindState]:
+        return self._blind_state
+
+    @property
+    def blinds(self) -> Sequence[BlindInfo]:
+        return self._run_blinds
 
     def game_reset(self) -> None:
         # Resets the run to the start, with new randomness
         self._game_state = GameState.IN_BLIND_SELECT
         self._blind_state = None
-        self._board_state.reset()
+        self._board_state = BoardState()
         self._run_blinds = generate_run_blinds()
         self._action_counter = 0
 
@@ -134,7 +150,10 @@ class Run:
         self._blind_state = None
 
     def _process_board_action(self, action: GameAction) -> None:
+        print("Here1")
         if action.action_type == BoardAction.START_ANTE:
+            print("Here2")
+
             if self._game_state is GameState.IN_BLIND_SELECT:
                 self._game_state = GameState.IN_ANTE
                 self._setup_ante()
@@ -142,6 +161,8 @@ class Run:
                 return None
 
     def _process_hand_action(self, action: GameAction) -> bool:
+        if len(action.selected_playing) > 0:
+            return False
         if self._game_state is GameState.IN_ANTE:
             assert self._blind_state is not None
             if action.action_type == HandAction.DISCARD:
@@ -173,10 +194,11 @@ class Run:
 
     def step(self, action: Optional[GameAction]) -> RunObservation:
         done = False
-        if action is not None and len(action.selected_playing) > 0:
+
+        if action is not None:
             if self._blind_state is None:
                 self._setup_ante()
-            if isinstance(action, HandAction):
+            if isinstance(action.action_type, HandAction):
                 done = self._process_hand_action(action)
             else:
                 self._process_board_action(action)

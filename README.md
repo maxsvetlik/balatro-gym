@@ -37,15 +37,11 @@ Contributions are welcome. Please fork the repository and open a pull request in
 
 ### Setting up a dev environment
 
-1) Install `uv` for your platform via the instructions [here](https://docs.astral.sh/uv/getting-started/installation/).
+1) Clone this repository
 
-2) Clone this repository
+2) (Optional, but recommended) Create a virtual environment in the project directory
 
-3) (Optional, but recommended) Create a virtual environment in the project directory
+3) Install the project
 ```
-: ~/balatro-gym$ uv venv
-```
-4) Finally, install the dependencies
-```
-: ~/balatro-gym$ uv sync
+pip install -e .
 ```
