@@ -1,0 +1,26 @@
+[project]
+name = "balatro_gym"
+version = "0.0.1"
+description = "A gym wrapper for the balatro game."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "gymnasium>=1.1.0",
+]
+
+[tool.uv.workspace]
+balatro = ["python/balatro"]
+
+[tool.uv.sources]
+balatro = { workspace = true }
+
+# BELOW ARE REQUIRED FOR PACKAGED APPS
+[tool.hatch.build.targets.wheel]
+packages = ["src/balatro_gym"]
+
+[project.scripts]
+hello = "balatro_gym.hello:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
