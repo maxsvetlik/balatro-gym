@@ -228,9 +228,11 @@ class PlayingCard(HasChips):
     def is_face_card(self) -> bool:
         return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK]
 
-    def __print__(self) -> str:
-        return f"{self._base_chips} of {self._rank.value}"
+    def __str__(self) -> str:
+        return f"{self._rank.name} of {self.suit.name}"
 
+    def __repr__(self) -> str:
+        return f"{self._rank.name} of {self.suit.name}"
 
 class Deck(HasReset):
     _cards_remaining: Sequence[PlayingCard]

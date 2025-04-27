@@ -112,6 +112,10 @@ def _get_max_rank(hand: Sequence[PlayingCard]) -> Sequence[tuple[Rank, int]]:
 
 
 def _is_full_house(counts: Sequence[tuple[Rank, int]]) -> bool:
+    if len(counts) < 2:
+        # Only a single card was played, so there aren't multiple counts
+        return False
+
     mc_rank, mc_count = counts[0]
     smc_rank, smc_count = counts[1]
 
