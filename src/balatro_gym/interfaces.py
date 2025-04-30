@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 from enum import Enum, auto
 import dataclasses
+from typing import Any
 
 from .mixins import HasReset
 from .constants import DEFAULT_NUM_CONSUMMABLE, DEFAULT_START_MONEY
@@ -142,6 +143,11 @@ class ConsummableState(HasReset):
     def reset(self) -> None:
         self.num_slots = DEFAULT_NUM_CONSUMMABLE
         self.consummables = []
+
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, ConsummableState):
+            return self.consummables == obj.consummables and self.num_slots == obj.num_slots
+        return False
 
 
 class JokerBase:

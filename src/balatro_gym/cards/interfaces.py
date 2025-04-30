@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from enum import Enum, auto
 import random
-from typing import Optional, Protocol
+from typing import Any, Optional, Protocol
 
 import numpy as np
 
@@ -240,14 +240,15 @@ class Deck(HasReset):
 
     def __init__(self, cards: Sequence[PlayingCard]) -> None:
         self._cards_played = []
-        self._cards = cards
+        self._cards_remaining = cards
 
     def reset(self) -> None:
         self._cards_remaining = [*self._cards_remaining, *self._cards_played]
         self.shuffle()
 
     def add(self, cards: Sequence[PlayingCard]) -> None:
-        self._cards = [*self._cards, *cards]
+        self._cards_remaining = [*self._cards, *cards]
+        self._cards_played = []
         self.shuffle()
 
     def deal(self, num: int) -> Sequence[PlayingCard]:
@@ -271,3 +272,8 @@ class Deck(HasReset):
 
     def get_num_remaining(self) -> int:
         return len(self._cards_remaining)
+    
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, Deck):
+            return self._cards_remaining == obj._cards_remaining and self._cards_played == obj._cards_played
+        return False

@@ -8,6 +8,13 @@ dependencies = [
     "gymnasium>=1.1.0",
     "mypy",
     "ruff",
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
 ]
 
 [tool.uv.workspace]

@@ -1,58 +1,3 @@
-"""
-
-States:
-- At blind selection
-    actions: skip (if blind is Small or Big), select blind
-
-- In a blind:
-    until hands remaining is 0:
-        actions: use consumable, sell consumable, sell joker, select 1-5 cards to discard, select 1-5 cards to play
-        on use consumable:
-            ...
-        on sell consumable:
-            sell(consumable)
-        on sell joker:
-            sell(joker)
-            process sold joker (e.g. disable boss blind)
-        on discard:
-            for card in discarded hand:
-                1) process-stamped | card
-                2) for joker in jokers:
-                    process joker | card
-                3) move card to discard pile
-
-        on score hand
-            subtract 1 from hands remaining
-            for card in scored_hand:
-                score card:
-                    1) take chips value
-                    2) take mult value
-                    3) ...
-                for joker in jokers:
-                    score joker:
-                        1) take chips | card
-                        2) take mult | card
-                        3) take retrigger | card
-            for card in non_scored_hand:
-                score card:
-                    1) take multiplication
-
-            for joker in jokers:
-                score joker:
-                    1) take chips | scored_hand
-                    2) take mult | scored_hand
-                    3) take mulitiplcation | scored_hand
-                    4) take money | scored_hand
-                update joker:
-                    1) add chips | scored_hand
-                    2) add mult | scored_hand
-                    3) add multiplication | scored_hand
-                    4) subtract multiplication | round
-
-
-
-"""
-
 import dataclasses
 from enum import Enum, IntEnum, auto
 from typing import Optional, Sequence, Union
@@ -122,7 +67,7 @@ class Run:
 
     @property
     def game_state(self) -> GameState:
-        return self.game_state
+        return self._game_state
 
     @property
     def board_state(self) -> BoardState:
@@ -135,6 +80,10 @@ class Run:
     @property
     def blinds(self) -> Sequence[BlindInfo]:
         return self._run_blinds
+    
+    @property
+    def action_counter(self) -> int:
+        return self._action_counter
 
     def game_reset(self) -> None:
         # Resets the run to the start, with new randomness
