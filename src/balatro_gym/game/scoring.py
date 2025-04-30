@@ -1,8 +1,9 @@
 from collections import Counter
 from typing import Sequence
-from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
+
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
 from balatro_gym.cards.joker import JokerBase
+from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
 
 
 def _process_joker_card(

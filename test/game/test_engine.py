@@ -1,7 +1,8 @@
-from balatro_gym.interfaces import BoardState
 import pytest
 
 from balatro_gym.game.engine import GameState, Run
+from balatro_gym.interfaces import BoardState
+
 
 @pytest.mark.unit
 def test_game_reset() -> None:

@@ -6,7 +6,7 @@ from balatro_gym.game.scoring import score_hand
 
 from ..cards.decks import discard
 from ..cards.interfaces import PlayingCard
-from ..interfaces import BoardState, BlindState
+from ..interfaces import BlindState, BoardState
 from .blinds import BlindInfo, generate_run_blinds, get_blind_required_score
 
 

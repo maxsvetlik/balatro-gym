@@ -17,6 +17,9 @@ markers = [
     "integration: Integration tests",
 ]
 
+[tool.ruff]
+lint.extend-select = ["I"]
+
 [tool.uv.workspace]
 balatro = ["python/balatro"]
 

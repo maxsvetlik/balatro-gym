@@ -1,11 +1,20 @@
+import random
 from collections.abc import Sequence
 from enum import Enum, auto
-import random
 from typing import Any, Optional, Protocol
 
 import numpy as np
 
-from ..mixins import HasChips, HasMult, HasMultiplier, HasMoney, HasReset, HasRetrigger, HasCreatePlanet, HasCreateTarot
+from ..mixins import (
+    HasChips,
+    HasCreatePlanet,
+    HasCreateTarot,
+    HasMoney,
+    HasMult,
+    HasMultiplier,
+    HasReset,
+    HasRetrigger,
+)
 
 
 class Suit(Enum):

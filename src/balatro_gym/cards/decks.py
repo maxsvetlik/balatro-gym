@@ -1,7 +1,7 @@
-from typing import Sequence
-from .interfaces import PlayingCard, Rank, Suit
-
 import itertools
+from typing import Sequence
+
+from .interfaces import PlayingCard, Rank, Suit
 
 STANDARD_DECK: Sequence[PlayingCard] = [
     PlayingCard(rank, suit, None, None, None)

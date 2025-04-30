@@ -1,6 +1,7 @@
-from typing import Sequence
-from balatro_gym.game.engine import BoardAction, GameAction, GameState, HandAction, Run
 from pprint import pprint
+from typing import Sequence
+
+from balatro_gym.game.engine import BoardAction, GameAction, GameState, HandAction, Run
 
 
 def _cards_idxs(cards: Sequence[str]) -> Sequence[int]:
