@@ -258,7 +258,10 @@ class PlayingCard(HasChips):
 
     def __repr__(self) -> str:
         return f"{self._rank.name} of {self.suit.name}"
-
+    
+    def __hash__(self) -> int:
+        return hash(self._base_suit) + hash(self._enhancement) + hash(self._edition) + hash(self._base_chips) + hash(self._seal) + hash(self._added_chips)
+    
 class Deck(HasReset):
     _cards_remaining: deque[PlayingCard]
     _cards_played: deque[PlayingCard]
