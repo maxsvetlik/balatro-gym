@@ -1,4 +1,6 @@
+import copy
 import random
+from collections import deque
 from collections.abc import Sequence
 from enum import Enum, auto
 from typing import Any, Optional, Protocol
@@ -23,22 +25,34 @@ class Suit(Enum):
     DIAMONDS = auto()
     HEARTS = auto()
 
+class RankVal:
+    """An annoying workaround to allow using an Enum since aenum doesn't have good typing support."""
+    _val: int
+
+    def __init__(self, val: int) -> None:
+        self._val = val
+
+    @property
+    def value(self) -> int:
+        return self._val
 
 class Rank(Enum):
-    ACE = 11
-    KING = 10
-    QUEEN = 10
-    JACK = 10
-    TEN = 10
-    NINE = 9
-    EIGHT = 8
-    SEVEN = 7
-    SIX = 6
-    FIVE = 5
-    FOUR = 4
-    THREE = 3
-    TWO = 2
-    ONE = 1
+    ACE = RankVal(11)
+    KING = RankVal(10)
+    QUEEN = RankVal(10)
+    JACK = RankVal(10)
+    TEN = RankVal(10)
+    NINE = RankVal(9)
+    EIGHT = RankVal(8)
+    SEVEN = RankVal(7)
+    SIX = RankVal(6)
+    FIVE = RankVal(5)
+    FOUR = RankVal(4)
+    THREE = RankVal(3)
+    TWO = RankVal(2)
+
+
+
 
 
 ############# Editions
@@ -186,7 +200,7 @@ class PlayingCard(HasChips):
         self._enhancement = enhancement
         self._edition = edition
         self._seal = seal
-        self._base_chips = rank.value
+        self._base_chips = rank.value.value
         self._added_chips = 0
 
     @property
@@ -237,6 +251,11 @@ class PlayingCard(HasChips):
     def is_face_card(self) -> bool:
         return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK]
 
+    def __eq__(self, value: Any) -> bool:
+        if isinstance(value, PlayingCard):
+            return self._rank == value._rank and self._added_chips == value._added_chips and self._base_chips == value._base_chips and self._base_suit == value._base_suit and self._edition == value._edition and self._seal == value._seal
+        return False
+    
     def __str__(self) -> str:
         return f"{self._rank.name} of {self.suit.name}"
 
@@ -244,40 +263,43 @@ class PlayingCard(HasChips):
         return f"{self._rank.name} of {self.suit.name}"
 
 class Deck(HasReset):
-    _cards_remaining: Sequence[PlayingCard]
-    _cards_played: Sequence[PlayingCard]
+    _cards_remaining: deque[PlayingCard]
+    _cards_played: deque[PlayingCard]
 
     def __init__(self, cards: Sequence[PlayingCard]) -> None:
-        self._cards_played = []
-        self._cards_remaining = cards
+        self._cards_played = deque()
+        self._cards_remaining = deque(cards)
 
+    @property
+    def cards_remaining(self) -> Sequence[PlayingCard]:
+        return [*self._cards_remaining]
+    
+    @property
+    def cards_played(self) -> Sequence[PlayingCard]:
+        return [*self._cards_played]
+    
     def reset(self) -> None:
-        self._cards_remaining = [*self._cards_remaining, *self._cards_played]
+        self._cards_remaining = deque([*self._cards_remaining, *self._cards_played])
         self.shuffle()
 
     def add(self, cards: Sequence[PlayingCard]) -> None:
-        self._cards_remaining = [*self._cards, *cards]
-        self._cards_played = []
+        self._cards_remaining.extend(cards)
         self.shuffle()
 
     def deal(self, num: int) -> Sequence[PlayingCard]:
-        delt: list[PlayingCard] = []
-        for _ in range(num):
-            selected = random.choice(self._cards)
-            self._remove([selected])
-            self._cards_played = [*self._cards_played, selected]
-            delt.append(selected)
+        delt = [self._cards_remaining.pop() for i in range(num)]
+        self._cards_played.extend(delt)
         return delt
 
-    def _remove(self, cards: Sequence[PlayingCard]) -> None:
-        for card in cards:
-            list(self._cards).remove(card)
-
     def destroy(self, cards: Sequence[PlayingCard]) -> None:
-        self._remove(cards)
+        """Destroyed cards are removed permanently. Though, this can only happen to cards in-play."""
+        for card in cards:
+            self._cards_remaining.remove(card)
 
     def shuffle(self) -> None:
-        random.shuffle(list(self._cards))
+        cards = list(copy.deepcopy(self._cards_remaining))
+        random.shuffle(cards)
+        self._cards_remaining = deque(cards)
 
     def get_num_remaining(self) -> int:
         return len(self._cards_remaining)

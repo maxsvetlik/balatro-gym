@@ -9,6 +9,7 @@ dependencies = [
     "mypy",
     "ruff",
     "pytest",
+    "aenum",
 ]
 
 [tool.pytest.ini_options]

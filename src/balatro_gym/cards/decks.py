@@ -5,7 +5,7 @@ from .interfaces import PlayingCard, Rank, Suit
 
 STANDARD_DECK: Sequence[PlayingCard] = [
     PlayingCard(rank, suit, None, None, None)
-    for suit, rank in itertools.product([suit for suit in Suit], [rank for rank in Rank])
+    for suit, rank in itertools.product([suit for suit in Suit], [rank for rank in Rank]) # type: ignore
 ]
 
 
