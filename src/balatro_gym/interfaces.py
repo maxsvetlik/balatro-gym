@@ -130,7 +130,7 @@ class BlindState:
     required_score: int
     current_score: int
     num_hands_remaining: int
-    num_discareds_reamining: int
+    num_discards_reamining: int
 
 
 class ConsummableState(HasReset):
@@ -217,7 +217,7 @@ class BoardState(HasReset):
         self.deck = Deck(STANDARD_DECK)
         self.money = DEFAULT_START_MONEY
         self.jokers = []
-        self.ante_num = 1
+        self.ante_num = 0
         self.round_num = 1
         self.num_hands = 4
         self.num_discards = 3

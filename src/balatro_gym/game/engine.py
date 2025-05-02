@@ -108,31 +108,33 @@ class Run:
 
     def _process_hand_action(self, action: GameAction) -> bool:
         if len(action.selected_playing) == 0:
-            return False        
+            return False
         if self._game_state is GameState.IN_ANTE:
             assert self._blind_state is not None
             if action.action_type == HandAction.DISCARD:
+                if self._blind_state.num_discards_reamining == 0:
+                    return False
                 new_cards = self._board_state.deck.deal(len(action.selected_playing))
                 self._blind_state.hand = discard(self._blind_state.hand, action.selected_playing, new_cards)
-                self._blind_state.num_discareds_reamining -= 1
+                self._blind_state.num_discards_reamining -= 1
 
             if action.action_type == HandAction.SCORE_HAND:
                 hand_score = score_hand(action.selected_playing, self._board_state, self._blind_state)
                 self._blind_state.current_score += int(hand_score)
+                self._blind_state.num_hands_remaining -= 1
 
                 if self._blind_state.required_score <= self._blind_state.current_score:
                     # Ante is won. End ante and transition to next state
                     self._end_ante()
                     self._game_state = GameState.IN_BLIND_SELECT
-                    return False
+                    return True
 
-                if self._blind_state.num_hands_remaining == 0:
+                if self._blind_state.num_hands_remaining < 0:
                     # Game loss
                     return True
                 
                 new_cards = self._board_state.deck.deal(len(action.selected_playing))
                 self._blind_state.hand = discard(self._blind_state.hand, action.selected_playing, new_cards)
-                self._blind_state.num_hands_remaining -= 1
 
         return False
 

@@ -52,9 +52,6 @@ class Rank(Enum):
     TWO = RankVal(2)
 
 
-
-
-
 ############# Editions
 class Edition(HasChips, HasMult, HasMultiplier, Protocol):
     def is_negative(self) -> bool:
