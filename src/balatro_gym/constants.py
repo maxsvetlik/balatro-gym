@@ -1,6 +1,5 @@
 from collections.abc import Mapping
 
-
 DEFAULT_NUM_CONSUMMABLE = 2
 DEFAULT_START_MONEY = 4
 

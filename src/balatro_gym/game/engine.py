@@ -1,58 +1,3 @@
-"""
-
-States:
-- At blind selection
-    actions: skip (if blind is Small or Big), select blind
-
-- In a blind:
-    until hands remaining is 0:
-        actions: use consumable, sell consumable, sell joker, select 1-5 cards to discard, select 1-5 cards to play
-        on use consumable:
-            ...
-        on sell consumable:
-            sell(consumable)
-        on sell joker:
-            sell(joker)
-            process sold joker (e.g. disable boss blind)
-        on discard:
-            for card in discarded hand:
-                1) process-stamped | card
-                2) for joker in jokers:
-                    process joker | card
-                3) move card to discard pile
-
-        on score hand
-            subtract 1 from hands remaining
-            for card in scored_hand:
-                score card:
-                    1) take chips value
-                    2) take mult value
-                    3) ...
-                for joker in jokers:
-                    score joker:
-                        1) take chips | card
-                        2) take mult | card
-                        3) take retrigger | card
-            for card in non_scored_hand:
-                score card:
-                    1) take multiplication
-
-            for joker in jokers:
-                score joker:
-                    1) take chips | scored_hand
-                    2) take mult | scored_hand
-                    3) take mulitiplcation | scored_hand
-                    4) take money | scored_hand
-                update joker:
-                    1) add chips | scored_hand
-                    2) add mult | scored_hand
-                    3) add multiplication | scored_hand
-                    4) subtract multiplication | round
-
-
-
-"""
-
 import dataclasses
 from enum import Enum, IntEnum, auto
 from typing import Optional, Sequence, Union
@@ -61,7 +6,7 @@ from balatro_gym.game.scoring import score_hand
 
 from ..cards.decks import discard
 from ..cards.interfaces import PlayingCard
-from ..interfaces import BoardState, BlindState
+from ..interfaces import BlindState, BoardState
 from .blinds import BlindInfo, generate_run_blinds, get_blind_required_score
 
 
@@ -122,7 +67,7 @@ class Run:
 
     @property
     def game_state(self) -> GameState:
-        return self.game_state
+        return self._game_state
 
     @property
     def board_state(self) -> BoardState:
@@ -135,6 +80,10 @@ class Run:
     @property
     def blinds(self) -> Sequence[BlindInfo]:
         return self._run_blinds
+    
+    @property
+    def action_counter(self) -> int:
+        return self._action_counter
 
     def game_reset(self) -> None:
         # Resets the run to the start, with new randomness
@@ -150,10 +99,7 @@ class Run:
         self._blind_state = None
 
     def _process_board_action(self, action: GameAction) -> None:
-        print("Here1")
         if action.action_type == BoardAction.START_ANTE:
-            print("Here2")
-
             if self._game_state is GameState.IN_BLIND_SELECT:
                 self._game_state = GameState.IN_ANTE
                 self._setup_ante()
@@ -161,27 +107,35 @@ class Run:
                 return None
 
     def _process_hand_action(self, action: GameAction) -> bool:
-        if len(action.selected_playing) > 0:
+        if len(action.selected_playing) == 0:
             return False
         if self._game_state is GameState.IN_ANTE:
             assert self._blind_state is not None
             if action.action_type == HandAction.DISCARD:
-                discards = action.selected_playing
-                new_cards = self._board_state.deck.deal(len(discards))
-                self._blind_state.hand = discard(self._blind_state.hand, discards, new_cards)
-            if action == HandAction.SCORE_HAND:
+                if self._blind_state.num_discards_reamining == 0:
+                    return False
+                new_cards = self._board_state.deck.deal(len(action.selected_playing))
+                self._blind_state.hand = discard(self._blind_state.hand, action.selected_playing, new_cards)
+                self._blind_state.num_discards_reamining -= 1
+
+            if action.action_type == HandAction.SCORE_HAND:
                 hand_score = score_hand(action.selected_playing, self._board_state, self._blind_state)
                 self._blind_state.current_score += int(hand_score)
+                self._blind_state.num_hands_remaining -= 1
 
                 if self._blind_state.required_score <= self._blind_state.current_score:
                     # Ante is won. End ante and transition to next state
                     self._end_ante()
                     self._game_state = GameState.IN_BLIND_SELECT
-                    return False
+                    return True
 
-                if self._blind_state.num_hands_remaining == 0:
+                if self._blind_state.num_hands_remaining < 0:
                     # Game loss
                     return True
+                
+                new_cards = self._board_state.deck.deal(len(action.selected_playing))
+                self._blind_state.hand = discard(self._blind_state.hand, action.selected_playing, new_cards)
+
         return False
 
     def _setup_ante(self) -> None:

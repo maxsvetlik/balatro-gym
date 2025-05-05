@@ -1,12 +1,13 @@
+import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-import dataclasses
+from typing import Any
 
-from .mixins import HasReset
-from .constants import DEFAULT_NUM_CONSUMMABLE, DEFAULT_START_MONEY
-from .cards.interfaces import PlayingCard, Deck
 from .cards.decks import STANDARD_DECK
+from .cards.interfaces import Deck, PlayingCard
+from .constants import DEFAULT_NUM_CONSUMMABLE, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
+from .mixins import HasReset
 
 __all__ = [
     "Tag",
@@ -129,7 +130,7 @@ class BlindState:
     required_score: int
     current_score: int
     num_hands_remaining: int
-    num_discareds_reamining: int
+    num_discards_reamining: int
 
 
 class ConsummableState(HasReset):
@@ -142,6 +143,11 @@ class ConsummableState(HasReset):
     def reset(self) -> None:
         self.num_slots = DEFAULT_NUM_CONSUMMABLE
         self.consummables = []
+
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, ConsummableState):
+            return self.consummables == obj.consummables and self.num_slots == obj.num_slots
+        return False
 
 
 class JokerBase:
@@ -211,7 +217,7 @@ class BoardState(HasReset):
         self.deck = Deck(STANDARD_DECK)
         self.money = DEFAULT_START_MONEY
         self.jokers = []
-        self.ante_num = 1
+        self.ante_num = 0
         self.round_num = 1
         self.num_hands = 4
         self.num_discards = 3

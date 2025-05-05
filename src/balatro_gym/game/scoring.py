@@ -1,8 +1,9 @@
 from collections import Counter
 from typing import Sequence
-from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
+
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
 from balatro_gym.cards.joker import JokerBase
+from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
 
 
 def _process_joker_card(
@@ -112,6 +113,10 @@ def _get_max_rank(hand: Sequence[PlayingCard]) -> Sequence[tuple[Rank, int]]:
 
 
 def _is_full_house(counts: Sequence[tuple[Rank, int]]) -> bool:
+    if len(counts) < 2:
+        # Only a single card was played, so there aren't multiple counts
+        return False
+
     mc_rank, mc_count = counts[0]
     smc_rank, smc_count = counts[1]
 
