@@ -43,7 +43,7 @@ THREE_SET = [
     PlayingCard(2, Suit.SPADES, None, None, None),
     PlayingCard(2, Suit.DIAMONDS, None, None, None),
 ]
-TWO_PAIRS = [
+TWO_PAIR = [
     PlayingCard(2, Suit.HEARTS, None, None, None),
     PlayingCard(2, Suit.SPADES, None, None, None),
     PlayingCard(5, Suit.DIAMONDS, None, None, None),
@@ -75,7 +75,7 @@ HIGH_CARD = [
     [FULL_HOUSE, PokerHandType.FULL_HOUSE],
     [FOUR_SET, PokerHandType.FOUR_SET],
     [THREE_SET, PokerHandType.THREE_SET],
-    [TWO_PAIRS, PokerHandType.TWO_PAIRS],
+    [TWO_PAIR, PokerHandType.TWO_PAIR],
     [PAIR, PokerHandType.PAIR],
     [HIGH_CARD, PokerHandType.HIGH_CARD],
 ])

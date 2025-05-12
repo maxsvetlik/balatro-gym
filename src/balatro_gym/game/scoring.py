@@ -114,7 +114,7 @@ def _get_straight(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
 
 
 def _is_royal(hand: Sequence[PlayingCard]) -> bool:
-    return set([card.rank.value.order for card in hand]) == {0, 9, 10, 11, 12}
+    return set([card.rank.value.order for card in hand]) == {1, 10, 11, 12, 13}
 
 
 def _get_max_rank(hand: Sequence[PlayingCard]) -> Sequence[tuple[Rank, int]]:
@@ -135,7 +135,7 @@ def _is_full_house(counts: Sequence[tuple[Rank, int]]) -> bool:
     return False
 
 
-def _is_two_pairs(counts: Sequence[tuple[Rank, int]]) -> bool:
+def _is_two_pair(counts: Sequence[tuple[Rank, int]]) -> bool:
     if len(counts) < 2:
         # Only a single card was played, so there aren't multiple counts
         return False
@@ -162,7 +162,7 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
     flush = len(_get_flush(hand)) == 5
     straight = len(_get_straight(hand)) == 5
     is_full = _is_full_house(counts)
-    is_two_pairs = _is_two_pairs(counts)
+    is_two_pair = _is_two_pair(counts)
     is_royal = _is_royal(hand)
     max_set = _extract_largest_set(hand, counts)
 
@@ -186,8 +186,8 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
         return hand, PokerHandType.FULL_HOUSE
     elif len(max_set) == 3:
         return max_set, PokerHandType.THREE_SET
-    elif is_two_pairs:
-        return [card for card in hand if card.rank in set([counts[0][0], counts[1][0]])], PokerHandType.TWO_PAIRS
+    elif is_two_pair:
+        return [card for card in hand if card.rank in set([counts[0][0], counts[1][0]])], PokerHandType.TWO_PAIR
     elif len(max_set) == 2:
         return max_set, PokerHandType.PAIR
     else:
