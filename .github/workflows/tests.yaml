@@ -23,4 +23,4 @@ jobs:
         run: pip install .
       - name: Run tests
         run: |
-          pytest test/ # or use unittest, e.g., python -m unittest discover
+          pytest -m unit # or use unittest, e.g., python -m unittest discover

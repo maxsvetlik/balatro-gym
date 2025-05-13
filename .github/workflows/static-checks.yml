@@ -25,5 +25,3 @@ jobs:
         run: mypy .
       - name: Run ruff
         run: ruff check
-      - name: Pytest
-        run: pytest -m unit
