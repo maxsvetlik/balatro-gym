@@ -163,8 +163,6 @@ class Run:
         done = False
 
         if action is not None:
-            if self._blind_state is None:
-                self._setup_round()
             if isinstance(action.action_type, HandAction):
                 done = self._process_hand_action(action)
             else:
