@@ -73,17 +73,17 @@ class PokerScale:
 
 
 class PokerHandType(Enum):
-    HIGH_CARD = PokerScale(1, 10)
-    PAIR = PokerScale(1, 15)
+    HIGH_CARD = PokerScale(1, 5)
+    PAIR = PokerScale(2, 10)
     TWO_PAIR = PokerScale(2, 20)
     THREE_SET = PokerScale(3, 30)
     FULL_HOUSE = PokerScale(4, 40)
-    FLUSH_HOUSE = PokerScale(3, 50)
-    FOUR_SET = PokerScale(3, 30)
-    FIVE_SET = PokerScale(3, 35)
-    FLUSH = PokerScale(2, 15)
+    FLUSH_HOUSE = PokerScale(14, 140)
+    FOUR_SET = PokerScale(7, 60)
+    FIVE_SET = PokerScale(12, 120)
+    FLUSH = PokerScale(4, 35)
     ROYAL_FLUSH = PokerScale(8, 100)
-    STRAIGHT = PokerScale(3, 30)
+    STRAIGHT = PokerScale(4, 30)
     STRAIGHT_FLUSH = PokerScale(8, 100)
     FLUSH_FIVE = PokerScale(16, 160)
 
