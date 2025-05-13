@@ -3,7 +3,7 @@ import random
 from collections import deque
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol
+from typing import Any, Optional, Protocol, Union
 
 import numpy as np
 
@@ -28,28 +28,53 @@ class Suit(Enum):
 class RankVal:
     """An annoying workaround to allow using an Enum since aenum doesn't have good typing support."""
     _val: int
+    _order: int
 
-    def __init__(self, val: int) -> None:
+    def __init__(self, val: int, order: int) -> None:
         self._val = val
+        self._order = order
 
     @property
     def value(self) -> int:
         return self._val
 
+    @property
+    def order(self) -> int:
+        return self._order
+
 class Rank(Enum):
-    ACE = RankVal(11)
-    KING = RankVal(10)
-    QUEEN = RankVal(10)
-    JACK = RankVal(10)
-    TEN = RankVal(10)
-    NINE = RankVal(9)
-    EIGHT = RankVal(8)
-    SEVEN = RankVal(7)
-    SIX = RankVal(6)
-    FIVE = RankVal(5)
-    FOUR = RankVal(4)
-    THREE = RankVal(3)
-    TWO = RankVal(2)
+    ACE = RankVal(11, 1)
+    KING = RankVal(10, 13)
+    QUEEN = RankVal(10, 12)
+    JACK = RankVal(10, 11)
+    TEN = RankVal(10, 10)
+    NINE = RankVal(9, 9)
+    EIGHT = RankVal(8, 8)
+    SEVEN = RankVal(7, 7)
+    SIX = RankVal(6, 6)
+    FIVE = RankVal(5, 5)
+    FOUR = RankVal(4, 4)
+    THREE = RankVal(3, 3)
+    TWO = RankVal(2, 2)
+
+    @staticmethod
+    def from_int(int_rank: int) -> "Rank":
+        int_to_rank_map = {
+            1: Rank.ACE,
+            2: Rank.TWO,
+            3: Rank.THREE,
+            4: Rank.FOUR,
+            5: Rank.FIVE,
+            6: Rank.SIX,
+            7: Rank.SEVEN,
+            8: Rank.EIGHT,
+            9: Rank.NINE,
+            10: Rank.TEN,
+            11: Rank.JACK,
+            12: Rank.QUEEN,
+            13: Rank.KING,
+        }
+        return int_to_rank_map[int_rank]
 
 
 ############# Editions
@@ -186,18 +211,18 @@ class PlayingCard(HasChips):
 
     def __init__(
         self,
-        rank: Rank,
+        rank: Union[Rank, int],
         base_suit: Suit,
         enhancement: Optional[Enhancement],
         edition: Optional[Edition],
         seal: Optional[Seal],
     ):
-        self._rank = rank
+        self._rank = rank if isinstance(rank, Rank) else Rank.from_int(rank)
         self._base_suit = base_suit
         self._enhancement = enhancement
         self._edition = edition
         self._seal = seal
-        self._base_chips = rank.value.value
+        self._base_chips = self._rank.value.value
         self._added_chips = 0
 
     @property

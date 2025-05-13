@@ -98,13 +98,23 @@ def _get_flush(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
         return hand
     return []
 
+def is_consecutive(ordered_ranks: Sequence[int]) -> bool:
+    prev_rank = ordered_ranks[0]
+    for rank in ordered_ranks[1:]:
+        if not (rank == prev_rank + 1):
+            return False
+        prev_rank = rank
+    return True
 
 def _get_straight(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
+    sorted_ranks = sorted([card.rank.value.order for card in hand])
+    if is_consecutive(sorted_ranks) or _is_royal(hand):
+        return hand
     return []
 
 
 def _is_royal(hand: Sequence[PlayingCard]) -> bool:
-    return all([card.is_face_card() for card in hand])
+    return set([card.rank.value.order for card in hand]) == {1, 10, 11, 12, 13}
 
 
 def _get_max_rank(hand: Sequence[PlayingCard]) -> Sequence[tuple[Rank, int]]:
@@ -125,6 +135,19 @@ def _is_full_house(counts: Sequence[tuple[Rank, int]]) -> bool:
     return False
 
 
+def _is_two_pair(counts: Sequence[tuple[Rank, int]]) -> bool:
+    if len(counts) < 2:
+        # Only a single card was played, so there aren't multiple counts
+        return False
+
+    mc_rank, mc_count = counts[0]
+    smc_rank, smc_count = counts[1]
+
+    if mc_count == 2 and smc_count == 2:
+        return True
+    return False
+
+
 def _extract_largest_set(hand: Sequence[PlayingCard], counts: Sequence[tuple[Rank, int]]) -> Sequence[PlayingCard]:
     mc_rank, mc_count = counts[0]
     return [card for card in hand if card.rank == mc_rank]
@@ -136,14 +159,21 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
         Straight flush, straight, flush, five set, four set, flush house, full house, three set, two set, one set
     """
     counts = _get_max_rank(hand)
-    flush = _get_flush(hand)
-    straight = _get_straight(hand)
+    flush = len(_get_flush(hand)) == 5
+    straight = len(_get_straight(hand)) == 5
     is_full = _is_full_house(counts)
-    _ = _is_royal(hand)
+    is_two_pair = _is_two_pair(counts)
+    is_royal = _is_royal(hand)
     max_set = _extract_largest_set(hand, counts)
 
-    if flush and straight:
+    if is_royal and flush and straight:
+        return hand, PokerHandType.ROYAL_FLUSH
+    elif flush and straight:
         return hand, PokerHandType.STRAIGHT_FLUSH
+    elif flush and is_full:
+        return hand, PokerHandType.FLUSH_HOUSE
+    elif flush and len(max_set) == 5:
+        return hand, PokerHandType.FLUSH_FIVE
     elif straight:
         return hand, PokerHandType.STRAIGHT
     elif flush:
@@ -156,7 +186,9 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
         return hand, PokerHandType.FULL_HOUSE
     elif len(max_set) == 3:
         return max_set, PokerHandType.THREE_SET
+    elif is_two_pair:
+        return [card for card in hand if card.rank in set([counts[0][0], counts[1][0]])], PokerHandType.TWO_PAIR
     elif len(max_set) == 2:
-        return max_set, PokerHandType.FIVE_SET
+        return max_set, PokerHandType.PAIR
     else:
         return max_set, PokerHandType.HIGH_CARD

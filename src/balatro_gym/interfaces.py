@@ -75,16 +75,17 @@ class PokerScale:
 class PokerHandType(Enum):
     HIGH_CARD = PokerScale(1, 10)
     PAIR = PokerScale(1, 15)
-    THREE_SET = PokerScale(2, 20)
+    TWO_PAIR = PokerScale(2, 20)
+    THREE_SET = PokerScale(3, 30)
     FULL_HOUSE = PokerScale(4, 40)
     FLUSH_HOUSE = PokerScale(3, 50)
     FOUR_SET = PokerScale(3, 30)
     FIVE_SET = PokerScale(3, 35)
-    ROYAL_FIVE_SET = PokerScale(3, 50)
     FLUSH = PokerScale(2, 15)
-    ROYAL_FLUSH = PokerScale(2, 15)
+    ROYAL_FLUSH = PokerScale(8, 100)
     STRAIGHT = PokerScale(3, 30)
     STRAIGHT_FLUSH = PokerScale(4, 40)
+    FLUSH_FIVE = PokerScale(16, 160)
 
 
 class ConsummableCardBase: ...
