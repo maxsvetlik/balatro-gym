@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 
-DEFAULT_NUM_CONSUMMABLE = 2
+DEFAULT_NUM_CONSUMABLE = 2
 DEFAULT_START_MONEY = 4
 
 BLIND_ANTE_TO_BASE: Mapping[int, float] = {

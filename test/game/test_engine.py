@@ -52,10 +52,10 @@ def test_process_hand_action_discard() -> None:
     run = Run()
     run._process_board_action(GameAction(BoardAction.START_ANTE, []))
     assert run.blind_state
-    num_discards = run.blind_state.num_discards_reamining
+    num_discards = run.blind_state.num_discards_remaining
     for i in range(1, num_discards+1):
         run._process_hand_action(GameAction(HandAction.DISCARD, [run.blind_state.hand[0]]))
-        assert num_discards == run.blind_state.num_discards_reamining + i
+        assert num_discards == run.blind_state.num_discards_remaining + i
 
     # Check that discards aren't processed after running out
     old_blind_state = copy.deepcopy(run.blind_state)
