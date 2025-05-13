@@ -51,9 +51,9 @@ class Rank(Enum):
     THREE = RankVal(3)
     TWO = RankVal(2)
 
-    # def __deepcopy__(self, memo):
-    #     # Return the same enum instance—skip deepcopy
-    #     return self
+    def __deepcopy__(self, memo):
+        # Return the same enum instance—skip deepcopy
+        return self
 
 
 ############# Editions
