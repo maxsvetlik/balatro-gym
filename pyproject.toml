@@ -19,7 +19,8 @@ markers = [
 ]
 
 [tool.ruff]
-lint.extend-select = ["I"]
+lint.extend-select = ["I", "E", "W"]
+line-length = 120
 
 [tool.uv.workspace]
 balatro = ["python/balatro"]
