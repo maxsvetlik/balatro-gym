@@ -100,13 +100,12 @@ class Run:
     def _end_ante(self) -> None:
         # Call at the end of the ante
         self._board_state.deck.reset()
-        self._board_state.ante_num += 1
 
     def _process_board_action(self, action: GameAction) -> None:
         if action.action_type == BoardAction.START_ANTE:
             if self._game_state is GameState.IN_BLIND_SELECT:
                 self._game_state = GameState.IN_ANTE
-                self._setup_round()
+                self._setup_ante()
             else:
                 return None
 
@@ -155,10 +154,15 @@ class Run:
             initial_hand, req_score, 0, self._board_state.num_hands, self._board_state.num_discards, money_reward
         )
 
+    def _setup_ante(self) -> None:
+        self._board_state.ante_num += 1
+
     def step(self, action: Optional[GameAction]) -> RunObservation:
         done = False
 
         if action is not None:
+            if self._blind_state is None:
+                self._setup_round()
             if isinstance(action.action_type, HandAction):
                 done = self._process_hand_action(action)
             else:
