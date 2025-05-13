@@ -21,14 +21,14 @@ def test_game_reset() -> None:
 def test_process_board_action_state_transition() -> None:
     run = Run()
     assert run.game_state == GameState.IN_BLIND_SELECT
-    run._process_board_action(GameAction(BoardAction.START_ANTE, []))
+    run._process_board_action(GameAction(BoardAction.START_ROUND, []))
     assert run.game_state == GameState.IN_ANTE
 
 @pytest.mark.unit
 def test_process_hand_action_state_transition_win() -> None:
     run = Run()
     assert run.game_state == GameState.IN_BLIND_SELECT
-    run._process_board_action(GameAction(BoardAction.START_ANTE, []))
+    run._process_board_action(GameAction(BoardAction.START_ROUND, []))
     assert run.blind_state
     req_score = run.blind_state.required_score
     with patch("balatro_gym.game.engine.score_hand", lambda x,y,z: req_score+1):
@@ -38,7 +38,7 @@ def test_process_hand_action_state_transition_win() -> None:
 def test_process_hand_action_state_transition_loss() -> None:
     run = Run()
     assert run.game_state == GameState.IN_BLIND_SELECT
-    run._process_board_action(GameAction(BoardAction.START_ANTE, []))
+    run._process_board_action(GameAction(BoardAction.START_ROUND, []))
     assert run.blind_state
     num_hands = run.blind_state.num_hands_remaining
     terminal = False
@@ -50,7 +50,7 @@ def test_process_hand_action_state_transition_loss() -> None:
 @pytest.mark.unit
 def test_process_hand_action_discard() -> None:
     run = Run()
-    run._process_board_action(GameAction(BoardAction.START_ANTE, []))
+    run._process_board_action(GameAction(BoardAction.START_ROUND, []))
     assert run.blind_state
     num_discards = run.blind_state.num_discards_remaining
     for i in range(1, num_discards+1):
@@ -66,7 +66,15 @@ def test_process_hand_action_discard() -> None:
 def test_setup_ante() -> None:
     run = Run()
     assert run.board_state.ante_num == 0
-    assert run.blind_state is None
     run._setup_ante()
     assert run.board_state.ante_num == 1
+
+
+@pytest.mark.unit
+def test_setup_round() -> None:
+    run = Run()
+    assert run.board_state.round_num == 0
+    assert run.blind_state is None
+    run._setup_round()
+    assert run.board_state.round_num == 1
     assert run.blind_state is not None

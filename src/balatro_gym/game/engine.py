@@ -19,7 +19,7 @@ class HandAction(IntEnum):
 
 
 class BoardAction(IntEnum):
-    START_ANTE = auto()
+    START_ROUND = auto()
     # USE_CONSUMABLE = auto()
     # SELL_CONSUMABLE = auto()
     # SELL_JOKER = auto()
@@ -102,10 +102,12 @@ class Run:
         self._board_state.deck.reset()
 
     def _process_board_action(self, action: GameAction) -> None:
-        if action.action_type == BoardAction.START_ANTE:
+        if action.action_type == BoardAction.START_ROUND:
             if self._game_state is GameState.IN_BLIND_SELECT:
                 self._game_state = GameState.IN_ANTE
-                self._setup_ante()
+                if self._board_state.round_num % 3 == 0:
+                    self._setup_ante()
+                self._setup_round()
             else:
                 return None
 
