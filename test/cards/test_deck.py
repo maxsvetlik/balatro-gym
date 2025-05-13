@@ -48,7 +48,7 @@ def test_destroy() -> None:
     destroy_cards = [ACE_HEART]
     deck.destroy(destroy_cards)
     assert len(initial_cards) == len(deck.cards_remaining) + len(destroy_cards)
-    
+
 
 @pytest.mark.unit
 def test_eq_ordering() -> None:
