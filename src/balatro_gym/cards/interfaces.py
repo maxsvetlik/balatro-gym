@@ -161,8 +161,8 @@ class GoldCard(Enhancement):
 
 
 class LuckyCard(Enhancement):
-    _base_mult_probability = 0.25
-    _base_money_probability = 0.0666666
+    _base_mult_probability = 1 / 5
+    _base_money_probability = 1 / 15
 
     def get_mult(self, probability_modifier: int = 1) -> int:
         if np.random.random() <= self._base_mult_probability * probability_modifier:
@@ -273,6 +273,16 @@ class PlayingCard(HasChips):
         if isinstance(self.enhancement, HasMultiplier):
             return int(self.enhancement.get_multiplication())
         return 1
+
+    def get_scored_money(self) -> int:
+        if isinstance(self.enhancement, HasMoney):
+            return self.enhancement.get_scored_money()
+        return 0
+
+    def get_end_money(self) -> int:
+        if isinstance(self.enhancement, HasMoney):
+            return self.enhancement.get_end_money()
+        return 0
 
     def set_enhancement(self, enhancement: Optional[Enhancement]) -> None:
         self._enhancement = enhancement
