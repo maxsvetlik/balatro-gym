@@ -279,18 +279,28 @@ class PlayingCard(HasChips):
 
     def __eq__(self, value: Any) -> bool:
         if isinstance(value, PlayingCard):
-            return self._rank == value._rank and self._added_chips == value._added_chips and self._base_chips == value._base_chips and self._base_suit == value._base_suit and self._edition == value._edition and self._seal == value._seal
+            return self._rank == value._rank \
+                and self._added_chips == value._added_chips \
+                and self._base_chips == value._base_chips \
+                and self._base_suit == value._base_suit \
+                and self._edition == value._edition \
+                and self._seal == value._seal
         return False
-    
+
     def __str__(self) -> str:
         return f"{self._rank.name} of {self.suit.name}"
 
     def __repr__(self) -> str:
         return f"{self._rank.name} of {self.suit.name}"
-    
+
     def __hash__(self) -> int:
-        return hash(self._base_suit) + hash(self._enhancement) + hash(self._edition) + hash(self._base_chips) + hash(self._seal) + hash(self._added_chips)
-    
+        return hash(self._base_suit) \
+            + hash(self._enhancement) \
+            + hash(self._edition) \
+            + hash(self._base_chips) \
+            + hash(self._seal) \
+            + hash(self._added_chips)
+
 class Deck(HasReset):
     _cards_remaining: deque[PlayingCard]
     _cards_played: deque[PlayingCard]
@@ -302,11 +312,11 @@ class Deck(HasReset):
     @property
     def cards_remaining(self) -> Sequence[PlayingCard]:
         return [*self._cards_remaining]
-    
+
     @property
     def cards_played(self) -> Sequence[PlayingCard]:
         return [*self._cards_played]
-    
+
     def reset(self) -> None:
         self._cards_remaining = deque([*self._cards_remaining, *self._cards_played])
         self.shuffle()
@@ -332,7 +342,7 @@ class Deck(HasReset):
 
     def get_num_remaining(self) -> int:
         return len(self._cards_remaining)
-    
+
     def __eq__(self, obj: Any) -> bool:
         if isinstance(obj, Deck):
             return self._cards_remaining == obj._cards_remaining and self._cards_played == obj._cards_played

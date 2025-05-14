@@ -80,7 +80,7 @@ class Run:
     @property
     def blinds(self) -> Sequence[BlindInfo]:
         return self._run_blinds
-    
+
     @property
     def action_counter(self) -> int:
         return self._action_counter
@@ -141,7 +141,7 @@ class Run:
                 if self._blind_state.num_hands_remaining < 0:
                     # Game loss
                     return True
-                
+
                 new_cards = self._board_state.deck.deal(len(action.selected_playing))
                 self._blind_state.hand = discard(self._blind_state.hand, action.selected_playing, new_cards)
 

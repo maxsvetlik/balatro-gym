@@ -41,7 +41,7 @@ if __name__ == "__main__":
             else:
                 action = HandAction.SCORE_HAND
             run.step(GameAction(action, cards))
-                
+
 
         elif obs.game_state == GameState.IN_BLIND_SELECT:
             print("You are in blind selection.")
