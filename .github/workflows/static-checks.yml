@@ -3,8 +3,8 @@ name: Static Checks
 on: pull_request
 
 jobs:
-  mypy:
-    name: mypy
+  static-checks:
+    name: static-checks
     runs-on: ubuntu-latest
     strategy:
       matrix:

@@ -76,7 +76,7 @@ class Rank(Enum):
         }
         return int_to_rank_map[int_rank]
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> "Rank":
         # Return the same enum instance—skip deepcopy
         return self
 
