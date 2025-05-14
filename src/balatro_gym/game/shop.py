@@ -44,7 +44,8 @@ class Shop:
     def voucher_generator(self) -> Sequence[Voucher]:
         valid_vouchers = []
         for voucher in ALL_VOUCHERS:
-            check_dependency = (voucher.dependency is None or voucher.dependency in self.bought_vouchers)
+            dependency_met = any([isinstance(voucher.dependency, v.__class__) for v in self.bought_vouchers])
+            check_dependency = voucher.dependency is None or dependency_met
             if check_dependency and voucher not in self.bought_vouchers:
                 valid_vouchers.append(voucher)
         return random.sample(valid_vouchers, self.num_vouchers)
