@@ -43,5 +43,10 @@ Contributions are welcome. Please fork the repository and open a pull request in
 
 3) Install the project
 ```
-pip install -e .
+$ pip install -e .
+```
+
+4) (Optional) You may install pre-commit hooks to run static checks on-commit:
+```
+$ lefthook install
 ```

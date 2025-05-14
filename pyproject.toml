@@ -10,6 +10,7 @@ dependencies = [
     "ruff",
     "pytest",
     "aenum",
+    "lefthook"
 ]
 
 [tool.pytest.ini_options]
