@@ -25,8 +25,10 @@ class Suit(Enum):
     DIAMONDS = auto()
     HEARTS = auto()
 
+
 class RankVal:
     """An annoying workaround to allow using an Enum since aenum doesn't have good typing support."""
+
     _val: int
     _order: int
 
@@ -41,6 +43,7 @@ class RankVal:
     @property
     def order(self) -> int:
         return self._order
+
 
 class Rank(Enum):
     ACE = RankVal(11, 1)
@@ -114,7 +117,7 @@ class Negative(Edition):
 ############# Enhancements
 class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, Protocol):
     def get_suit(self, card: "PlayingCard") -> Sequence[Suit]:
-        return [card.suit]
+        return [card.base_suit]
 
 
 class BonusCard(Enhancement):
@@ -234,8 +237,14 @@ class PlayingCard(HasChips):
         return self._rank
 
     @property
-    def suit(self) -> Suit:
+    def base_suit(self) -> Suit:
         return self._base_suit
+
+    @property
+    def suit(self) -> Sequence[Suit]:
+        if self._enhancement:
+            return self._enhancement.get_suit(self)
+        return [self._base_suit]
 
     @property
     def enhancement(self) -> Optional[Enhancement]:
@@ -250,7 +259,10 @@ class PlayingCard(HasChips):
         return self._seal
 
     def get_chips(self) -> int:
-        return self._base_chips + self._added_chips
+        enhancement_chips = 0
+        if self._enhancement:
+            enhancement_chips += self._enhancement.get_chips()
+        return self._base_chips + self._added_chips + enhancement_chips
 
     def get_mult(self) -> int:
         if isinstance(self.enhancement, HasMult):
@@ -279,27 +291,32 @@ class PlayingCard(HasChips):
 
     def __eq__(self, value: Any) -> bool:
         if isinstance(value, PlayingCard):
-            return self._rank == value._rank \
-                and self._added_chips == value._added_chips \
-                and self._base_chips == value._base_chips \
-                and self._base_suit == value._base_suit \
-                and self._edition == value._edition \
+            return (
+                self._rank == value._rank
+                and self._added_chips == value._added_chips
+                and self._base_chips == value._base_chips
+                and self._base_suit == value._base_suit
+                and self._edition == value._edition
                 and self._seal == value._seal
+            )
         return False
 
     def __str__(self) -> str:
-        return f"{self._rank.name} of {self.suit.name}"
+        return f"{self._rank.name} of {self.base_suit.name}"
 
     def __repr__(self) -> str:
-        return f"{self._rank.name} of {self.suit.name}"
+        return f"{self._rank.name} of {self.base_suit.name}"
 
     def __hash__(self) -> int:
-        return hash(self._base_suit) \
-            + hash(self._enhancement) \
-            + hash(self._edition) \
-            + hash(self._base_chips) \
-            + hash(self._seal) \
+        return (
+            hash(self._base_suit)
+            + hash(self._enhancement)
+            + hash(self._edition)
+            + hash(self._base_chips)
+            + hash(self._seal)
             + hash(self._added_chips)
+        )
+
 
 class Deck(HasReset):
     _cards_remaining: deque[PlayingCard]
