@@ -8,4 +8,4 @@ pre-commit:
       run: mypy {staged_files}
     ruff-check:
       glob: "*.{py}"
-      run: ruff check {staged_files}
+      run: ruff check --fix {staged_files}
