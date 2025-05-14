@@ -3,9 +3,9 @@ name: Run Unit Tests
 on: pull_request
 
 jobs:
-  test:
+  pytest:
+    name: pytest
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         python-version:
