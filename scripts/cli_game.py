@@ -46,4 +46,4 @@ if __name__ == "__main__":
         elif obs.game_state == GameState.IN_BLIND_SELECT:
             print("You are in blind selection.")
             input("You must select a blind. Press anything to continue.")
-            run.step(GameAction(BoardAction.START_ANTE, []))
+            run.step(GameAction(BoardAction.START_ROUND, []))
