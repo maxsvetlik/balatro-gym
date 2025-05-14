@@ -1,10 +1,10 @@
 import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any
+from typing import Any, Optional
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import Deck, PlayingCard
+from .cards.interfaces import Card, Deck, PlayingCard
 from .constants import DEFAULT_NUM_CONSUMMABLE, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
@@ -14,7 +14,6 @@ __all__ = [
     "Voucher",
     "Spectral",
     "Tarot",
-    "Shop",
     "Rarity",
     "Activation",
     "Type",
@@ -28,19 +27,20 @@ class Tag:
     pass
 
 
+@dataclasses.dataclass
 class Voucher:
+    dependency: Optional["Voucher"]
+
+
+class Spectral(Card):
     pass
 
 
-class Spectral:
+class Tarot(Card):
     pass
 
 
-class Tarot:
-    pass
-
-
-class Shop:
+class BoosterPack:
     pass
 
 
@@ -105,7 +105,7 @@ class PokerHand:
         )
 
 
-class PlanetCard:
+class PlanetCard(Card):
     _hand_type: PokerHandType
 
     def increase_level(self, poker_hands: Sequence[PokerHand]) -> PokerHand:
@@ -151,7 +151,7 @@ class ConsummableState(HasReset):
         return False
 
 
-class JokerBase:
+class JokerBase(Card):
 
     _base_cost: int = 0
 

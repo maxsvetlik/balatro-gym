@@ -1,4 +1,5 @@
 import copy
+import dataclasses
 import random
 from collections import deque
 from collections.abc import Sequence
@@ -76,7 +77,7 @@ class Rank(Enum):
         }
         return int_to_rank_map[int_rank]
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> "Rank":
         # Return the same enum instance—skip deepcopy
         return self
 
@@ -204,7 +205,12 @@ class PurpleSeal(Seal):
         return True
 
 
-class PlayingCard(HasChips):
+@dataclasses.dataclass
+class Card(Protocol):
+    cash_value: int = 1
+
+
+class PlayingCard(HasChips, Card):
     _rank: Rank
     _base_suit: Suit
     _enhancement: Optional[Enhancement]

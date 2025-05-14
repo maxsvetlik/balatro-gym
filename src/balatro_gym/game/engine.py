@@ -8,6 +8,7 @@ from ..cards.decks import discard
 from ..cards.interfaces import PlayingCard
 from ..interfaces import BlindState, BoardState
 from .blinds import BlindInfo, generate_run_blinds, get_blind_required_score
+from .shop import Shop, ShopState
 
 
 class HandAction(IntEnum):
@@ -20,6 +21,8 @@ class HandAction(IntEnum):
 
 class BoardAction(IntEnum):
     START_ANTE = auto()
+    VIEW_SHOP = auto()
+    NEXT_ROUND = auto()
     # USE_CONSUMABLE = auto()
     # SELL_CONSUMABLE = auto()
     # SELL_JOKER = auto()
@@ -31,7 +34,8 @@ class BoardAction(IntEnum):
 class GameState(Enum):
     IN_ANTE = auto()
     IN_BLIND_SELECT = auto()
-    # IN_SHOP = auto()
+    GENERATE_SHOP = auto()
+    IN_SHOP = auto()
     # IN_CONSUMABLE_REDEEM = auto()
 
 
@@ -39,7 +43,7 @@ class GameState(Enum):
 class RunObservation:
     game_state: GameState
     board_state: BoardState
-    # shop_state: ShopState
+    shop_state: Optional[ShopState]
     blind_state: Optional[BlindState]
     action_counter: int
     done: bool
@@ -58,9 +62,11 @@ class GameAction:
 class Run:
     _game_state: GameState
     _board_state: BoardState
+    _shop_state: Optional[ShopState]
     _blind_state: Optional[BlindState]
     _run_blinds: Sequence[BlindInfo]
     _action_counter: int
+    _shop: Shop
 
     def __init__(self) -> None:
         self.game_reset()
@@ -85,13 +91,19 @@ class Run:
     def action_counter(self) -> int:
         return self._action_counter
 
+    @property
+    def shop_state(self) -> Optional[ShopState]:
+        return self._shop_state
+
     def game_reset(self) -> None:
         # Resets the run to the start, with new randomness
         self._game_state = GameState.IN_BLIND_SELECT
         self._blind_state = None
+        self._shop_state = None
         self._board_state = BoardState()
         self._run_blinds = generate_run_blinds()
         self._action_counter = 0
+        self._shop = Shop()
 
     def _end_ante(self) -> None:
         # Call at the end of the ante
@@ -105,6 +117,11 @@ class Run:
                 self._setup_ante()
             else:
                 return None
+        elif action.action_type == BoardAction.VIEW_SHOP:
+            self._shop_state = self._shop.generate_shop_state(self._board_state.round_num)
+            self._game_state = GameState.IN_SHOP
+        elif action.action_type == BoardAction.NEXT_ROUND:
+            self._game_state = GameState.IN_BLIND_SELECT
 
     def _process_hand_action(self, action: GameAction) -> bool:
         if len(action.selected_playing) == 0:
@@ -126,7 +143,7 @@ class Run:
                 if self._blind_state.required_score <= self._blind_state.current_score:
                     # Ante is won. End ante and transition to next state
                     self._end_ante()
-                    self._game_state = GameState.IN_BLIND_SELECT
+                    self._game_state = GameState.GENERATE_SHOP
                     return True
 
                 if self._blind_state.num_hands_remaining < 0:
@@ -145,16 +162,17 @@ class Run:
         self._blind_state = BlindState(
             initial_hand, req_score, 0, self._board_state.num_hands, self._board_state.num_discards
         )
+        self._shop_state = None
 
     def step(self, action: Optional[GameAction]) -> RunObservation:
         done = False
 
         if action is not None:
-            if self._blind_state is None:
-                self._setup_ante()
             if isinstance(action.action_type, HandAction):
                 done = self._process_hand_action(action)
             else:
                 self._process_board_action(action)
+
         self._action_counter += 1
-        return RunObservation(self._game_state, self._board_state, self._blind_state, self._action_counter, done)
+        return RunObservation(
+            self._game_state, self._board_state, self._shop_state, self._blind_state, self._action_counter, done)

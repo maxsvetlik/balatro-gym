@@ -47,3 +47,13 @@ if __name__ == "__main__":
             print("You are in blind selection.")
             input("You must select a blind. Press anything to continue.")
             run.step(GameAction(BoardAction.START_ANTE, []))
+
+        elif obs.game_state == GameState.GENERATE_SHOP:
+            run.step(GameAction(BoardAction.VIEW_SHOP, []))
+
+        elif obs.game_state == GameState.IN_SHOP:
+            print("You are in the shop.")
+            # TODO: Add input to interact with the shop
+            # For now just exit the shop
+            input("Press any key to exit the shop.")
+            run.step(GameAction(BoardAction.NEXT_ROUND, []))
