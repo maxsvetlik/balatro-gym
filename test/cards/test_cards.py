@@ -1,13 +1,17 @@
 from typing import (
     Optional,
 )
+from unittest.mock import Mock, patch
 
 import pytest
 
+import balatro_gym.cards.interfaces
 from balatro_gym.cards.interfaces import (
     BonusCard,
     Edition,
     Enhancement,
+    GoldCard,
+    LuckyCard,
     MultCard,
     PlayingCard,
     Rank,
@@ -70,5 +74,42 @@ def test_enhancement_stone() -> None:
     enhancement = StoneCard()
     card = _make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
-    assert card.get_chips() == 50
+    assert enhancement.get_chips() == 50
+    assert card.get_chips() == 50  # This is wrong, base chips shouldn't be in the sum
     assert len(card.suit) == 0
+
+
+@pytest.mark.unit
+def test_enhancement_gold() -> None:
+    enhancement = GoldCard()
+    card = _make_card(enhancement=enhancement)
+    assert card.enhancement == enhancement
+    assert card.get_scored_money() == 0
+    assert card.get_end_money() == 3
+
+
+@pytest.mark.unit
+def test_enhancement_lucky() -> None:
+    enhancement = LuckyCard()
+    card = _make_card(enhancement=enhancement)
+    assert card.enhancement == enhancement
+    with patch.object(balatro_gym.cards.interfaces, "np") as mock:
+        random_mock = Mock()
+        mock.random.random = random_mock
+        # Test degenerate cases
+        random_mock.return_value = 1
+        assert enhancement.get_mult() == 0
+        assert enhancement.get_scored_money() == 0
+        random_mock.return_value = 0
+        assert enhancement.get_mult() == 20
+        assert enhancement.get_scored_money() == 20
+        # Verify that the base probabilities are correct
+        random_mock.return_value = 1 / 5
+        assert enhancement.get_mult() == 20
+        random_mock.return_value = 1 / 15
+        assert enhancement.get_scored_money() == 20
+
+
+@pytest.mark.unit
+def test_enhancement_lucky_modifiers() -> None:
+    pass
