@@ -11,7 +11,7 @@ class Overstock(Voucher):
 
 @dataclasses.dataclass
 class OverstockPlus(Voucher):
-    dependency: Optional[Voucher] = Overstock()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=Overstock)
 
 
 @dataclasses.dataclass
@@ -21,7 +21,7 @@ class ClearanceSale(Voucher):
 
 @dataclasses.dataclass
 class Liquidation(Voucher):
-    dependency: Optional[Voucher] = ClearanceSale()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=ClearanceSale)
 
 
 @dataclasses.dataclass
@@ -31,7 +31,7 @@ class Hone(Voucher):
 
 @dataclasses.dataclass
 class GlowUp(Voucher):
-    dependency: Optional[Voucher] = Hone()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=Hone)
 
 
 @dataclasses.dataclass
@@ -41,7 +41,7 @@ class RerollSurplus(Voucher):
 
 @dataclasses.dataclass
 class RerollGlut(Voucher):
-    dependency: Optional[Voucher] = RerollSurplus()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=RerollSurplus)
 
 
 @dataclasses.dataclass
@@ -51,7 +51,7 @@ class CrystalBall(Voucher):
 
 @dataclasses.dataclass
 class OmenGlobe(Voucher):
-    dependency: Optional[Voucher] = CrystalBall()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=CrystalBall)
 
 
 @dataclasses.dataclass
@@ -61,7 +61,7 @@ class Telescope(Voucher):
 
 @dataclasses.dataclass
 class Observatory(Voucher):
-    dependency: Optional[Voucher] = Telescope()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=Telescope)
 
 
 @dataclasses.dataclass
@@ -71,7 +71,7 @@ class Grabber(Voucher):
 
 @dataclasses.dataclass
 class NachoTong(Voucher):
-    dependency: Optional[Voucher] = Grabber()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=Grabber)
 
 
 @dataclasses.dataclass
@@ -81,7 +81,7 @@ class Wasteful(Voucher):
 
 @dataclasses.dataclass
 class Recyclomancy(Voucher):
-    dependency: Optional[Voucher] = Wasteful()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=Wasteful)
 
 
 @dataclasses.dataclass
@@ -91,7 +91,7 @@ class TarotMerchant(Voucher):
 
 @dataclasses.dataclass
 class TarotTycoon(Voucher):
-    dependency: Optional[Voucher] = TarotMerchant()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=TarotMerchant)
 
 
 @dataclasses.dataclass
@@ -101,7 +101,7 @@ class PlanetMerchant(Voucher):
 
 @dataclasses.dataclass
 class PlanetTycoon(Voucher):
-    dependency: Optional[Voucher] = PlanetMerchant()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=PlanetMerchant)
 
 
 @dataclasses.dataclass
@@ -111,7 +111,7 @@ class SeedMoney(Voucher):
 
 @dataclasses.dataclass
 class MoneyTree(Voucher):
-    dependency: Optional[Voucher] = SeedMoney()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=SeedMoney)
 
 
 @dataclasses.dataclass
@@ -121,7 +121,7 @@ class Blank(Voucher):
 
 @dataclasses.dataclass
 class Antimatter(Voucher):
-    dependency: Optional[Voucher] = Blank()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=Blank)
 
 
 @dataclasses.dataclass
@@ -131,7 +131,7 @@ class MagicTrick(Voucher):
 
 @dataclasses.dataclass
 class Illusion(Voucher):
-    dependency: Optional[Voucher] = MagicTrick()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=MagicTrick)
 
 
 @dataclasses.dataclass
@@ -141,7 +141,7 @@ class Hieroglyph(Voucher):
 
 @dataclasses.dataclass
 class Petroglyph(Voucher):
-    dependency: Optional[Voucher] = Hieroglyph()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=Hieroglyph)
 
 
 @dataclasses.dataclass
@@ -151,7 +151,7 @@ class DirectorsCut(Voucher):
 
 @dataclasses.dataclass
 class Retcon(Voucher):
-    dependency: Optional[Voucher] = DirectorsCut()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=DirectorsCut)
 
 
 @dataclasses.dataclass
@@ -161,7 +161,7 @@ class PaintBrush(Voucher):
 
 @dataclasses.dataclass
 class Palette(Voucher):
-    dependency: Optional[Voucher] = PaintBrush()
+    dependency: Optional[Voucher] = dataclasses.field(default_factory=PaintBrush)
 
 
 ALL_VOUCHERS = [
