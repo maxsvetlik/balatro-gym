@@ -12,6 +12,10 @@ from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.interfaces import Booster
 
 
+__all__ = [
+    "StandardPack", "ArcanaPack", "CelestialPack", "BuffoonPack", "SpectralPack"
+]
+
 class PackInfo(NamedTuple):
     cash_value: int
     n_cards: int
@@ -88,3 +92,20 @@ class SpectralPack(Booster):
 
     def sample(self) -> Sequence[Card]:
         return random.sample(SPECTRAL_CARDS, self.n_cards)
+
+
+class BoosterType(enum.Enum):
+    StandardPack = StandardPack
+    CelestialPack = CelestialPack
+    ArcanaPack = ArcanaPack
+    BuffoonPack = BuffoonPack
+    SpectralPack = SpectralPack
+
+
+BOOSTER_TO_PACK_INFO = {
+    BoosterType.SpectralPack: JOKER_SPECTRAL_PACK_INFO,
+    BoosterType.BuffoonPack: JOKER_SPECTRAL_PACK_INFO,
+    BoosterType.ArcanaPack: PLANET_TAROT_CARD_PACK_INFO,
+    BoosterType.CelestialPack: PLANET_TAROT_CARD_PACK_INFO,
+    BoosterType.StandardPack: PLANET_TAROT_CARD_PACK_INFO,
+}

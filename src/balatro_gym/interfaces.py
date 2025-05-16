@@ -1,7 +1,7 @@
 import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol
+from typing import Any, Optional, Protocol, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import Card, Deck, PlayingCard
@@ -40,6 +40,7 @@ class Tarot(Card):
     pass
 
 
+@runtime_checkable
 class Booster(Protocol):
     cash_value: int
     n_cards: int

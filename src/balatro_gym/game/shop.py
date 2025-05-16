@@ -1,18 +1,28 @@
 import dataclasses
 import random
-from typing import Sequence
+from typing import Sequence, NamedTuple
 
+from balatro_gym.cards.booster_packs import PackType, BoosterType, BOOSTER_TO_PACK_INFO, StandardPack
 from balatro_gym.cards.interfaces import Card
 from balatro_gym.cards.voucher import ALL_VOUCHERS
-from balatro_gym.interfaces import BoosterPack, Voucher
+from balatro_gym.interfaces import Voucher, Booster
 
 
 @dataclasses.dataclass
 class ShopState:
     buyable_cards: Sequence[Card]
     vouchers: Sequence[Voucher]
-    booster_packs: Sequence[BoosterPack]
+    booster_packs: Sequence[Booster]
 
+
+# Based on the info at https://balatrogame.fandom.com/wiki/Booster_Packs
+PROBABILITY_MAPPING = {
+    BoosterType.StandardPack: {PackType.NORMAL: 4., PackType.JUMBO: 2., PackType.MEGA: 0.5},
+    BoosterType.ArcanaPack: {PackType.NORMAL: 4., PackType.JUMBO: 2., PackType.MEGA: 0.5},
+    BoosterType.CelestialPack: {PackType.NORMAL: 4., PackType.JUMBO: 2., PackType.MEGA: 0.5},
+    BoosterType.BuffoonPack: {PackType.NORMAL: 1.2, PackType.JUMBO: 0.6, PackType.MEGA: 0.15},
+    BoosterType.SpectralPack: {PackType.NORMAL: 0.6, PackType.JUMBO: 0.3, PackType.MEGA: 0.07},
+}
 
 class Shop:
 
@@ -28,6 +38,7 @@ class Shop:
         self.vouchers: Sequence[Voucher] = []
         self.bought_vouchers: Sequence[Voucher] = []
         self.current_state = None
+
 
     def increase_num_buyable_slots(self) -> None:
         self.num_vouchers += 1
@@ -57,5 +68,17 @@ class Shop:
         return ShopState(
             vouchers=self.vouchers,
             buyable_cards=[],
-            booster_packs=[],
+            booster_packs=self.generate_booster_packs(),
         )
+
+    def generate_booster_packs(self) -> Sequence[Booster]:
+        potential_packs = []
+        probabilities = []
+        for pack_type in PackType:
+            for booster_type in BoosterType:
+                pack_info_map = BOOSTER_TO_PACK_INFO[booster_type]
+                pack_info = pack_info_map[pack_type]
+                potential_packs.append(booster_type.value(pack_info.cash_value, pack_info.n_cards, pack_info.n_choice))
+                probabilities.append(PROBABILITY_MAPPING[booster_type][pack_type])
+
+        return random.choices(potential_packs, weights=probabilities, k=self.num_booster_packs)

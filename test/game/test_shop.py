@@ -2,6 +2,7 @@ import pytest
 
 from balatro_gym.cards.voucher import ALL_VOUCHERS
 from balatro_gym.game.shop import Shop, ShopState
+from balatro_gym.interfaces import Booster
 
 
 @pytest.mark.unit
@@ -10,6 +11,8 @@ def test_generate_shop_state() -> None:
     state = shop.generate_shop_state(1)
     voucher = state.vouchers[0]
     assert isinstance(state, ShopState)
+    assert all([isinstance(pack, Booster) for pack in state.booster_packs])
+    assert len(state.booster_packs) == shop.num_booster_packs
     state = shop.generate_shop_state(2)
     # Make sure we use the same voucher for the entire ante
     assert state.vouchers[0] == voucher
