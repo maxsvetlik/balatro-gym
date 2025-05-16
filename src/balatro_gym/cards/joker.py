@@ -3,6 +3,8 @@ from collections.abc import Sequence
 from ..interfaces import BlindState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
 
+JOKERS: Sequence[JokerBase] = []
+
 
 class Joker(JokerBase):
 
