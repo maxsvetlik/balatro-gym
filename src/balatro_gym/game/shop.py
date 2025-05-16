@@ -1,11 +1,11 @@
 import dataclasses
 import random
-from typing import Sequence, NamedTuple
+from typing import Sequence
 
-from balatro_gym.cards.booster_packs import PackType, BoosterType, BOOSTER_TO_PACK_INFO, StandardPack
+from balatro_gym.cards.booster_packs import BOOSTER_TO_PACK_INFO, BoosterType, PackType
 from balatro_gym.cards.interfaces import Card
 from balatro_gym.cards.voucher import ALL_VOUCHERS
-from balatro_gym.interfaces import Voucher, Booster
+from balatro_gym.interfaces import Booster, Voucher
 
 
 @dataclasses.dataclass

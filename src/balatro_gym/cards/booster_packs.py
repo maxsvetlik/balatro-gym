@@ -11,7 +11,6 @@ from balatro_gym.cards.spectral import SPECTRAL_CARDS
 from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.interfaces import Booster
 
-
 __all__ = [
     "StandardPack", "ArcanaPack", "CelestialPack", "BuffoonPack", "SpectralPack"
 ]
