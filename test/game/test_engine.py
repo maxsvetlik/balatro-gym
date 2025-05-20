@@ -17,12 +17,14 @@ def test_game_reset() -> None:
     assert len(run.blinds) > 0
     assert run.action_counter == 0
 
+
 @pytest.mark.unit
 def test_process_board_action_state_transition() -> None:
     run = Run()
     assert run.game_state == GameState.IN_BLIND_SELECT
     run._process_board_action(GameAction(BoardAction.START_ANTE, []))
     assert run.game_state == GameState.IN_ANTE
+
 
 @pytest.mark.unit
 def test_process_hand_action_state_transition_win() -> None:
@@ -31,8 +33,9 @@ def test_process_hand_action_state_transition_win() -> None:
     run._process_board_action(GameAction(BoardAction.START_ANTE, []))
     assert run.blind_state
     req_score = run.blind_state.required_score
-    with patch("balatro_gym.game.engine.score_hand", lambda x,y,z: req_score+1):
+    with patch("balatro_gym.game.engine.score_hand", lambda x, y, z: req_score + 1):
         assert run._process_hand_action(GameAction(HandAction.SCORE_HAND, [run.blind_state.hand[0]])) is True
+
 
 @pytest.mark.unit
 def test_process_hand_action_state_transition_loss() -> None:
@@ -42,10 +45,11 @@ def test_process_hand_action_state_transition_loss() -> None:
     assert run.blind_state
     num_hands = run.blind_state.num_hands_remaining
     terminal = False
-    with patch("balatro_gym.game.engine.score_hand", lambda x,y,z: 0):
+    with patch("balatro_gym.game.engine.score_hand", lambda x, y, z: 0):
         for i in range(num_hands):
             terminal &= run._process_hand_action(GameAction(HandAction.SCORE_HAND, [run.blind_state.hand[0]]))
     assert terminal is False
+
 
 @pytest.mark.unit
 def test_process_hand_action_discard() -> None:
@@ -53,7 +57,7 @@ def test_process_hand_action_discard() -> None:
     run._process_board_action(GameAction(BoardAction.START_ANTE, []))
     assert run.blind_state
     num_discards = run.blind_state.num_discards_reamining
-    for i in range(1, num_discards+1):
+    for i in range(1, num_discards + 1):
         run._process_hand_action(GameAction(HandAction.DISCARD, [run.blind_state.hand[0]]))
         assert num_discards == run.blind_state.num_discards_reamining + i
 
@@ -61,6 +65,7 @@ def test_process_hand_action_discard() -> None:
     old_blind_state = copy.deepcopy(run.blind_state)
     run._process_hand_action(GameAction(HandAction.DISCARD, [run.blind_state.hand[0]]))
     assert old_blind_state == run.blind_state
+
 
 @pytest.mark.unit
 def test_setup_ante() -> None:

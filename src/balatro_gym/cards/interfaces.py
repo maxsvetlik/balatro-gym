@@ -25,6 +25,7 @@ class Suit(Enum):
     DIAMONDS = auto()
     HEARTS = auto()
 
+
 class RankVal:
     """An annoying workaround to allow using an Enum since aenum doesn't have good typing support."""
     _val: int
@@ -41,6 +42,7 @@ class RankVal:
     @property
     def order(self) -> int:
         return self._order
+
 
 class Rank(Enum):
     ACE = RankVal(11, 1)
@@ -81,7 +83,7 @@ class Rank(Enum):
         return self
 
 
-############# Editions
+# Editions
 class Edition(HasChips, HasMult, HasMultiplier, Protocol):
     def is_negative(self) -> bool:
         return False
@@ -111,7 +113,7 @@ class Negative(Edition):
         return True
 
 
-############# Enhancements
+# Enhancements
 class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, Protocol):
     def get_suit(self, card: "PlayingCard") -> Sequence[Suit]:
         return [card.suit]
@@ -300,6 +302,7 @@ class PlayingCard(HasChips):
             + hash(self._base_chips) \
             + hash(self._seal) \
             + hash(self._added_chips)
+
 
 class Deck(HasReset):
     _cards_remaining: deque[PlayingCard]
