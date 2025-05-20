@@ -22,6 +22,7 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
+from balatro_gym.game.scoring import get_poker_hand, score_hand
 
 
 def _make_card(
@@ -64,7 +65,21 @@ def test_enhancement_glass() -> None:
     card = _make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert card.get_multiplication() == 2
-    # TODO MAX add steel card to scoring logic and test
+
+
+@pytest.mark.unit
+def test_enhancement_glass_scoring() -> None:
+    enhancement = GlassCard()
+    card = _make_card(enhancement=enhancement)
+    board_mock = Mock()
+    board_mock.jokers = []
+    blind_mock = Mock()
+    blind_mock.hand = []
+    submitted_hand = [card]
+    score = score_hand(submitted_hand, board_mock, blind_mock)
+    _, hand_type = get_poker_hand(submitted_hand)
+    expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
+    assert score == expected_score
     # TODO MAX test card destruction
 
 
@@ -74,7 +89,28 @@ def test_enhancement_steel() -> None:
     card = _make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert card.get_multiplication() == 1.5
-    # TODO MAX add steel card to scoring logic and test
+
+
+@pytest.mark.unit
+def test_enhancement_steel_scoring() -> None:
+    # Submit a single card as a hand with a single steel card held in hand
+    enhancement = SteelCard()
+    held_card = _make_card(enhancement=enhancement)
+    submitted_card = _make_card()
+    submitted_hand = [submitted_card]
+    board_mock = Mock()
+    board_mock.jokers = []
+    blind_mock = Mock()
+    blind_mock.hand = [held_card]
+    score = score_hand(submitted_hand, board_mock, blind_mock)
+    _, hand_type = get_poker_hand(submitted_hand)
+    expected_score = (
+        (hand_type.value.chips + submitted_card.get_chips())
+        * hand_type.value.mult
+        * submitted_card.get_multiplication()
+        * held_card.get_multiplication()
+    )
+    assert score == expected_score
 
 
 @pytest.mark.unit
@@ -83,9 +119,24 @@ def test_enhancement_stone() -> None:
     card = _make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert enhancement.get_chips() == 50
-    assert card.get_chips() == card._base_chips + enhancement.get_chips()
+    assert card.get_chips() == 50
     assert len(card.suit) == 0
-    # TODO MAX add stone card to scoring logic and test
+
+
+@pytest.mark.unit
+def test_enhancement_stone_scoring() -> None:
+    # Submit a single stone card
+    enhancement = StoneCard()
+    card = _make_card(enhancement=enhancement)
+    board_mock = Mock()
+    board_mock.jokers = []
+    blind_mock = Mock()
+    blind_mock.hand = []
+    submitted_hand = [card]
+    score = score_hand(submitted_hand, board_mock, blind_mock)
+    _, hand_type = get_poker_hand(submitted_hand)
+    expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
+    assert score == expected_score
 
 
 @pytest.mark.unit

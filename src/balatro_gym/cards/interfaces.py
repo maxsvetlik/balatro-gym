@@ -262,6 +262,8 @@ class PlayingCard(HasChips):
     def get_chips(self) -> int:
         enhancement_chips = 0
         if self._enhancement:
+            if isinstance(self._enhancement, StoneCard):
+                return 50
             enhancement_chips += self._enhancement.get_chips()
         return self._base_chips + self._added_chips + enhancement_chips
 
