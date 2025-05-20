@@ -20,7 +20,7 @@ class HandAction(IntEnum):
 
 
 class BoardAction(IntEnum):
-    START_ANTE = auto()
+    START_ROUND = auto()
     VIEW_SHOP = auto()
     NEXT_ROUND = auto()
     # USE_CONSUMABLE = auto()
@@ -56,7 +56,7 @@ GameActionTypes = Union[HandAction, BoardAction]
 class GameAction:
     action_type: GameActionTypes
     selected_playing: Sequence[PlayingCard]
-    # selected_consummable: Sequence[Consummable]
+    # selected_consumable: Sequence[Consumable]
 
 
 class Run:
@@ -105,16 +105,21 @@ class Run:
         self._action_counter = 0
         self._shop = Shop()
 
+    def _end_round(self) -> None:
+        # Call at the end of the round
+        self._blind_state = None
+
     def _end_ante(self) -> None:
         # Call at the end of the ante
         self._board_state.deck.reset()
-        self._blind_state = None
 
     def _process_board_action(self, action: GameAction) -> None:
-        if action.action_type == BoardAction.START_ANTE:
+        if action.action_type == BoardAction.START_ROUND:
             if self._game_state is GameState.IN_BLIND_SELECT:
                 self._game_state = GameState.IN_ANTE
-                self._setup_ante()
+                if self._board_state.round_num % 3 == 0:
+                    self._setup_ante()
+                self._setup_round()
             else:
                 return None
         elif action.action_type == BoardAction.VIEW_SHOP:
@@ -129,11 +134,11 @@ class Run:
         if self._game_state is GameState.IN_ANTE:
             assert self._blind_state is not None
             if action.action_type == HandAction.DISCARD:
-                if self._blind_state.num_discards_reamining == 0:
+                if self._blind_state.num_discards_remaining == 0:
                     return False
                 new_cards = self._board_state.deck.deal(len(action.selected_playing))
                 self._blind_state.hand = discard(self._blind_state.hand, action.selected_playing, new_cards)
-                self._blind_state.num_discards_reamining -= 1
+                self._blind_state.num_discards_remaining -= 1
 
             if action.action_type == HandAction.SCORE_HAND:
                 hand_score = score_hand(action.selected_playing, self._board_state, self._blind_state)
@@ -141,9 +146,13 @@ class Run:
                 self._blind_state.num_hands_remaining -= 1
 
                 if self._blind_state.required_score <= self._blind_state.current_score:
-                    # Ante is won. End ante and transition to next state
-                    self._end_ante()
                     self._game_state = GameState.GENERATE_SHOP
+                    self._board_state.money += self._blind_state.reward
+                    # Round is won. End round and transition to next state
+                    self._end_round()
+                    # If we beat a boss blind, then we end the ante too
+                    if self._board_state.round_num % 3 == 0:
+                        self._end_ante()
                     return True
 
                 if self._blind_state.num_hands_remaining < 0:
@@ -155,14 +164,18 @@ class Run:
 
         return False
 
-    def _setup_ante(self) -> None:
-        self._board_state.ante_num += 1
+    def _setup_round(self) -> None:
+        self._board_state.round_num += 1
         initial_hand = self._board_state.deck.deal(self._board_state.hand_size)
-        req_score = get_blind_required_score(self._board_state.ante_num)
+        req_score = get_blind_required_score(self._board_state.round_num)
+        money_reward = self.blinds[self._board_state.round_num].reward
         self._blind_state = BlindState(
-            initial_hand, req_score, 0, self._board_state.num_hands, self._board_state.num_discards
+            initial_hand, req_score, 0, self._board_state.num_hands, self._board_state.num_discards, money_reward
         )
         self._shop_state = None
+
+    def _setup_ante(self) -> None:
+        self._board_state.ante_num += 1
 
     def step(self, action: Optional[GameAction]) -> RunObservation:
         done = False
