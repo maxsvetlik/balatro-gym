@@ -1,7 +1,7 @@
 import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any, Optional, Protocol
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import Card, Deck, PlayingCard
@@ -27,9 +27,15 @@ class Tag:
     pass
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Voucher:
     dependency: Optional["Voucher"]
+
+    def __hash__(self) -> int:
+        return hash(self.__class__.__name__)
+
+    def __eq__(self, obj: Any) -> bool:
+        return obj._class__.__name__ == self.__class__.__name__
 
 
 class Spectral(Card):
