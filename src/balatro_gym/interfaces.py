@@ -1,7 +1,7 @@
 import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol
+from typing import Any, Optional
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import Card, Deck, PlayingCard
