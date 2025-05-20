@@ -84,7 +84,7 @@ class Shop:
             for booster_type in BoosterType:
                 pack_info_map = BOOSTER_TO_PACK_INFO[booster_type]
                 pack_info = pack_info_map[pack_type]
-                potential_packs.append(booster_type.value(pack_info.cash_value, pack_info.n_cards, pack_info.n_choice))
+                potential_packs.append(booster_type.value(pack_info.cost, pack_info.n_cards, pack_info.n_choice))
                 probabilities.append(PROBABILITY_MAPPING[booster_type][pack_type])
 
         return random.choices(potential_packs, weights=probabilities, k=self.num_booster_packs)

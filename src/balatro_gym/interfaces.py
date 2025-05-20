@@ -48,7 +48,7 @@ class Tarot(Card):
 
 @runtime_checkable
 class Booster(Protocol):
-    cash_value: int
+    cost: int
     n_cards: int
     n_choice: int
 

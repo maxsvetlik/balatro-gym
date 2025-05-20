@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 class PackInfo(NamedTuple):
-    cash_value: int
+    cost: int
     n_cards: int
     n_choice: int
 
@@ -28,22 +28,22 @@ class PackType(enum.Enum):
 
 
 JOKER_SPECTRAL_PACK_INFO = {
-    PackType.NORMAL: PackInfo(cash_value=4, n_cards=2, n_choice=1),
-    PackType.JUMBO: PackInfo(cash_value=6, n_cards=4, n_choice=1),
-    PackType.MEGA: PackInfo(cash_value=8, n_cards=4, n_choice=2),
+    PackType.NORMAL: PackInfo(cost=4, n_cards=2, n_choice=1),
+    PackType.JUMBO: PackInfo(cost=6, n_cards=4, n_choice=1),
+    PackType.MEGA: PackInfo(cost=8, n_cards=4, n_choice=2),
 }
 
 
 PLANET_TAROT_CARD_PACK_INFO = {
-    PackType.NORMAL: PackInfo(cash_value=4, n_cards=3, n_choice=1),
-    PackType.JUMBO: PackInfo(cash_value=6, n_cards=5, n_choice=1),
-    PackType.MEGA: PackInfo(cash_value=8, n_cards=5, n_choice=2),
+    PackType.NORMAL: PackInfo(cost=4, n_cards=3, n_choice=1),
+    PackType.JUMBO: PackInfo(cost=6, n_cards=5, n_choice=1),
+    PackType.MEGA: PackInfo(cost=8, n_cards=5, n_choice=2),
 }
 
 
 @dataclasses.dataclass
 class StandardPack(Booster):
-    cash_value: int
+    cost: int
     n_cards: int
     n_choice: int
 
@@ -54,7 +54,7 @@ class StandardPack(Booster):
 
 @dataclasses.dataclass
 class ArcanaPack(Booster):
-    cash_value: int
+    cost: int
     n_cards: int
     n_choice: int
 
@@ -64,7 +64,7 @@ class ArcanaPack(Booster):
 
 @dataclasses.dataclass
 class CelestialPack(Booster):
-    cash_value: int
+    cost: int
     n_cards: int
     n_choice: int
 
@@ -74,7 +74,7 @@ class CelestialPack(Booster):
 
 @dataclasses.dataclass
 class BuffoonPack(Booster):
-    cash_value: int
+    cost: int
     n_cards: int
     n_choice: int
 
@@ -85,7 +85,7 @@ class BuffoonPack(Booster):
 
 @dataclasses.dataclass
 class SpectralPack(Booster):
-    cash_value: int
+    cost: int
     n_cards: int
     n_choice: int
 
