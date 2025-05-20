@@ -207,7 +207,7 @@ class PurpleSeal(Seal):
 
 @dataclasses.dataclass
 class Card(Protocol):
-    cash_value: int = 1
+    cost: int = 1
 
 
 class PlayingCard(HasChips, Card):
