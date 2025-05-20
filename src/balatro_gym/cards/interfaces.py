@@ -137,12 +137,13 @@ class WildCard(Enhancement):
 
 class GlassCard(Enhancement):
     def get_multiplication(self) -> float:
+        # When scored
         return 2.0
 
 
 class SteelCard(Enhancement):
     def get_multiplication(self) -> float:
-        # TODO : When card is in hand
+        # When card is in hand
         return 1.5
 
 
@@ -165,12 +166,12 @@ class LuckyCard(Enhancement):
     _base_money_probability = 1 / 15
 
     def get_mult(self, probability_modifier: int = 1) -> int:
-        if np.random.random() <= self._base_mult_probability * probability_modifier:
+        if np.random.random() <= min(self._base_mult_probability * probability_modifier, 1):
             return 20
         return 0
 
     def get_scored_money(self, probability_modifier: int = 1) -> int:
-        if np.random.random() <= self._base_money_probability * probability_modifier:
+        if np.random.random() <= min(self._base_money_probability * probability_modifier, 1):
             return 20
         return 0
 
@@ -269,9 +270,9 @@ class PlayingCard(HasChips):
             return self.enhancement.get_mult()
         return 0
 
-    def get_multiplication(self) -> int:
+    def get_multiplication(self) -> float:
         if isinstance(self.enhancement, HasMultiplier):
-            return int(self.enhancement.get_multiplication())
+            return self.enhancement.get_multiplication()
         return 1
 
     def get_scored_money(self) -> int:
