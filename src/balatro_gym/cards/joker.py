@@ -130,3 +130,20 @@ class MadJoker(JokerBase):
         if scored_hand == PokerHandType.TWO_PAIR:
             return 10
         return 0
+
+
+class CrazyJoker(JokerBase):
+    _base_cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ADDITIVE_MULT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        if scored_hand == PokerHandType.STRAIGHT or scored_hand == PokerHandType.STRAIGHT_FLUSH:
+            return 12
+        return 0
