@@ -8,4 +8,4 @@ class Pluto(PlanetCard):
         return PokerHandType.HIGH_CARD
 
 
-PLANET_CARDS: set[PlanetCard] = {Pluto()}
+PLANET_CARDS: list[type[PlanetCard]] = [Pluto]

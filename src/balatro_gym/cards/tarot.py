@@ -6,4 +6,4 @@ class Fool(Tarot):
     pass
 
 
-TAROT_CARDS: set[Tarot] = {Fool()}
+TAROT_CARDS: list[type[Tarot]] = [Fool]

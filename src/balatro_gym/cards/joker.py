@@ -120,6 +120,6 @@ class ZanyJoker(JokerBase):
         return 0
 
 
-JOKERS: set[JokerBase] = {
-    Joker(), GreedyJoker(), LustyJoker(), WrathfulJoker(), GluttonousJoker(), JollyJoker(), ZanyJoker()
-}
+JOKERS: list[type[JokerBase]] = [
+    Joker, GreedyJoker, LustyJoker, WrathfulJoker, GluttonousJoker, JollyJoker, ZanyJoker
+]

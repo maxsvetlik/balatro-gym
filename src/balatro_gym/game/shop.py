@@ -110,10 +110,11 @@ class Shop:
 
     def generate_buyable_cards(self) -> Sequence[HasCost]:
         sampled_cards: list[HasCost] = []
-        all_tarot_cards = TAROT_CARDS
-        all_planet_cards = PLANET_CARDS
-        all_joker_cards = JOKERS
-        card: HasCost
+        # Provide a copy of the lists
+        all_tarot_cards = [card for card in TAROT_CARDS]
+        all_planet_cards = [card for card in PLANET_CARDS]
+        all_joker_cards = [card for card in JOKERS]
+        card: type[HasCost]
         for _ in range(self.num_buyable_slots):
             rand = random.random()
             # The probabilities are based on numbers provided by https://balatrogame.fandom.com/wiki/The_Shop
@@ -122,13 +123,13 @@ class Shop:
                 if not self.allow_duplicates:
                     all_tarot_cards.remove(card)
             elif rand < 2 / 7:
-                card = random.sample(PLANET_CARDS, 1)[0]
+                card = random.sample(all_planet_cards, 1)[0]
                 if not self.allow_duplicates:
                     all_planet_cards.remove(card)
             else:
                 # TODO: Consider rarity when sampling jokers
-                card = random.sample(JOKERS, 1)[0]
+                card = random.sample(all_joker_cards, 1)[0]
                 if not self.allow_duplicates:
                     all_joker_cards.remove(card)
-            sampled_cards.append(card)
+            sampled_cards.append(card())
         return sampled_cards
