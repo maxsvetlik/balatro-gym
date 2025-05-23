@@ -210,11 +210,11 @@ class PurpleSeal(Seal):
 
 
 @dataclasses.dataclass
-class Card(Protocol):
+class HasCost(Protocol):
     _cost: int = 1
 
 
-class PlayingCard(HasChips, Card):
+class PlayingCard(HasChips, HasCost):
     _rank: Rank
     _base_suit: Suit
     _enhancement: Optional[Enhancement]

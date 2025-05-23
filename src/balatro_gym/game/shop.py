@@ -2,14 +2,14 @@ import dataclasses
 import random
 from typing import Sequence
 
-from balatro_gym.cards.interfaces import Card
+from balatro_gym.cards.interfaces import HasCost
 from balatro_gym.cards.voucher import ALL_VOUCHERS
 from balatro_gym.interfaces import BoosterPack, Voucher
 
 
 @dataclasses.dataclass
 class ShopState:
-    buyable_cards: Sequence[Card]
+    buyable_cards: Sequence[HasCost]
     vouchers: Sequence[Voucher]
     booster_packs: Sequence[BoosterPack]
 
