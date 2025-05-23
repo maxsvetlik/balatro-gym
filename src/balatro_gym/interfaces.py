@@ -169,7 +169,6 @@ class ConsumableState(HasReset):
 
 
 class JokerBase(HasCost):
-
     _base_cost: int = 0
 
     @property
@@ -205,7 +204,7 @@ class JokerBase(HasCost):
     def get_chips_card(self, card: PlayingCard, state: BlindState) -> int:
         return 0
 
-    def get_chips_hand(self, state: BlindState, scored_hand: PokerHandType) -> int:
+    def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
         return 0
 
 

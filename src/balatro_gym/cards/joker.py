@@ -1,5 +1,7 @@
 from collections.abc import Sequence
 
+from balatro_gym.cards.utils import get_num_pairs
+
 from ..interfaces import BlindState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
 
@@ -151,3 +153,40 @@ class CrazyJoker(JokerBase):
         ):
             return 12
         return 0
+
+
+class DrollJoker(JokerBase):
+    _base_cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ADDITIVE_MULT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        if (
+            scored_hand == PokerHandType.FLUSH
+            or scored_hand == PokerHandType.FLUSH_FIVE
+            or scored_hand == PokerHandType.FLUSH_HOUSE
+            or scored_hand == PokerHandType.STRAIGHT_FLUSH
+        ):
+            return 10
+        return 0
+
+
+class SlyJoker(JokerBase):
+    _base_cost: int = 3
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        return 50 if get_num_pairs(scored_cards) >= 1 else 0

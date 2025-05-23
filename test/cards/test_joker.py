@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Optional
 from unittest.mock import Mock
 
@@ -6,12 +7,14 @@ import pytest
 from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
 from balatro_gym.cards.joker import (
     CrazyJoker,
+    DrollJoker,
     GluttonousJoker,
     GreedyJoker,
     Joker,
     JollyJoker,
     LustyJoker,
     MadJoker,
+    SlyJoker,
     WrathfulJoker,
     ZanyJoker,
 )
@@ -35,10 +38,9 @@ def test_base_joker() -> None:
     assert j.base_cost == 0
     assert j.get_money(Mock()) == 0
     assert j.get_mult_card(Mock(), Mock()) == 0
-    assert j.get_chips_hand(Mock(), Mock()) == 0
+    assert j.get_chips_hand(Mock(), Mock(), Mock()) == 0
     assert j.get_multiplication(Mock(), Mock(), Mock()) == 1.0
     assert j.get_chips_card(Mock(), Mock()) == 0
-    assert j.get_chips_hand(Mock(), Mock()) == 0
 
 
 @pytest.mark.unit
@@ -183,3 +185,45 @@ def test_crazy_joker(hand_type: PokerHandType, expected_score: int) -> None:
     j = CrazyJoker()
     assert j.joker_type == Type.ADDITIVE_MULT
     assert j.get_mult(Mock(), Mock(), hand_type) == expected_score
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand_type,expected_score",
+    [
+        [PokerHandType.HIGH_CARD, 0],
+        [PokerHandType.PAIR, 0],
+        [PokerHandType.TWO_PAIR, 0],
+        [PokerHandType.THREE_SET, 0],
+        [PokerHandType.FULL_HOUSE, 0],
+        [PokerHandType.FLUSH_HOUSE, 10],
+        [PokerHandType.FOUR_SET, 0],
+        [PokerHandType.FIVE_SET, 0],
+        [PokerHandType.FLUSH, 10],
+        [PokerHandType.ROYAL_FLUSH, 10],
+        [PokerHandType.STRAIGHT, 0],
+        [PokerHandType.STRAIGHT_FLUSH, 10],
+        [PokerHandType.FLUSH_FIVE, 10],
+    ],
+)
+def test_droll_joker(hand_type: PokerHandType, expected_score: int) -> None:
+    j = DrollJoker()
+    assert j.joker_type == Type.ADDITIVE_MULT
+    assert j.get_mult(Mock(), Mock(), hand_type) == expected_score
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_chips",
+    [
+        [[_make_card(Rank.ACE)], 0],
+        [[_make_card(Rank.ACE), _make_card(Rank.ACE)], 50],
+        [[_make_card(Rank.ACE)] * 2, 50],
+        [[_make_card(Rank.ACE)] * 3, 50],
+        [[_make_card(Rank.ACE)] * 4, 50],
+    ],
+)
+def test_sly_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
+    j = SlyJoker()
+    assert j.joker_type == Type.CHIPS
+    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
