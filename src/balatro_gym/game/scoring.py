@@ -82,7 +82,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
     return chips_sum * mult_sum
 
 
-###### These are broken out for testability
+# These are broken out for testability
 
 
 def _get_flush(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
@@ -91,12 +91,18 @@ def _get_flush(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
         if card.enhancement is not None:
             counter.update(card.enhancement.get_suit(card))
         else:
-            counter.update([card.suit])
+            counter.update(card.suit)
 
-    common_suit, count = counter.most_common(1)[0]
+    most_common_list = counter.most_common(1)
+    count = 0
+    if len(most_common_list) > 0:
+        # In some situations there may not be a suit played. For instance a single StoneCard.
+        _, count = most_common_list[0]
+
     if count >= 5:
         return hand
     return []
+
 
 def is_consecutive(ordered_ranks: Sequence[int]) -> bool:
     prev_rank = ordered_ranks[0]
@@ -105,6 +111,7 @@ def is_consecutive(ordered_ranks: Sequence[int]) -> bool:
             return False
         prev_rank = rank
     return True
+
 
 def _get_straight(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
     sorted_ranks = sorted([card.rank.value.order for card in hand])
