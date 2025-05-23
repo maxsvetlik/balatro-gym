@@ -4,7 +4,7 @@ import random
 from typing import NamedTuple, Sequence
 
 from balatro_gym.cards.decks import STANDARD_DECK
-from balatro_gym.cards.interfaces import Card
+from balatro_gym.cards.interfaces import HasCost
 from balatro_gym.cards.joker import JOKERS
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.cards.spectral import SPECTRAL_CARDS
@@ -47,7 +47,7 @@ class StandardPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[Card]:
+    def sample(self) -> Sequence[HasCost]:
         # TODO: add enhancements
         return random.sample(STANDARD_DECK, self.n_cards)
 
@@ -58,7 +58,7 @@ class ArcanaPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[Card]:
+    def sample(self) -> Sequence[HasCost]:
         return random.sample(TAROT_CARDS, self.n_cards)
 
 
@@ -68,7 +68,7 @@ class CelestialPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[Card]:
+    def sample(self) -> Sequence[HasCost]:
         return random.sample(PLANET_CARDS, self.n_cards)
 
 
@@ -78,7 +78,7 @@ class BuffoonPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[Card]:
+    def sample(self) -> Sequence[HasCost]:
         # TODO: add enhancements and consider joker rarity
         return random.sample(JOKERS, self.n_cards)
 
@@ -89,7 +89,7 @@ class SpectralPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[Card]:
+    def sample(self) -> Sequence[HasCost]:
         return random.sample(SPECTRAL_CARDS, self.n_cards)
 
 
