@@ -20,6 +20,8 @@ markers = [
 ]
 
 [tool.ruff]
+lint.preview = true
+format.preview = true
 lint.extend-select = ["I", "E", "W", "Q", "F401"]
 line-length = 120
 

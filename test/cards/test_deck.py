@@ -14,12 +14,14 @@ def test_deck_shuffle() -> None:
     deck.shuffle()
     assert deck.cards_remaining != initial_cards
 
+
 def _count_cards(deck: Deck, card: PlayingCard) -> int:
     total = 0
     for c in deck.cards_remaining:
         if c == card:
-            total+=1
+            total += 1
     return total
+
 
 @pytest.mark.unit
 def test_add() -> None:
@@ -28,8 +30,9 @@ def test_add() -> None:
     assert len(deck.cards_remaining) == len(initial_cards)
     assert _count_cards(deck, ACE_HEART) == 1
     deck.add([ACE_HEART])
-    assert len(deck.cards_remaining) == len(initial_cards) +1
+    assert len(deck.cards_remaining) == len(initial_cards) + 1
     assert _count_cards(deck, ACE_HEART) == 2
+
 
 @pytest.mark.unit
 def test_deal() -> None:
@@ -38,6 +41,7 @@ def test_deal() -> None:
     delt = deck.deal(5)
     assert len(initial_cards) == len(deck.cards_played) + len(deck.cards_remaining)
     assert delt == deck.cards_played
+
 
 @pytest.mark.unit
 def test_destroy() -> None:
@@ -59,6 +63,7 @@ def test_eq_ordering() -> None:
     deck2.shuffle()
     assert deck1 != deck2
 
+
 @pytest.mark.unit
 def test_eq_card_action() -> None:
     initial_cards = STANDARD_DECK
@@ -69,6 +74,7 @@ def test_eq_card_action() -> None:
     assert deck1 != deck2
     deck2._cards_remaining.append(ACE_HEART)
     assert deck1 == deck2
+
 
 @pytest.mark.unit
 def test_reset() -> None:

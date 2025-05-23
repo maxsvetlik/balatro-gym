@@ -4,7 +4,7 @@ from enum import Enum, auto
 from typing import Any, Optional, Protocol, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import Card, Deck, PlayingCard
+from .cards.interfaces import HasCost, Deck, PlayingCard
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
@@ -38,11 +38,15 @@ class Voucher:
         return obj._class__.__name__ == self.__class__.__name__
 
 
-class Spectral(Card):
+class Spectral(HasCost):
     pass
 
 
-class Tarot(Card):
+class Tarot(HasCost):
+    pass
+
+
+class BoosterPack:
     pass
 
 
@@ -52,7 +56,7 @@ class Booster(Protocol):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[Card]:
+    def sample(self) -> Sequence[HasCost]:
         raise NotImplementedError
 
 
@@ -117,7 +121,7 @@ class PokerHand:
         )
 
 
-class PlanetCard(Card):
+class PlanetCard(HasCost):
     _hand_type: PokerHandType
 
     def increase_level(self, poker_hands: Sequence[PokerHand]) -> PokerHand:
@@ -164,7 +168,7 @@ class ConsumableState(HasReset):
         return False
 
 
-class JokerBase(Card):
+class JokerBase(HasCost):
 
     _base_cost: int = 0
 

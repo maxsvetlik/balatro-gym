@@ -3,14 +3,14 @@ import random
 from typing import Sequence
 
 from balatro_gym.cards.booster_packs import BOOSTER_TO_PACK_INFO, BoosterType, PackType
-from balatro_gym.cards.interfaces import Card
+from balatro_gym.cards.interfaces import HasCost
 from balatro_gym.cards.voucher import ALL_VOUCHERS
 from balatro_gym.interfaces import Booster, Voucher
 
 
 @dataclasses.dataclass
 class ShopState:
-    buyable_cards: Sequence[Card]
+    buyable_cards: Sequence[HasCost]
     vouchers: Sequence[Voucher]
     booster_packs: Sequence[Booster]
 
@@ -23,6 +23,7 @@ PROBABILITY_MAPPING = {
     BoosterType.BuffoonPack: {PackType.NORMAL: 1.2, PackType.JUMBO: 0.6, PackType.MEGA: 0.15},
     BoosterType.SpectralPack: {PackType.NORMAL: 0.6, PackType.JUMBO: 0.3, PackType.MEGA: 0.07},
 }
+
 
 class Shop:
 
@@ -38,7 +39,6 @@ class Shop:
         self.vouchers: Sequence[Voucher] = []
         self.bought_vouchers: set[Voucher] = set()
         self.current_state = None
-
 
     def increase_num_buyable_slots(self) -> None:
         self.num_vouchers += 1
