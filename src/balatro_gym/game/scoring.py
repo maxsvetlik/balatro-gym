@@ -82,7 +82,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
     return chips_sum * mult_sum
 
 
-###### These are broken out for testability
+# These are broken out for testability
 
 
 def _get_flush(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
@@ -98,6 +98,7 @@ def _get_flush(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
         return hand
     return []
 
+
 def is_consecutive(ordered_ranks: Sequence[int]) -> bool:
     prev_rank = ordered_ranks[0]
     for rank in ordered_ranks[1:]:
@@ -105,6 +106,7 @@ def is_consecutive(ordered_ranks: Sequence[int]) -> bool:
             return False
         prev_rank = rank
     return True
+
 
 def _get_straight(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
     sorted_ranks = sorted([card.rank.value.order for card in hand])
