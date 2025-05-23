@@ -4,7 +4,7 @@ from enum import Enum, auto
 from typing import Any, Optional
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import HasCost, Deck, PlayingCard
+from .cards.interfaces import Deck, HasCost, PlayingCard
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
