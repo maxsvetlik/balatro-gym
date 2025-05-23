@@ -7,7 +7,6 @@ JOKERS: Sequence[JokerBase] = []
 
 
 class Joker(JokerBase):
-
     _base_cost: int = 2
 
     @property
@@ -23,7 +22,6 @@ class Joker(JokerBase):
 
 
 class GreedyJoker(JokerBase):
-
     _base_cost: int = 5
 
     @property
@@ -39,7 +37,6 @@ class GreedyJoker(JokerBase):
 
 
 class LustyJoker(JokerBase):
-
     _base_cost: int = 5
 
     @property
@@ -55,7 +52,6 @@ class LustyJoker(JokerBase):
 
 
 class WrathfulJoker(JokerBase):
-
     _base_cost: int = 5
 
     @property
@@ -71,7 +67,6 @@ class WrathfulJoker(JokerBase):
 
 
 class GluttonousJoker(JokerBase):
-
     _base_cost: int = 5
 
     @property
@@ -87,8 +82,7 @@ class GluttonousJoker(JokerBase):
 
 
 class JollyJoker(JokerBase):
-
-    _base_cost: int = 5
+    _base_cost: int = 3
 
     @property
     def joker_type(self) -> Type:
@@ -105,8 +99,7 @@ class JollyJoker(JokerBase):
 
 
 class ZanyJoker(JokerBase):
-
-    _base_cost: int = 5
+    _base_cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -119,4 +112,21 @@ class ZanyJoker(JokerBase):
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
         if scored_hand == PokerHandType.THREE_SET:
             return 12
+        return 0
+
+
+class MadJoker(JokerBase):
+    _base_cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ADDITIVE_MULT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        if scored_hand == PokerHandType.TWO_PAIR:
+            return 10
         return 0
