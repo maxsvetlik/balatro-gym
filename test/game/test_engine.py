@@ -25,6 +25,12 @@ def test_process_board_action_state_transition() -> None:
     run._process_board_action(GameAction(BoardAction.START_ROUND, []))
     assert run.game_state == GameState.IN_ANTE
 
+    run._process_board_action(GameAction(BoardAction.VIEW_SHOP, []))
+    assert run.game_state == GameState.IN_SHOP
+
+    run._process_board_action(GameAction(BoardAction.NEXT_ROUND, []))
+    assert run.game_state == GameState.IN_BLIND_SELECT
+
 
 @pytest.mark.unit
 def test_process_hand_action_state_transition_win() -> None:

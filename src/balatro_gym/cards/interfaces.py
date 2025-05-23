@@ -1,4 +1,5 @@
 import copy
+import dataclasses
 import random
 from collections import deque
 from collections.abc import Sequence
@@ -208,7 +209,12 @@ class PurpleSeal(Seal):
         return True
 
 
-class PlayingCard(HasChips):
+@dataclasses.dataclass
+class HasCost(Protocol):
+    _cost: int = 1
+
+
+class PlayingCard(HasChips, HasCost):
     _rank: Rank
     _base_suit: Suit
     _enhancement: Optional[Enhancement]
