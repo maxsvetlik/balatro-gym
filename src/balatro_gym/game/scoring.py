@@ -82,7 +82,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
     return chips_sum * mult_sum
 
 
-###### These are broken out for testability
+# These are broken out for testability
 
 
 def _get_flush(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:

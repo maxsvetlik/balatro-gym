@@ -84,7 +84,7 @@ class Rank(Enum):
         return self
 
 
-############# Editions
+# Editions
 class Edition(HasChips, HasMult, HasMultiplier, Protocol):
     def is_negative(self) -> bool:
         return False
@@ -114,7 +114,7 @@ class Negative(Edition):
         return True
 
 
-############# Enhancements
+# Enhancements
 class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, Protocol):
     def get_suit(self, card: "PlayingCard") -> Sequence[Suit]:
         return [card.base_suit]
@@ -329,6 +329,7 @@ class PlayingCard(HasChips):
             + hash(self._seal)
             + hash(self._added_chips)
         )
+
 
 
 class Deck(HasReset):

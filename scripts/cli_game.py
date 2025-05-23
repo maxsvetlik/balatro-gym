@@ -13,6 +13,7 @@ def _cards_idxs(cards: Sequence[str]) -> Sequence[int]:
             pass
     return card_idxs
 
+
 if __name__ == "__main__":
     run = Run()
     done = False
@@ -42,8 +43,7 @@ if __name__ == "__main__":
                 action = HandAction.SCORE_HAND
             run.step(GameAction(action, cards))
 
-
         elif obs.game_state == GameState.IN_BLIND_SELECT:
             print("You are in blind selection.")
             input("You must select a blind. Press anything to continue.")
-            run.step(GameAction(BoardAction.START_ANTE, []))
+            run.step(GameAction(BoardAction.START_ROUND, []))
