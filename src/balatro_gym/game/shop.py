@@ -16,8 +16,8 @@ from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.cards.voucher import ALL_VOUCHERS
 from balatro_gym.interfaces import Booster, Voucher
 
-
 __all__ = ["Shop"]
+
 
 @dataclasses.dataclass
 class ShopState:
