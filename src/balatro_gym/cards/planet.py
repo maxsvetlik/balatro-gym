@@ -1,4 +1,3 @@
-from typing import Sequence
 
 from balatro_gym.interfaces import PlanetCard, PokerHandType
 
@@ -9,4 +8,4 @@ class Pluto(PlanetCard):
         return PokerHandType.HIGH_CARD
 
 
-PLANET_CARDS: Sequence[PlanetCard] = [Pluto()]
+PLANET_CARDS: set[PlanetCard] = {Pluto()}

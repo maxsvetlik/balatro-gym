@@ -120,6 +120,6 @@ class ZanyJoker(JokerBase):
         return 0
 
 
-JOKERS: Sequence[JokerBase] = [
+JOKERS: set[JokerBase] = {
     Joker(), GreedyJoker(), LustyJoker(), WrathfulJoker(), GluttonousJoker(), JollyJoker(), ZanyJoker()
-]
+}

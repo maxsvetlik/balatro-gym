@@ -8,7 +8,7 @@ from balatro_gym.cards.joker import JOKERS
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.cards.voucher import ALL_VOUCHERS
-from balatro_gym.interfaces import Booster, Voucher
+from balatro_gym.interfaces import Booster, Tarot, Voucher
 
 
 @dataclasses.dataclass
@@ -34,7 +34,9 @@ class Shop:
     num_buyable_slots: int = 2,
     num_vouchers: int = 1,
     num_booster_packs: int = 2,
-    reroll_price: int = 5):
+    reroll_price: int = 5,
+    allow_duplicates: bool = False,
+                 ):
         self.num_buyable_slots = num_buyable_slots
         self.num_vouchers = num_vouchers
         self.num_booster_packs = num_booster_packs
@@ -42,6 +44,7 @@ class Shop:
         self.vouchers: Sequence[Voucher] = []
         self.bought_vouchers: set[Voucher] = set()
         self.current_state = None
+        self.allow_duplicates = allow_duplicates
 
     def increase_num_buyable_slots(self) -> None:
         self.num_vouchers += 1
@@ -94,14 +97,25 @@ class Shop:
 
     def generate_buyable_cards(self) -> Sequence[HasCost]:
         sampled_cards: list[HasCost] = []
+        all_tarot_cards = TAROT_CARDS
+        all_planet_cards = PLANET_CARDS
+        all_joker_cards = JOKERS
+        card : HasCost
         for _ in range(self.num_buyable_slots):
             rand = random.random()
             # The probabilities are based on numbers provided by https://balatrogame.fandom.com/wiki/The_Shop
             if rand < 1 / 7:
-                sampled_cards.extend(random.sample(TAROT_CARDS, 1))
+                card = random.sample(all_tarot_cards, 1)[0]
+                if not self.allow_duplicates:
+                    all_tarot_cards.remove(card)
             elif rand < 2 / 7:
-                sampled_cards.extend(random.sample(PLANET_CARDS, 1))
+                card = random.sample(PLANET_CARDS, 1)[0]
+                if not self.allow_duplicates:
+                    all_planet_cards.remove(card)
             else:
                 # TODO: Consider rarity when sampling jokers
-                sampled_cards.extend(random.sample(JOKERS, 1))
+                card = random.sample(JOKERS, 1)[0]
+                if not self.allow_duplicates:
+                    all_joker_cards.remove(card)
+            sampled_cards.append(card)
         return sampled_cards
