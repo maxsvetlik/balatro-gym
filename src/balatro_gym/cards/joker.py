@@ -33,7 +33,7 @@ class GreedyJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return sum([3 if card.suit == Suit.DIAMONDS else 0 for card in state.hand])
+        return sum([3 if Suit.DIAMONDS in card.suit else 0 for card in scored_cards])
 
 
 class LustyJoker(JokerBase):
@@ -48,7 +48,7 @@ class LustyJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return sum([3 if card.suit == Suit.HEARTS else 0 for card in state.hand])
+        return sum([3 if Suit.HEARTS in card.suit else 0 for card in scored_cards])
 
 
 class WrathfulJoker(JokerBase):
@@ -63,7 +63,7 @@ class WrathfulJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return sum([3 if card.suit == Suit.CLUBS else 0 for card in state.hand])
+        return sum([3 if Suit.CLUBS in card.suit else 0 for card in scored_cards])
 
 
 class GluttonousJoker(JokerBase):
@@ -78,7 +78,7 @@ class GluttonousJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return sum([3 if card.suit == Suit.SPADES else 0 for card in state.hand])
+        return sum([3 if Suit.SPADES in card.suit else 0 for card in scored_cards])
 
 
 class JollyJoker(JokerBase):
