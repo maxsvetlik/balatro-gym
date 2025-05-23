@@ -377,7 +377,10 @@ class Deck(HasReset):
     def destroy(self, cards: Sequence[PlayingCard]) -> None:
         """Destroyed cards are removed permanently. Though, this can only happen to cards in-play."""
         for card in cards:
-            self._cards_played.remove(card)
+            try:
+                self._cards_played.remove(card)
+            except ValueError:
+                print("Attempted to destroy card that wasn't played. This is unexpected.")
 
     def shuffle(self) -> None:
         cards = list(copy.deepcopy(self._cards_remaining))
