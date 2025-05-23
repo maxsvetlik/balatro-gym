@@ -3,8 +3,6 @@ from collections.abc import Sequence
 from ..interfaces import BlindState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
 
-JOKERS: Sequence[JokerBase] = []
-
 
 class Joker(JokerBase):
 
@@ -120,3 +118,8 @@ class ZanyJoker(JokerBase):
         if scored_hand == PokerHandType.THREE_SET:
             return 12
         return 0
+
+
+JOKERS: Sequence[JokerBase] = [
+    Joker(), GreedyJoker(), LustyJoker(), WrathfulJoker(), GluttonousJoker(), JollyJoker(), ZanyJoker()
+]

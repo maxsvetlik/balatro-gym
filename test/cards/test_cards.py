@@ -23,6 +23,7 @@ from balatro_gym.cards.interfaces import (
     WildCard,
 )
 from balatro_gym.game.scoring import get_poker_hand, score_hand
+from balatro_gym.interfaces import BoardState
 
 
 def _make_card(
@@ -71,7 +72,7 @@ def test_enhancement_glass() -> None:
 def test_enhancement_glass_scoring() -> None:
     enhancement = GlassCard()
     card = _make_card(enhancement=enhancement)
-    board_mock = Mock()
+    board_mock = BoardState()
     board_mock.jokers = []
     blind_mock = Mock()
     blind_mock.hand = []
@@ -98,7 +99,7 @@ def test_enhancement_steel_scoring() -> None:
     held_card = _make_card(enhancement=enhancement)
     submitted_card = _make_card()
     submitted_hand = [submitted_card]
-    board_mock = Mock()
+    board_mock = BoardState()
     board_mock.jokers = []
     blind_mock = Mock()
     blind_mock.hand = [held_card]
@@ -128,7 +129,7 @@ def test_enhancement_stone_scoring() -> None:
     # Submit a single stone card
     enhancement = StoneCard()
     card = _make_card(enhancement=enhancement)
-    board_mock = Mock()
+    board_mock = BoardState()
     board_mock.jokers = []
     blind_mock = Mock()
     blind_mock.hand = []

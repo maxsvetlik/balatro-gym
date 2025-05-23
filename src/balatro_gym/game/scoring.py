@@ -51,9 +51,9 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
                     4) subtract multiplication | round
     """
     cards, hand_type = get_poker_hand(hand)
-    hand_val = hand_type.value
-    chips_sum = hand_val.chips
-    mult_sum: float = hand_val.mult
+    poker_scale = board_state.get_poker_hand(hand_type).score
+    chips_sum = poker_scale.chips
+    mult_sum: float = poker_scale.mult
     money_sum = 0
 
     for card in cards:

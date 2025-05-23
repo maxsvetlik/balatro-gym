@@ -4,6 +4,9 @@ from typing import Sequence
 
 from balatro_gym.cards.booster_packs import BOOSTER_TO_PACK_INFO, BoosterType, PackType
 from balatro_gym.cards.interfaces import HasCost
+from balatro_gym.cards.joker import JOKERS
+from balatro_gym.cards.planet import PLANET_CARDS
+from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.cards.voucher import ALL_VOUCHERS
 from balatro_gym.interfaces import Booster, Voucher
 
@@ -73,7 +76,7 @@ class Shop:
             self.vouchers = self.voucher_generator()
         return ShopState(
             vouchers=self.vouchers,
-            buyable_cards=[],
+            buyable_cards=self.generate_buyable_cards(),
             booster_packs=self.generate_booster_packs(),
         )
 
@@ -88,3 +91,17 @@ class Shop:
                 probabilities.append(PROBABILITY_MAPPING[booster_type][pack_type])
 
         return random.choices(potential_packs, weights=probabilities, k=self.num_booster_packs)
+
+    def generate_buyable_cards(self) -> Sequence[HasCost]:
+        sampled_cards: list[HasCost] = []
+        for _ in range(self.num_buyable_slots):
+            rand = random.random()
+            # The probabilities are based on numbers provided by https://balatrogame.fandom.com/wiki/The_Shop
+            if rand < 1 / 7:
+                sampled_cards.extend(random.sample(TAROT_CARDS, 1))
+            elif rand < 2 / 7:
+                sampled_cards.extend(random.sample(PLANET_CARDS, 1))
+            else:
+                # TODO: Consider rarity when sampling jokers
+                sampled_cards.extend(random.sample(JOKERS, 1))
+        return sampled_cards
