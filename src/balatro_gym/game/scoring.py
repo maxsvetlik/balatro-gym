@@ -93,11 +93,11 @@ def _get_flush(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
         else:
             counter.update(card.suit)
 
-    most_common_tup = counter.most_common(1)
+    most_common_list = counter.most_common(1)
     count = 0
-    if len(most_common_tup) > 0:
+    if len(most_common_list) > 0:
         # In some situations there may not be a suit played. For instance a single StoneCard.
-        _, count = most_common_tup[0]
+        _, count = most_common_list[0]
 
     if count >= 5:
         return hand
