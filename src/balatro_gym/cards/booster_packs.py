@@ -15,6 +15,7 @@ __all__ = [
     "StandardPack", "ArcanaPack", "CelestialPack", "BuffoonPack", "SpectralPack"
 ]
 
+
 class PackInfo(NamedTuple):
     cost: int
     n_cards: int
