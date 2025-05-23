@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from balatro_gym.cards.utils import get_num_pairs
+from balatro_gym.cards.utils import contains_three_set, get_flush, get_num_pairs, get_straight
 
 from ..interfaces import BlindState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
@@ -190,3 +190,78 @@ class SlyJoker(JokerBase):
 
     def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
         return 50 if get_num_pairs(scored_cards) >= 1 else 0
+
+
+class WilyJoker(JokerBase):
+    _base_cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        return 100 if contains_three_set(scored_cards) else 0
+
+
+class CleverJoker(JokerBase):
+    _base_cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        return 80 if get_num_pairs(scored_cards) >= 2 else 0
+
+
+class DeviousJoker(JokerBase):
+    _base_cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        return 100 if len(get_straight(scored_cards)) > 0 else 0
+
+
+class CraftyJoker(JokerBase):
+    _base_cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        return 80 if len(get_flush(scored_cards)) > 0 else 0
+
+
+class HalfJoker(JokerBase):
+    _base_cost: int = 5
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ADDITIVE_MULT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        return 20 if len(scored_cards) <= 3 else 0

@@ -6,15 +6,20 @@ import pytest
 
 from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
 from balatro_gym.cards.joker import (
+    CleverJoker,
+    CraftyJoker,
     CrazyJoker,
+    DeviousJoker,
     DrollJoker,
     GluttonousJoker,
     GreedyJoker,
+    HalfJoker,
     Joker,
     JollyJoker,
     LustyJoker,
     MadJoker,
     SlyJoker,
+    WilyJoker,
     WrathfulJoker,
     ZanyJoker,
 )
@@ -217,7 +222,6 @@ def test_droll_joker(hand_type: PokerHandType, expected_score: int) -> None:
     "hand,expected_chips",
     [
         [[_make_card(Rank.ACE)], 0],
-        [[_make_card(Rank.ACE), _make_card(Rank.ACE)], 50],
         [[_make_card(Rank.ACE)] * 2, 50],
         [[_make_card(Rank.ACE)] * 3, 50],
         [[_make_card(Rank.ACE)] * 4, 50],
@@ -227,3 +231,93 @@ def test_sly_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
     j = SlyJoker()
     assert j.joker_type == Type.CHIPS
     assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_chips",
+    [
+        [[_make_card(Rank.ACE)], 0],
+        [[_make_card(Rank.ACE)] * 2, 0],
+        [[_make_card(Rank.ACE)] * 3, 100],
+        [[_make_card(Rank.ACE)] * 4, 100],
+    ],
+)
+def test_wily_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
+    j = WilyJoker()
+    assert j.joker_type == Type.CHIPS
+    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_chips",
+    [
+        [[_make_card(Rank.ACE)], 0],
+        [[_make_card(Rank.ACE)] * 2, 0],
+        [[_make_card(Rank.ACE)] * 3, 0],
+        [[_make_card(Rank.ACE)] * 4, 80],
+    ],
+)
+def test_clever_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
+    j = CleverJoker()
+    assert j.joker_type == Type.CHIPS
+    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_chips",
+    [
+        [[_make_card(Rank.ACE)], 0],
+        [[_make_card(Rank.ACE)] * 2, 0],
+        [
+            [
+                _make_card(Rank.ACE),
+                _make_card(Rank.KING),
+                _make_card(Rank.QUEEN),
+                _make_card(Rank.JACK),
+                _make_card(Rank.TEN),
+            ],
+            100,
+        ],
+    ],
+)
+def test_devious_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
+    j = DeviousJoker()
+    assert j.joker_type == Type.CHIPS
+    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_chips",
+    [
+        [[_make_card(Rank.ACE)], 0],
+        [[_make_card(Rank.ACE)] * 2, 0],
+        [[_make_card(Rank.ACE)] * 3, 0],
+        [[_make_card(Rank.ACE)] * 4, 0],
+        [[_make_card(Rank.ACE)] * 5, 80],
+    ],
+)
+def test_crafty_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
+    j = CraftyJoker()
+    assert j.joker_type == Type.CHIPS
+    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_chips",
+    [
+        [[_make_card(Rank.ACE)], 20],
+        [[_make_card(Rank.ACE)] * 2, 20],
+        [[_make_card(Rank.ACE)] * 3, 20],
+        [[_make_card(Rank.ACE)] * 4, 0],
+        [[_make_card(Rank.ACE)] * 5, 0],
+    ],
+)
+def test_half_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
+    j = HalfJoker()
+    assert j.joker_type == Type.ADDITIVE_MULT
+    assert j.get_mult(hand, Mock(), Mock()) == expected_score

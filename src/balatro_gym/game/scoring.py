@@ -3,6 +3,7 @@ from typing import Sequence
 
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
 from balatro_gym.cards.joker import JokerBase
+from balatro_gym.cards.utils import get_flush, get_straight, is_royal
 from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
 
 
@@ -74,7 +75,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             num_card_retriggers = 2 if isinstance(unplayed_card.seal, RedSeal) else 1
             mult_sum *= unplayed_card.get_multiplication() * num_card_retriggers
         for joker in board_state.jokers:
-            chips_sum += joker.get_chips_hand(blind_state, hand_type)
+            chips_sum += joker.get_chips_hand(cards, blind_state, hand_type)
             mult_sum += joker.get_mult_hand(cards, blind_state, hand_type)
             mult_sum *= joker.get_multiplication(cards, blind_state, hand_type)
             money_sum += joker.get_money(blind_state)
@@ -83,45 +84,6 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
 
 
 # These are broken out for testability
-
-
-def _get_flush(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
-    counter: Counter = Counter()
-    for card in hand:
-        if card.enhancement is not None:
-            counter.update(card.enhancement.get_suit(card))
-        else:
-            counter.update(card.suit)
-
-    most_common_list = counter.most_common(1)
-    count = 0
-    if len(most_common_list) > 0:
-        # In some situations there may not be a suit played. For instance a single StoneCard.
-        _, count = most_common_list[0]
-
-    if count >= 5:
-        return hand
-    return []
-
-
-def is_consecutive(ordered_ranks: Sequence[int]) -> bool:
-    prev_rank = ordered_ranks[0]
-    for rank in ordered_ranks[1:]:
-        if not (rank == prev_rank + 1):
-            return False
-        prev_rank = rank
-    return True
-
-
-def _get_straight(hand: Sequence[PlayingCard]) -> Sequence[PlayingCard]:
-    sorted_ranks = sorted([card.rank.value.order for card in hand])
-    if is_consecutive(sorted_ranks) or _is_royal(hand):
-        return hand
-    return []
-
-
-def _is_royal(hand: Sequence[PlayingCard]) -> bool:
-    return set([card.rank.value.order for card in hand]) == {1, 10, 11, 12, 13}
 
 
 def _get_max_rank(hand: Sequence[PlayingCard]) -> Sequence[tuple[Rank, int]]:
@@ -166,14 +128,14 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
         Straight flush, straight, flush, five set, four set, flush house, full house, three set, two set, one set
     """
     counts = _get_max_rank(hand)
-    flush = len(_get_flush(hand)) == 5
-    straight = len(_get_straight(hand)) == 5
+    flush = len(get_flush(hand)) == 5
+    straight = len(get_straight(hand)) == 5
     is_full = _is_full_house(counts)
     is_two_pair = _is_two_pair(counts)
-    is_royal = _is_royal(hand)
+    is_royal_res = is_royal(hand)
     max_set = _extract_largest_set(hand, counts)
 
-    if is_royal and flush and straight:
+    if is_royal_res and flush and straight:
         return hand, PokerHandType.ROYAL_FLUSH
     elif flush and straight:
         return hand, PokerHandType.STRAIGHT_FLUSH
