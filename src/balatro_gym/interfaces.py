@@ -1,7 +1,7 @@
 import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any, Optional, Protocol, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import Deck, HasCost, PlayingCard
@@ -48,6 +48,16 @@ class Tarot(HasCost):
 
 class BoosterPack:
     pass
+
+
+@runtime_checkable
+class Booster(Protocol):
+    cost: int
+    n_cards: int
+    n_choice: int
+
+    def sample(self) -> Sequence[HasCost]:
+        raise NotImplementedError
 
 
 class Rarity(Enum):
