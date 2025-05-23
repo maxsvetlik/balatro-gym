@@ -331,7 +331,6 @@ class PlayingCard(HasChips):
         )
 
 
-
 class Deck(HasReset):
     _cards_remaining: deque[PlayingCard]
     _cards_played: deque[PlayingCard]
