@@ -2,7 +2,13 @@ import dataclasses
 import random
 from typing import Sequence
 
-from balatro_gym.cards.booster_packs import BOOSTER_TO_PACK_INFO, BoosterType, PackType
+from balatro_gym.cards.booster_packs import (
+    BOOSTER_TO_PACK_INFO,
+    JOKER_SPECTRAL_PACK_INFO,
+    BoosterType,
+    BuffoonPack,
+    PackType,
+)
 from balatro_gym.cards.interfaces import HasCost
 from balatro_gym.cards.joker import JOKERS
 from balatro_gym.cards.planet import PLANET_CARDS
@@ -80,10 +86,10 @@ class Shop:
         return ShopState(
             vouchers=self.vouchers,
             buyable_cards=self.generate_buyable_cards(),
-            booster_packs=self.generate_booster_packs(),
+            booster_packs=self.generate_booster_packs(round),
         )
 
-    def generate_booster_packs(self) -> Sequence[Booster]:
+    def generate_booster_packs(self, round: int) -> Sequence[Booster]:
         potential_packs = []
         probabilities = []
         for pack_type in PackType:
@@ -93,6 +99,11 @@ class Shop:
                 potential_packs.append(booster_type.value(pack_info.cost, pack_info.n_cards, pack_info.n_choice))
                 probabilities.append(PROBABILITY_MAPPING[booster_type][pack_type])
 
+        # On the first round, one normal buffoon pack is guaranteed
+        if round == 1:
+            pack_info = JOKER_SPECTRAL_PACK_INFO[PackType.NORMAL]
+            random_booster = random.choices(potential_packs, weights=probabilities, k=self.num_booster_packs - 1)
+            return [BuffoonPack(pack_info.cost, pack_info.n_cards, pack_info.n_choice)] + random_booster
         return random.choices(potential_packs, weights=probabilities, k=self.num_booster_packs)
 
     def generate_buyable_cards(self) -> Sequence[HasCost]:
