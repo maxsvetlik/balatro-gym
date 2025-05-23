@@ -17,6 +17,8 @@ from balatro_gym.cards.voucher import ALL_VOUCHERS
 from balatro_gym.interfaces import Booster, Voucher
 
 
+__all__ = ["Shop"]
+
 @dataclasses.dataclass
 class ShopState:
     buyable_cards: Sequence[HasCost]
