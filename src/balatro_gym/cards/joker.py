@@ -144,6 +144,10 @@ class CrazyJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        if scored_hand == PokerHandType.STRAIGHT or scored_hand == PokerHandType.STRAIGHT_FLUSH:
+        if (
+            scored_hand == PokerHandType.STRAIGHT
+            or scored_hand == PokerHandType.STRAIGHT_FLUSH
+            or scored_hand == PokerHandType.ROYAL_FLUSH
+        ):
             return 12
         return 0

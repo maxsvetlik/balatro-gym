@@ -4,8 +4,18 @@ from unittest.mock import Mock
 import pytest
 
 from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
-from balatro_gym.cards.joker import GluttonousJoker, GreedyJoker, Joker, LustyJoker, WrathfulJoker
-from balatro_gym.interfaces import JokerBase, Type
+from balatro_gym.cards.joker import (
+    CrazyJoker,
+    GluttonousJoker,
+    GreedyJoker,
+    Joker,
+    JollyJoker,
+    LustyJoker,
+    MadJoker,
+    WrathfulJoker,
+    ZanyJoker,
+)
+from balatro_gym.interfaces import JokerBase, PokerHandType, Type
 
 
 def _make_card(
@@ -75,20 +85,101 @@ def test_gluttonous_joker(num_suit: int) -> None:
 
 
 @pytest.mark.unit
-def test_jolly_joker() -> None:
-    pass
+@pytest.mark.parametrize(
+    "hand_type,expected_score",
+    [
+        [PokerHandType.HIGH_CARD, 0],
+        [PokerHandType.PAIR, 8],
+        [PokerHandType.TWO_PAIR, 0],
+        [PokerHandType.THREE_SET, 0],
+        [PokerHandType.FULL_HOUSE, 0],
+        [PokerHandType.FLUSH_HOUSE, 0],
+        [PokerHandType.FLUSH_FIVE, 0],
+        [PokerHandType.FOUR_SET, 0],
+        [PokerHandType.FIVE_SET, 0],
+        [PokerHandType.FLUSH, 0],
+        [PokerHandType.ROYAL_FLUSH, 0],
+        [PokerHandType.STRAIGHT, 0],
+        [PokerHandType.STRAIGHT_FLUSH, 0],
+        [PokerHandType.FLUSH_FIVE, 0],
+    ],
+)
+def test_jolly_joker(hand_type: PokerHandType, expected_score: int) -> None:
+    j = JollyJoker()
+    assert j.joker_type == Type.ADDITIVE_MULT
+    assert j.get_mult(Mock(), Mock(), hand_type) == expected_score
 
 
 @pytest.mark.unit
-def test_zany_joker() -> None:
-    pass
+@pytest.mark.parametrize(
+    "hand_type,expected_score",
+    [
+        [PokerHandType.HIGH_CARD, 0],
+        [PokerHandType.PAIR, 0],
+        [PokerHandType.TWO_PAIR, 0],
+        [PokerHandType.THREE_SET, 12],
+        [PokerHandType.FULL_HOUSE, 0],
+        [PokerHandType.FLUSH_HOUSE, 0],
+        [PokerHandType.FOUR_SET, 0],
+        [PokerHandType.FIVE_SET, 0],
+        [PokerHandType.FLUSH, 0],
+        [PokerHandType.ROYAL_FLUSH, 0],
+        [PokerHandType.STRAIGHT, 0],
+        [PokerHandType.STRAIGHT_FLUSH, 0],
+        [PokerHandType.FLUSH_FIVE, 0],
+    ],
+)
+def test_zany_joker(hand_type: PokerHandType, expected_score: int) -> None:
+    j = ZanyJoker()
+    assert j.joker_type == Type.ADDITIVE_MULT
+    assert j.get_mult(Mock(), Mock(), hand_type) == expected_score
 
 
 @pytest.mark.unit
-def test_mad_joker() -> None:
-    pass
+@pytest.mark.parametrize(
+    "hand_type,expected_score",
+    [
+        [PokerHandType.HIGH_CARD, 0],
+        [PokerHandType.PAIR, 0],
+        [PokerHandType.TWO_PAIR, 10],
+        [PokerHandType.THREE_SET, 0],
+        [PokerHandType.FULL_HOUSE, 0],
+        [PokerHandType.FLUSH_HOUSE, 0],
+        [PokerHandType.FOUR_SET, 0],
+        [PokerHandType.FIVE_SET, 0],
+        [PokerHandType.FLUSH, 0],
+        [PokerHandType.ROYAL_FLUSH, 0],
+        [PokerHandType.STRAIGHT, 0],
+        [PokerHandType.STRAIGHT_FLUSH, 0],
+        [PokerHandType.FLUSH_FIVE, 0],
+    ],
+)
+def test_mad_joker(hand_type: PokerHandType, expected_score: int) -> None:
+    j = MadJoker()
+    assert j.joker_type == Type.ADDITIVE_MULT
+    assert j.get_mult(Mock(), Mock(), hand_type) == expected_score
 
 
 @pytest.mark.unit
-def test_crazy_joker() -> None:
-    pass
+@pytest.mark.parametrize(
+    "hand_type,expected_score",
+    [
+        [PokerHandType.HIGH_CARD, 0],
+        [PokerHandType.PAIR, 0],
+        [PokerHandType.TWO_PAIR, 0],
+        [PokerHandType.THREE_SET, 0],
+        [PokerHandType.FULL_HOUSE, 0],
+        [PokerHandType.FLUSH_HOUSE, 0],
+        [PokerHandType.FOUR_SET, 0],
+        [PokerHandType.FIVE_SET, 0],
+        [PokerHandType.FLUSH, 0],
+        [PokerHandType.ROYAL_FLUSH, 12],
+        [PokerHandType.STRAIGHT, 12],
+        [PokerHandType.STRAIGHT_FLUSH, 12],
+        [PokerHandType.FLUSH_FIVE, 0],
+    ],
+)
+def test_crazy_joker(hand_type: PokerHandType, expected_score: int) -> None:
+    j = CrazyJoker()
+    assert j.joker_type == Type.ADDITIVE_MULT
+    assert j.get_mult(Mock(), Mock(), hand_type) == expected_score
