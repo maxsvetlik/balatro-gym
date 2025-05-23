@@ -8,7 +8,7 @@ from balatro_gym.cards.joker import JOKERS
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.cards.voucher import ALL_VOUCHERS
-from balatro_gym.interfaces import Booster, Tarot, Voucher
+from balatro_gym.interfaces import Booster, Voucher
 
 
 @dataclasses.dataclass
@@ -100,7 +100,7 @@ class Shop:
         all_tarot_cards = TAROT_CARDS
         all_planet_cards = PLANET_CARDS
         all_joker_cards = JOKERS
-        card : HasCost
+        card: HasCost
         for _ in range(self.num_buyable_slots):
             rand = random.random()
             # The probabilities are based on numbers provided by https://balatrogame.fandom.com/wiki/The_Shop
