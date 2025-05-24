@@ -169,7 +169,6 @@ class ConsumableState(HasReset):
 
 
 class JokerBase(HasCost):
-
     _base_cost: int = 0
 
     @property
@@ -189,23 +188,36 @@ class JokerBase(HasCost):
         raise NotImplementedError
 
     def get_money(self, state: BlindState) -> int:
+        """The money earned by the player from selling this Joker."""
         return 0
 
     def get_mult_card(self, card: PlayingCard, state: BlindState) -> int:
+        """Get any additional mult value of a given card based on the Joker's effects.
+        Note that mult is intended to be additive, so in the base case, return 0."""
         return 0
 
     def get_mult_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        """Get any additional mult value of a given hand based on the Joker's effects.
+        Note that mult is intended to be additive, so in the base case, return 0."""
+
         return 0
 
     def get_multiplication(
         self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType
     ) -> float:
+        """Get any additional multiplication value of a given hand based on the Joker's effects.
+        Note that multiplication is intended to be multiplicative, so in the base case, return 1."""
+
         return 1.0
 
     def get_chips_card(self, card: PlayingCard, state: BlindState) -> int:
+        """Get any additional chips value of a given card based on the Joker's effects.
+        Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
 
     def get_chips_hand(self, state: BlindState, scored_hand: PokerHandType) -> int:
+        """Get any additional chip value of a given hand based on the Joker's effects.
+        Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
 
 
