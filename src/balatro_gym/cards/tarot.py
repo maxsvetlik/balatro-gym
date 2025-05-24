@@ -93,8 +93,8 @@ class Justice(Tarot):
 
 class Hermit(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        money = max(20, board_state.money * 2)
-        board_state.set_money(money)
+        earn = min(20, board_state.money * 2)
+        board_state.set_money(board_state.money + earn)
         return True
 
 

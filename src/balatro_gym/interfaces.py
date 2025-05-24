@@ -263,7 +263,9 @@ class BoardState(HasReset):
     def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
         return self.poker_hands[poker_hand_type.name]
 
-    def use_consumable(self, card: ConsumableCardBase, selected_cards: Sequence[PlayingCard]) -> bool:
+    def use_consumable(self, index: int, selected_cards: Sequence[PlayingCard]) -> bool:
+        assert len(self.consumable.consumables) > index
+        card = self.consumable.consumables[index]
         assert isinstance(card, PlanetCard) or isinstance(card, Tarot)
         if isinstance(card, Tarot) and card.apply(selected_cards, self):
             self.last_used_consumable = card
