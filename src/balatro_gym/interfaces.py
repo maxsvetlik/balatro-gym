@@ -20,6 +20,7 @@ __all__ = [
     "PokerScale",
     "PokerHandType",
     "JokerBase",
+    "PlanetCard",
 ]
 
 

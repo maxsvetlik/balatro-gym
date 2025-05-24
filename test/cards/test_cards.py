@@ -22,7 +22,7 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
-from balatro_gym.cards.planet import Pluto, Mercury
+from balatro_gym.cards.planet import Mercury, Pluto
 from balatro_gym.game.scoring import get_poker_hand, score_hand
 from balatro_gym.interfaces import BoardState, PokerHand, PokerHandType
 
