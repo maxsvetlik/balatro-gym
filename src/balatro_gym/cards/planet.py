@@ -1,3 +1,4 @@
+from typing import Sequence
 
 from balatro_gym.interfaces import PlanetCard, PokerHandType
 
@@ -74,7 +75,7 @@ class Eris(PlanetCard):
         return PokerHandType.FLUSH_FIVE
 
 
-PLANET_CARDS: list[type[PlanetCard]] = [
+PLANET_CARDS: Sequence[type[PlanetCard]] = [
     Pluto,
     Mercury,
     Uranus,

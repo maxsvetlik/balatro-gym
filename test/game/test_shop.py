@@ -9,7 +9,7 @@ from balatro_gym.interfaces import Booster
 
 @pytest.mark.unit
 def test_generate_shop_state() -> None:
-    shop = Shop(allow_duplicates=True)
+    shop = Shop()
     state = shop.generate_shop_state(1)
     voucher = state.vouchers[0]
     assert isinstance(state, ShopState)
