@@ -234,7 +234,7 @@ class DeviousJoker(JokerBase):
         return Rarity.COMMON
 
     def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return 100 if len(get_straight(scored_cards)) > 0 else 0
+        return 100 if len(get_straight(scored_cards)) == 5 else 0
 
 
 class CraftyJoker(JokerBase):
