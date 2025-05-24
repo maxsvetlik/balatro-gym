@@ -1,12 +1,13 @@
 from collections.abc import Sequence
 
+from balatro_gym.cards.utils import contains_one_pair, contains_three_set, contains_two_pair, get_max_rank
+
 from ..interfaces import BlindState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
 
 
 class Joker(JokerBase):
-
-    _base_cost: int = 2
+    _cost: int = 2
 
     @property
     def joker_type(self) -> Type:
@@ -21,8 +22,7 @@ class Joker(JokerBase):
 
 
 class GreedyJoker(JokerBase):
-
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -33,12 +33,11 @@ class GreedyJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return sum([3 if card.suit == Suit.DIAMONDS else 0 for card in state.hand])
+        return sum([3 if Suit.DIAMONDS in card.suit else 0 for card in scored_cards])
 
 
 class LustyJoker(JokerBase):
-
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -49,12 +48,11 @@ class LustyJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return sum([3 if card.suit == Suit.HEARTS else 0 for card in state.hand])
+        return sum([3 if Suit.HEARTS in card.suit else 0 for card in scored_cards])
 
 
 class WrathfulJoker(JokerBase):
-
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -65,12 +63,11 @@ class WrathfulJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return sum([3 if card.suit == Suit.CLUBS else 0 for card in state.hand])
+        return sum([3 if Suit.CLUBS in card.suit else 0 for card in scored_cards])
 
 
 class GluttonousJoker(JokerBase):
-
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -81,12 +78,11 @@ class GluttonousJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        return sum([3 if card.suit == Suit.SPADES else 0 for card in state.hand])
+        return sum([3 if Suit.SPADES in card.suit else 0 for card in scored_cards])
 
 
 class JollyJoker(JokerBase):
-
-    _base_cost: int = 5
+    _cost: int = 3
 
     @property
     def joker_type(self) -> Type:
@@ -97,14 +93,13 @@ class JollyJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        if scored_hand == PokerHandType.PAIR:
+        if contains_one_pair(get_max_rank(state.hand)):
             return 8
         return 0
 
 
 class ZanyJoker(JokerBase):
-
-    _base_cost: int = 5
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -115,7 +110,45 @@ class ZanyJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        if scored_hand == PokerHandType.THREE_SET:
+        if contains_three_set(get_max_rank(state.hand)):
+            return 12
+        return 0
+
+
+class MadJoker(JokerBase):
+    _cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ADDITIVE_MULT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        if contains_two_pair(get_max_rank(state.hand)):
+            return 10
+        return 0
+
+
+class CrazyJoker(JokerBase):
+    _cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ADDITIVE_MULT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        if (
+            scored_hand == PokerHandType.STRAIGHT
+            or scored_hand == PokerHandType.STRAIGHT_FLUSH
+            or scored_hand == PokerHandType.ROYAL_FLUSH
+        ):
             return 12
         return 0
 
