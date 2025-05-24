@@ -23,6 +23,7 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
+from balatro_gym.cards.planet import Mercury, Pluto
 from balatro_gym.game.scoring import get_poker_hand, score_hand
 from balatro_gym.interfaces import BoardState, PokerHand, PokerHandType
 
@@ -203,3 +204,28 @@ def test_enhancement_lucky_modifiers(probability_modifier: int) -> None:
         assert enhancement.get_mult(probability_modifier) == 20
         random_mock.return_value = min(probability_modifier / 15, 1)
         assert enhancement.get_scored_money(probability_modifier) == 20
+
+
+@pytest.mark.unit
+def test_planet_cards() -> None:
+    pluto = Pluto()
+    initial_level_high_card = 2
+    initial_level_pair = 1
+    poker_hands = [
+        PokerHand(hand_type=PokerHandType.HIGH_CARD, level=initial_level_high_card, num_played=0),
+        PokerHand(hand_type=PokerHandType.PAIR, level=initial_level_pair, num_played=0)
+    ]
+    pluto.increase_level(poker_hands)
+
+    # Only increase the high card hand
+    assert poker_hands[0].level == initial_level_high_card + 1
+    assert poker_hands[1].level == initial_level_pair
+
+    mercury = Mercury()
+    mercury.decrease_level(poker_hands)
+    assert poker_hands[0].level == initial_level_high_card + 1
+    assert poker_hands[1].level == initial_level_pair
+
+    pluto.decrease_level(poker_hands)
+    assert poker_hands[0].level == initial_level_high_card
+    assert poker_hands[1].level == initial_level_pair
