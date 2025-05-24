@@ -113,27 +113,41 @@ def test_jolly_joker(hand_type: PokerHandType, expected_score: int) -> None:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "hand_type,expected_score",
+    "hand,expected_score",
     [
-        [PokerHandType.HIGH_CARD, 0],
-        [PokerHandType.PAIR, 0],
-        [PokerHandType.TWO_PAIR, 0],
-        [PokerHandType.THREE_SET, 12],
-        [PokerHandType.FULL_HOUSE, 0],
-        [PokerHandType.FLUSH_HOUSE, 0],
-        [PokerHandType.FOUR_SET, 0],
-        [PokerHandType.FIVE_SET, 0],
-        [PokerHandType.FLUSH, 0],
-        [PokerHandType.ROYAL_FLUSH, 0],
-        [PokerHandType.STRAIGHT, 0],
-        [PokerHandType.STRAIGHT_FLUSH, 0],
-        [PokerHandType.FLUSH_FIVE, 0],
+        [[_make_card()], 0],
+        [[_make_card()] * 2, 0],  # Pair
+        [[_make_card()] * 3, 12],  # Three Set
+        [[_make_card()] * 4, 12],  # Four Set
+        [[_make_card()] * 5, 12],  # Flush Five Set
+        [
+            [
+                _make_card(),
+                _make_card(),
+                _make_card(rank=Rank.KING),
+                _make_card(rank=Rank.KING),
+                _make_card(rank=Rank.KING),
+            ],
+            12,  # Full House
+        ],
+        [
+            [
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS, rank=Rank.EIGHT),
+            ],
+            12,
+        ],  # Flush
     ],
 )
-def test_zany_joker(hand_type: PokerHandType, expected_score: int) -> None:
+def test_zany_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
     j = ZanyJoker()
     assert j.joker_type == Type.ADDITIVE_MULT
-    assert j.get_mult(Mock(), Mock(), hand_type) == expected_score
+    blind = Mock()
+    blind.hand = hand
+    assert j.get_mult(Mock(), blind, Mock()) == expected_score
 
 
 @pytest.mark.unit
@@ -154,7 +168,16 @@ def test_zany_joker(hand_type: PokerHandType, expected_score: int) -> None:
             ],
             10,  # Full House
         ],
-        [[_make_card(suit=Suit.CLUBS)] * 5, 10],  # Flush
+        [
+            [
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS, rank=Rank.EIGHT),
+            ],
+            10,
+        ],  # Flush
     ],
 )
 def test_mad_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
