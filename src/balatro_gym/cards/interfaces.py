@@ -1,10 +1,9 @@
 import copy
-import dataclasses
 import random
 from collections import deque
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol, Union
+from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 import numpy as np
 
@@ -209,7 +208,7 @@ class PurpleSeal(Seal):
         return True
 
 
-@dataclasses.dataclass
+@runtime_checkable
 class HasCost(Protocol):
     _cost: int = 1
 

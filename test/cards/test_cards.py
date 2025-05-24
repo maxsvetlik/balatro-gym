@@ -23,6 +23,7 @@ from balatro_gym.cards.interfaces import (
     WildCard,
 )
 from balatro_gym.game.scoring import get_poker_hand, score_hand
+from balatro_gym.interfaces import BoardState
 
 
 def _make_card(
@@ -71,12 +72,12 @@ def test_enhancement_glass() -> None:
 def test_enhancement_glass_scoring() -> None:
     enhancement = GlassCard()
     card = _make_card(enhancement=enhancement)
-    board_mock = Mock()
-    board_mock.jokers = []
+    board = BoardState()
+    board.jokers = []
     blind_mock = Mock()
     blind_mock.hand = []
     submitted_hand = [card]
-    score = score_hand(submitted_hand, board_mock, blind_mock)
+    score = score_hand(submitted_hand, board, blind_mock)
     _, hand_type = get_poker_hand(submitted_hand)
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
@@ -98,11 +99,11 @@ def test_enhancement_steel_scoring() -> None:
     held_card = _make_card(enhancement=enhancement)
     submitted_card = _make_card()
     submitted_hand = [submitted_card]
-    board_mock = Mock()
-    board_mock.jokers = []
+    board = BoardState()
+    board.jokers = []
     blind_mock = Mock()
     blind_mock.hand = [held_card]
-    score = score_hand(submitted_hand, board_mock, blind_mock)
+    score = score_hand(submitted_hand, board, blind_mock)
     _, hand_type = get_poker_hand(submitted_hand)
     expected_score = (
         (hand_type.value.chips + submitted_card.get_chips())
@@ -128,12 +129,12 @@ def test_enhancement_stone_scoring() -> None:
     # Submit a single stone card
     enhancement = StoneCard()
     card = _make_card(enhancement=enhancement)
-    board_mock = Mock()
-    board_mock.jokers = []
+    board = BoardState()
+    board.jokers = []
     blind_mock = Mock()
     blind_mock.hand = []
     submitted_hand = [card]
-    score = score_hand(submitted_hand, board_mock, blind_mock)
+    score = score_hand(submitted_hand, board, blind_mock)
     _, hand_type = get_poker_hand(submitted_hand)
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score

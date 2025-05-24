@@ -1,6 +1,7 @@
 import pytest
 
 from balatro_gym.cards.booster_packs import BuffoonPack
+from balatro_gym.cards.interfaces import HasCost
 from balatro_gym.cards.voucher import ALL_VOUCHERS
 from balatro_gym.game.shop import Shop, ShopState
 from balatro_gym.interfaces import Booster
@@ -8,7 +9,7 @@ from balatro_gym.interfaces import Booster
 
 @pytest.mark.unit
 def test_generate_shop_state() -> None:
-    shop = Shop()
+    shop = Shop(allow_duplicates=True)
     state = shop.generate_shop_state(1)
     voucher = state.vouchers[0]
     assert isinstance(state, ShopState)
@@ -23,6 +24,8 @@ def test_generate_shop_state() -> None:
     assert len(state.vouchers) == 0
     # We should have a new voucher
     assert any([shop.generate_shop_state(4).vouchers[0] != voucher for _ in range(5)])
+    assert len(state.buyable_cards) == 2
+    assert all([isinstance(card, HasCost) for card in state.buyable_cards])
 
 
 @pytest.mark.unit
