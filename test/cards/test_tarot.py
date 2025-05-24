@@ -10,9 +10,19 @@ from balatro_gym.cards.interfaces import (
     WildCard,
 )
 from balatro_gym.cards.planet import Mercury
-from balatro_gym.cards.tarot import Chariot, Empress, Fool, Hierophant, Justice, Lovers, Magician, HighPriestess, \
-    Emperor, Hermit
-from balatro_gym.interfaces import BoardState, Tarot, PlanetCard
+from balatro_gym.cards.tarot import (
+    Chariot,
+    Emperor,
+    Empress,
+    Fool,
+    Hermit,
+    Hierophant,
+    HighPriestess,
+    Justice,
+    Lovers,
+    Magician,
+)
+from balatro_gym.interfaces import BoardState, PlanetCard, Tarot
 from balatro_gym.testing_utils import make_card
 
 
