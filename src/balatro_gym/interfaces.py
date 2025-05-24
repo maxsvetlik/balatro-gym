@@ -141,7 +141,8 @@ class PlanetCard(HasCost):
     def decrease_level(self, poker_hands: Sequence[PokerHand]) -> PokerHand:
         for hand in poker_hands:
             if hand.hand_type == self._hand_type:
-                hand.level -= 1
+                if hand.level > 1:
+                    hand.level -= 1
                 return hand
 
         raise RuntimeError("Hand not found, could not change hand level. This should not happen.")
