@@ -3,7 +3,7 @@ from typing import Sequence
 
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
 from balatro_gym.cards.joker import JokerBase
-from balatro_gym.cards.utils import get_max_rank
+from balatro_gym.cards.utils import contains_two_pair, get_max_rank
 from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
 
 
@@ -138,19 +138,6 @@ def _is_full_house(counts: Sequence[tuple[Rank, int]]) -> bool:
     return False
 
 
-def _is_two_pair(counts: Sequence[tuple[Rank, int]]) -> bool:
-    if len(counts) < 2:
-        # Only a single card was played, so there aren't multiple counts
-        return False
-
-    mc_rank, mc_count = counts[0]
-    smc_rank, smc_count = counts[1]
-
-    if mc_count == 2 and smc_count == 2:
-        return True
-    return False
-
-
 def _extract_largest_set(hand: Sequence[PlayingCard], counts: Sequence[tuple[Rank, int]]) -> Sequence[PlayingCard]:
     mc_rank, mc_count = counts[0]
     return [card for card in hand if card.rank == mc_rank]
@@ -165,7 +152,7 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
     flush = len(_get_flush(hand)) == 5
     straight = len(_get_straight(hand)) == 5
     is_full = _is_full_house(counts)
-    is_two_pair = _is_two_pair(counts)
+    is_two_pair = contains_two_pair(counts)
     is_royal = _is_royal(hand)
     max_set = _extract_largest_set(hand, counts)
 
@@ -190,7 +177,11 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
     elif len(max_set) == 3:
         return max_set, PokerHandType.THREE_SET
     elif is_two_pair:
-        return [card for card in hand if card.rank in set([counts[0][0], counts[1][0]])], PokerHandType.TWO_PAIR
+        if len(counts) == 1:
+            return [card for card in hand if card.rank in set([counts[0][0]])], PokerHandType.TWO_PAIR
+        else:
+            return [card for card in hand if card.rank in set([counts[0][0], counts[1][0]])], PokerHandType.TWO_PAIR
+
     elif len(max_set) == 2:
         return max_set, PokerHandType.PAIR
     else:
