@@ -1,6 +1,7 @@
 from collections import Counter
 from typing import Sequence
 
+from balatro_gym.cards.effect_joker import Mime
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
 from balatro_gym.cards.joker import JokerBase
 from balatro_gym.cards.utils import get_flush, get_straight, is_royal
@@ -73,6 +74,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             mult_sum += mult
         for unplayed_card in blind_state.hand:
             num_card_retriggers = 2 if isinstance(unplayed_card.seal, RedSeal) else 1
+            num_card_retriggers += 1 if Mime() in board_state.jokers else 0
             mult_sum *= unplayed_card.get_multiplication() * num_card_retriggers
         for joker in board_state.jokers:
             chips_sum += joker.get_chips_hand(cards, blind_state, board_state, hand_type)
