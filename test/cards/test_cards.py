@@ -1,7 +1,3 @@
-from collections.abc import Sequence
-from typing import (
-    Optional,
-)
 from unittest.mock import Mock, patch
 
 import pytest
@@ -9,38 +5,17 @@ import pytest
 import balatro_gym.cards.interfaces
 from balatro_gym.cards.interfaces import (
     BonusCard,
-    Edition,
-    Enhancement,
     GlassCard,
     GoldCard,
     LuckyCard,
     MultCard,
-    PlayingCard,
-    Rank,
-    Seal,
     SteelCard,
     StoneCard,
     Suit,
     WildCard,
 )
-from balatro_gym.cards.joker import Joker
 from balatro_gym.game.scoring import get_poker_hand, score_hand
-
-
-def _make_card(
-    rank: Rank = Rank.ACE,
-    suit: Suit = Suit.HEARTS,
-    enhancement: Optional[Enhancement] = None,
-    edition: Optional[Edition] = None,
-    seal: Optional[Seal] = None,
-) -> PlayingCard:
-    return PlayingCard(rank, suit, enhancement, edition, seal)
-
-
-def _make_board(jokers: Sequence[Joker] = []) -> Mock:
-    board = Mock()
-    board.jokers = jokers
-    return board
+from test.utils import _make_board, _make_card
 
 
 @pytest.mark.unit

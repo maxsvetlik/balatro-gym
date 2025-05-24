@@ -1,28 +1,10 @@
 from collections.abc import Sequence
-from typing import Optional
-from unittest.mock import Mock
 
 import pytest
 
-from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
-from balatro_gym.cards.joker import Joker
+from balatro_gym.cards.interfaces import PlayingCard, Rank, Suit
 from balatro_gym.cards.utils import get_flush, get_straight, is_consecutive, is_royal
-
-
-def _make_card(
-    rank: Rank = Rank.ACE,
-    suit: Suit = Suit.HEARTS,
-    enhancement: Optional[Enhancement] = None,
-    edition: Optional[Edition] = None,
-    seal: Optional[Seal] = None,
-) -> PlayingCard:
-    return PlayingCard(rank, suit, enhancement, edition, seal)
-
-
-def _make_board(jokers: Sequence[Joker] = []) -> Mock:
-    board = Mock()
-    board.jokers = jokers
-    return board
+from test.utils import _make_board, _make_card
 
 
 @pytest.mark.unit

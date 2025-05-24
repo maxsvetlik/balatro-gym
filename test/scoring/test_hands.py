@@ -1,19 +1,11 @@
 from typing import Sequence
-from unittest.mock import Mock
 
 import pytest
 
 from balatro_gym.cards.interfaces import PlayingCard, Suit
-from balatro_gym.cards.joker import Joker
 from balatro_gym.game.scoring import get_poker_hand
 from balatro_gym.interfaces import PokerHandType
-
-
-def _make_board(jokers: Sequence[Joker] = []) -> Mock:
-    board = Mock()
-    board.jokers = jokers
-    return board
-
+from test.utils import _make_board
 
 STRAIGHT_FLUSH = [PlayingCard(i, Suit.HEARTS, None, None, None) for i in range(1, 6)]
 ROYAL_FLUSH = [PlayingCard(i, Suit.HEARTS, None, None, None) for i in [13, 12, 11, 10, 1]]
