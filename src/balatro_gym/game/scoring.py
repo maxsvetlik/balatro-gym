@@ -3,6 +3,7 @@ from typing import Sequence
 
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
 from balatro_gym.cards.joker import JokerBase
+from balatro_gym.cards.utils import get_max_rank
 from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
 
 
@@ -124,11 +125,6 @@ def _is_royal(hand: Sequence[PlayingCard]) -> bool:
     return set([card.rank.value.order for card in hand]) == {1, 10, 11, 12, 13}
 
 
-def _get_max_rank(hand: Sequence[PlayingCard]) -> Sequence[tuple[Rank, int]]:
-    counter: Counter = Counter([card.rank for card in hand])
-    return counter.most_common(2)
-
-
 def _is_full_house(counts: Sequence[tuple[Rank, int]]) -> bool:
     if len(counts) < 2:
         # Only a single card was played, so there aren't multiple counts
@@ -165,7 +161,7 @@ def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], 
     Order of poker hand precedence:
         Straight flush, straight, flush, five set, four set, flush house, full house, three set, two set, one set
     """
-    counts = _get_max_rank(hand)
+    counts = get_max_rank(hand)
     flush = len(_get_flush(hand)) == 5
     straight = len(_get_straight(hand)) == 5
     is_full = _is_full_house(counts)

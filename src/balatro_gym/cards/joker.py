@@ -1,5 +1,7 @@
 from collections.abc import Sequence
 
+from balatro_gym.cards.utils import contains_two_pair, get_max_rank
+
 from ..interfaces import BlindState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
 
@@ -127,7 +129,8 @@ class MadJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        if scored_hand == PokerHandType.TWO_PAIR:
+        print(get_max_rank(state.hand))
+        if contains_two_pair(get_max_rank(state.hand)):
             return 10
         return 0
 
