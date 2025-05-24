@@ -8,6 +8,7 @@ import pytest
 import balatro_gym.cards.interfaces
 from balatro_gym.cards.interfaces import (
     BonusCard,
+    Deck,
     Edition,
     Enhancement,
     GlassCard,
@@ -82,7 +83,28 @@ def test_enhancement_glass_scoring() -> None:
     _, hand_type = get_poker_hand(submitted_hand)
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
-    # TODO MAX test card destruction
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("probability_modifier", [1, 2, 10])
+def test_enhancement_glass_destroy(probability_modifier: int) -> None:
+    enhancement = GlassCard()
+    card = _make_card(enhancement=enhancement)
+    deck = Deck([card])
+    submitted_hand = deck.deal(1)
+    assert card in deck.cards_played
+    board_mock = Mock()
+    board_mock.get_poker_hand.return_value = PokerHand(PokerHandType.HIGH_CARD, 1, 0)
+    board_mock.jokers = []  # TODO See #25. This can influence probabilities and should be tested.
+    board_mock.deck = deck
+    blind_mock = Mock()
+    blind_mock.hand = []
+    with patch.object(balatro_gym.cards.interfaces, "np") as mock:
+        random_mock = Mock()
+        mock.random.random = random_mock
+        random_mock.return_value = 0
+        score_hand(submitted_hand, board_mock, blind_mock)
+        assert card not in board_mock.deck.cards_played
 
 
 @pytest.mark.unit
