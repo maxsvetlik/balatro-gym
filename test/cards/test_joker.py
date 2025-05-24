@@ -33,7 +33,7 @@ def _make_card(
 def test_base_joker() -> None:
     # The base joker should return noop values as appropriate. E.g. 0 for additive, and 1 for multiplicative effects
     j = JokerBase()
-    assert j.base_cost == 0
+    assert j.base_cost == 1
     assert j.get_money(Mock()) == 0
     assert j.get_mult_card(Mock(), Mock()) == 0
     assert j.get_chips_hand(Mock(), Mock()) == 0

@@ -9,7 +9,7 @@ JOKERS: Sequence[JokerBase] = []
 
 
 class Joker(JokerBase):
-    _base_cost: int = 2
+    _cost: int = 2
 
     @property
     def joker_type(self) -> Type:
@@ -24,7 +24,7 @@ class Joker(JokerBase):
 
 
 class GreedyJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -39,7 +39,7 @@ class GreedyJoker(JokerBase):
 
 
 class LustyJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -54,7 +54,7 @@ class LustyJoker(JokerBase):
 
 
 class WrathfulJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -69,7 +69,7 @@ class WrathfulJoker(JokerBase):
 
 
 class GluttonousJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -84,7 +84,7 @@ class GluttonousJoker(JokerBase):
 
 
 class JollyJoker(JokerBase):
-    _base_cost: int = 3
+    _cost: int = 3
 
     @property
     def joker_type(self) -> Type:
@@ -101,7 +101,7 @@ class JollyJoker(JokerBase):
 
 
 class ZanyJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -118,7 +118,7 @@ class ZanyJoker(JokerBase):
 
 
 class MadJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -135,7 +135,7 @@ class MadJoker(JokerBase):
 
 
 class CrazyJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:

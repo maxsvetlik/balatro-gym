@@ -169,19 +169,17 @@ class ConsumableState(HasReset):
 
 
 class JokerBase(HasCost):
-    _base_cost: int = 0
-
     @property
     def joker_type(self) -> Type:
         raise NotImplementedError
 
     @property
     def base_cost(self) -> int:
-        return self._base_cost
+        return self._cost
 
     def cost(self, vouchers: Sequence[Voucher]) -> int:
         # TODO. Voucher impl doesn't exist yet, which may impact this.
-        return self._base_cost
+        return self._cost
 
     @property
     def rarity(self) -> Rarity:
