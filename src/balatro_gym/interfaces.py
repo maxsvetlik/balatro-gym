@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import Deck, HasCost, PlayingCard
@@ -39,10 +41,6 @@ class Voucher:
 
 
 class Spectral(HasCost):
-    pass
-
-
-class Tarot(HasCost):
     pass
 
 
@@ -106,9 +104,6 @@ class PokerHandType(Enum):
     FLUSH_FIVE = PokerScale(16, 160, 3, 50)
 
 
-class ConsumableCardBase: ...
-
-
 @dataclasses.dataclass
 class PokerHand:
     hand_type: PokerHandType
@@ -147,6 +142,15 @@ class PlanetCard(HasCost):
         raise RuntimeError("Hand not found, could not change hand level. This should not happen.")
 
 
+class Tarot(HasCost):
+    def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
+        """Returns true if the card was used successfully"""
+        raise NotImplementedError
+
+
+ConsumableCardBase = Union[PlanetCard, Tarot]
+
+
 @dataclasses.dataclass
 class BlindState:
     hand: Sequence[PlayingCard]
@@ -159,7 +163,7 @@ class BlindState:
 
 class ConsumableState(HasReset):
     num_slots: int
-    consumables: Sequence[ConsumableCardBase]
+    consumables: list[ConsumableCardBase]
 
     def __init__(self) -> None:
         self.reset()
@@ -232,6 +236,8 @@ class BoardState(HasReset):
     """Shows all blinds that have been completed, ordered."""
     round_blinds: Sequence[BlindInfo]
     """Contains the three blinds for the round."""
+    last_used_consumable: Optional[ConsumableCardBase]
+    """Last tarot or planet card used."""
 
     def __init__(self) -> None:
         self.reset()
@@ -250,6 +256,32 @@ class BoardState(HasReset):
         self.poker_hands = {poker_hand_type.name: PokerHand(poker_hand_type, 1, 0) for poker_hand_type in PokerHandType}
         self.completed_blinds = []
         self.round_blinds = []
+        self.last_used_consumable = None
 
     def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
         return self.poker_hands[poker_hand_type.name]
+
+    def use_consumable(self, card: ConsumableCardBase, selected_cards: Sequence[PlayingCard]) -> bool:
+        assert isinstance(card, PlanetCard) or isinstance(card, Tarot)
+        if isinstance(card, Tarot) and card.apply(selected_cards, self):
+            self.last_used_consumable = card
+            self.remove_consumable(card)
+            return True
+        elif isinstance(card, PlanetCard):
+            card.increase_level(list(self.poker_hands.values()))
+            self.remove_consumable(card)
+            return True
+        return False
+
+    def remove_consumable(self, card: ConsumableCardBase) -> None:
+        # Needed to consume or sell a consumable
+        assert card in self.consumable.consumables
+        self.consumable.consumables.remove(card)
+
+    def acquire_consumable(self, card: ConsumableCardBase) -> None:
+        # Needed to buy or acquire a consumable
+        assert self.consumable.num_slots > len(self.consumable.consumables)
+        self.consumable.consumables.append(card)
+
+    def set_money(self, amount: int) -> None:
+        self.money = amount
