@@ -17,7 +17,7 @@ class Fool(Tarot):
 
 class Magician(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) != 2:
+        if len(selected_cards) > 2 or len(selected_cards) == 0:
             return False
         for card in selected_cards:
             card.set_enhancement(LuckyCard())
@@ -39,7 +39,7 @@ class HighPriestess(Tarot):
 
 class Empress(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) != 2:
+        if len(selected_cards) > 2 or len(selected_cards) == 0:
             return False
         for card in selected_cards:
             card.set_enhancement(MultCard())
@@ -60,7 +60,7 @@ class Emperor(Tarot):
 
 class Hierophant(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) != 2:
+        if len(selected_cards) > 2 or len(selected_cards) == 0:
             return False
         for card in selected_cards:
             card.set_enhancement(BonusCard())
@@ -69,7 +69,7 @@ class Hierophant(Tarot):
 
 class Lovers(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) != 1:
+        if len(selected_cards) > 1 or len(selected_cards) == 0:
             return False
         selected_cards[0].set_enhancement(WildCard())
         return True
@@ -77,7 +77,7 @@ class Lovers(Tarot):
 
 class Chariot(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) != 1:
+        if len(selected_cards) > 1 or len(selected_cards) == 0:
             return False
         selected_cards[0].set_enhancement(SteelCard())
         return True
@@ -85,7 +85,7 @@ class Chariot(Tarot):
 
 class Justice(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) != 1:
+        if len(selected_cards) > 1 or len(selected_cards) == 0:
             return False
         selected_cards[0].set_enhancement(GlassCard())
         return True

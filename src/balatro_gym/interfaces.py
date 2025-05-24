@@ -270,6 +270,7 @@ class BoardState(HasReset):
             self.remove_consumable(card)
             return True
         elif isinstance(card, PlanetCard):
+            self.last_used_consumable = card
             card.increase_level(list(self.poker_hands.values()))
             self.remove_consumable(card)
             return True

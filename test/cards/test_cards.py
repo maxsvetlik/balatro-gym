@@ -1,6 +1,3 @@
-from typing import (
-    Optional,
-)
 from unittest.mock import Mock, patch
 
 import pytest
@@ -9,15 +6,10 @@ import balatro_gym.cards.interfaces
 from balatro_gym.cards.interfaces import (
     BonusCard,
     Deck,
-    Edition,
-    Enhancement,
     GlassCard,
     GoldCard,
     LuckyCard,
     MultCard,
-    PlayingCard,
-    Rank,
-    Seal,
     SteelCard,
     StoneCard,
     Suit,
@@ -26,22 +18,13 @@ from balatro_gym.cards.interfaces import (
 from balatro_gym.cards.planet import Mercury, Pluto
 from balatro_gym.game.scoring import get_poker_hand, score_hand
 from balatro_gym.interfaces import BoardState, PokerHand, PokerHandType
-
-
-def _make_card(
-    rank: Rank = Rank.ACE,
-    suit: Suit = Suit.HEARTS,
-    enhancement: Optional[Enhancement] = None,
-    edition: Optional[Edition] = None,
-    seal: Optional[Seal] = None,
-) -> PlayingCard:
-    return PlayingCard(rank, suit, enhancement, edition, seal)
+from balatro_gym.testing_utils import make_card
 
 
 @pytest.mark.unit
 def test_enhancement_bonus() -> None:
     enhancement = BonusCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert card.get_chips() == 50 + card._base_chips
 
@@ -49,7 +32,7 @@ def test_enhancement_bonus() -> None:
 @pytest.mark.unit
 def test_enhancement_mult() -> None:
     enhancement = MultCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert card.get_mult() == 4
 
@@ -57,7 +40,7 @@ def test_enhancement_mult() -> None:
 @pytest.mark.unit
 def test_enhancement_wild() -> None:
     enhancement = WildCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert len(set(card.suit)) == len(Suit)
 
@@ -65,7 +48,7 @@ def test_enhancement_wild() -> None:
 @pytest.mark.unit
 def test_enhancement_glass() -> None:
     enhancement = GlassCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert card.get_multiplication() == 2
 
@@ -73,7 +56,7 @@ def test_enhancement_glass() -> None:
 @pytest.mark.unit
 def test_enhancement_glass_scoring() -> None:
     enhancement = GlassCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     board = BoardState()
     board.jokers = []
     blind_mock = Mock()
@@ -89,7 +72,7 @@ def test_enhancement_glass_scoring() -> None:
 @pytest.mark.parametrize("probability_modifier", [1, 2, 10])
 def test_enhancement_glass_destroy(probability_modifier: int) -> None:
     enhancement = GlassCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     deck = Deck([card])
     submitted_hand = deck.deal(1)
     assert card in deck.cards_played
@@ -110,7 +93,7 @@ def test_enhancement_glass_destroy(probability_modifier: int) -> None:
 @pytest.mark.unit
 def test_enhancement_steel() -> None:
     enhancement = SteelCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert card.get_multiplication() == 1.5
 
@@ -119,8 +102,8 @@ def test_enhancement_steel() -> None:
 def test_enhancement_steel_scoring() -> None:
     # Submit a single card as a hand with a single steel card held in hand
     enhancement = SteelCard()
-    held_card = _make_card(enhancement=enhancement)
-    submitted_card = _make_card()
+    held_card = make_card(enhancement=enhancement)
+    submitted_card = make_card()
     submitted_hand = [submitted_card]
     board = BoardState()
     board.jokers = []
@@ -140,7 +123,7 @@ def test_enhancement_steel_scoring() -> None:
 @pytest.mark.unit
 def test_enhancement_stone() -> None:
     enhancement = StoneCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert enhancement.get_chips() == 50
     assert card.get_chips() == 50
@@ -151,7 +134,7 @@ def test_enhancement_stone() -> None:
 def test_enhancement_stone_scoring() -> None:
     # Submit a single stone card
     enhancement = StoneCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     board = BoardState()
     board.jokers = []
     blind_mock = Mock()
@@ -166,7 +149,7 @@ def test_enhancement_stone_scoring() -> None:
 @pytest.mark.unit
 def test_enhancement_gold() -> None:
     enhancement = GoldCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     assert card.get_scored_money() == 0
     assert card.get_end_money() == 3
@@ -175,7 +158,7 @@ def test_enhancement_gold() -> None:
 @pytest.mark.unit
 def test_enhancement_lucky() -> None:
     enhancement = LuckyCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     with patch.object(balatro_gym.cards.interfaces, "np") as mock:
         random_mock = Mock()
@@ -193,7 +176,7 @@ def test_enhancement_lucky() -> None:
 @pytest.mark.parametrize("probability_modifier", [1, 2, 10])
 def test_enhancement_lucky_modifiers(probability_modifier: int) -> None:
     enhancement = LuckyCard()
-    card = _make_card(enhancement=enhancement)
+    card = make_card(enhancement=enhancement)
     assert card.enhancement == enhancement
     with patch.object(balatro_gym.cards.interfaces, "np") as mock:
         random_mock = Mock()
