@@ -8,6 +8,12 @@ class HasChips(Protocol):
 
 
 @runtime_checkable
+class HasIsDestroyed(Protocol):
+    def is_destroyed(self, probability_modifier: int = 1) -> bool:
+        return False
+
+
+@runtime_checkable
 class HasMult(Protocol):
     def get_mult(self, probability_modifier: int = 1) -> int:
         # This is expected to be actively added. Thus we return 0 in the base case.
