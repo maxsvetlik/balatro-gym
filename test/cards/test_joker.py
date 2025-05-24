@@ -15,6 +15,7 @@ from balatro_gym.cards.joker import (
     GreedyJoker,
     HalfJoker,
     Joker,
+    JokerStencil,
     JollyJoker,
     LustyJoker,
     MadJoker,
@@ -23,6 +24,7 @@ from balatro_gym.cards.joker import (
     WrathfulJoker,
     ZanyJoker,
 )
+from balatro_gym.constants import DEFAULT_JOKER_SLOTS
 from balatro_gym.interfaces import JokerBase, PokerHandType, Type
 
 
@@ -44,7 +46,7 @@ def test_base_joker() -> None:
     assert j.get_money(Mock()) == 0
     assert j.get_mult_card(Mock(), Mock()) == 0
     assert j.get_chips_hand(Mock(), Mock(), Mock()) == 0
-    assert j.get_multiplication(Mock(), Mock(), Mock()) == 1.0
+    assert j.get_multiplication(Mock(), Mock(), Mock(), Mock()) == 1.0
     assert j.get_chips_card(Mock(), Mock()) == 0
 
 
@@ -296,7 +298,7 @@ def test_devious_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None
         [[_make_card(Rank.ACE)], 0],
         [[_make_card(Rank.ACE)] * 2, 0],
         [[_make_card(Rank.ACE)] * 3, 0],
-        [[_make_card(Rank.ACE)] * 4, 0],
+        [[_make_card(Rank.ACE)] * 4, 80],
         [[_make_card(Rank.ACE)] * 5, 80],
     ],
 )
@@ -317,7 +319,23 @@ def test_crafty_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
         [[_make_card(Rank.ACE)] * 5, 0],
     ],
 )
-def test_half_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
+def test_half_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
     j = HalfJoker()
     assert j.joker_type == Type.ADDITIVE_MULT
-    assert j.get_mult(hand, Mock(), Mock()) == expected_score
+    assert j.get_mult(hand, Mock(), Mock()) == expected_chips
+
+
+@pytest.mark.unit
+def test_joker_stencil() -> None:
+    j = JokerStencil()
+    assert j.joker_type == Type.MULTIPLICATIVE
+
+    board = Mock()
+    joker = Mock()
+    joker.edition.is_negative.return_value = False
+    jokers = [joker] * 5
+    board.jokers = jokers
+    assert j.get_multiplication(Mock(), Mock(), board, Mock()) == 0
+
+    joker.edition.is_negative.return_value = True
+    assert j.get_multiplication(Mock(), Mock(), board, Mock()) == DEFAULT_JOKER_SLOTS

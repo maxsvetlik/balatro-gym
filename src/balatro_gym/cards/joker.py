@@ -1,8 +1,9 @@
 from collections.abc import Sequence
 
 from balatro_gym.cards.utils import contains_three_set, get_flush, get_num_pairs, get_straight
+from balatro_gym.constants import DEFAULT_JOKER_SLOTS
 
-from ..interfaces import BlindState, JokerBase, PokerHandType, Rarity, Type
+from ..interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
 
 JOKERS: Sequence[JokerBase] = []
@@ -265,3 +266,23 @@ class HalfJoker(JokerBase):
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
         return 20 if len(scored_cards) <= 3 else 0
+
+
+class JokerStencil(JokerBase):
+    _base_cost: int = 8
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.MULTIPLICATIVE
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.UNCOMMON
+
+    def get_multiplication(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> float:
+        # Maybe this should be baked into BoardState, but its derived data based on negative jokers afaik.
+        num_negative = sum([joker.edition.is_negative() for joker in board.jokers])
+        num_jokers = len(board.jokers)
+        return DEFAULT_JOKER_SLOTS - num_jokers + num_negative

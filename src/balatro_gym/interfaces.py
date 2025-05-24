@@ -4,7 +4,7 @@ from enum import Enum, auto
 from typing import Any, Optional, Protocol, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import Deck, HasCost, PlayingCard
+from .cards.interfaces import BaseEdition, Deck, Edition, HasCost, PlayingCard
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
@@ -170,6 +170,7 @@ class ConsumableState(HasReset):
 
 class JokerBase(HasCost):
     _base_cost: int = 0
+    _edition: Edition = BaseEdition()
 
     @property
     def joker_type(self) -> Type:
@@ -179,6 +180,10 @@ class JokerBase(HasCost):
     def base_cost(self) -> int:
         return self._base_cost
 
+    @property
+    def edition(self) -> Edition:
+        return self._edition
+
     def cost(self, vouchers: Sequence[Voucher]) -> int:
         # TODO. Voucher impl doesn't exist yet, which may impact this.
         return self._base_cost
@@ -186,6 +191,9 @@ class JokerBase(HasCost):
     @property
     def rarity(self) -> Rarity:
         raise NotImplementedError
+
+    def set_edition(self, edition: Edition) -> None:
+        self._edition = edition
 
     def get_money(self, state: BlindState) -> int:
         return 0
@@ -197,7 +205,7 @@ class JokerBase(HasCost):
         return 0
 
     def get_multiplication(
-        self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
     ) -> float:
         return 1.0
 
