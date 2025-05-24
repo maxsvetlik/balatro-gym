@@ -24,7 +24,7 @@ from balatro_gym.cards.interfaces import (
     WildCard,
 )
 from balatro_gym.game.scoring import get_poker_hand, score_hand
-from balatro_gym.interfaces import BoardState
+from balatro_gym.interfaces import BoardState, PokerHand, PokerHandType
 
 
 def _make_card(
@@ -93,6 +93,7 @@ def test_enhancement_glass_destroy(probability_modifier: int) -> None:
     submitted_hand = deck.deal(1)
     assert card in deck.cards_played
     board_mock = Mock()
+    board_mock.get_poker_hand.return_value = PokerHand(PokerHandType.HIGH_CARD, 1, 0)
     board_mock.jokers = []  # TODO See #25. This can influence probabilities and should be tested.
     board_mock.deck = deck
     blind_mock = Mock()
