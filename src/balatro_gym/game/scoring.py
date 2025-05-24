@@ -16,7 +16,7 @@ def _process_joker_card(
 ) -> tuple[int, float]:
     chips_sum = 0
     mult_sum = 0.0
-    chips_sum += joker.get_chips_card(card, blind_state)
+    chips_sum += joker.get_chips_card(card, blind_state, board_state)
     mult_sum += joker.get_mult_card(card, blind_state)
     return chips_sum, mult_sum
 
@@ -51,7 +51,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
                     3) add multiplication | scored_hand
                     4) subtract multiplication | round
     """
-    cards, hand_type = get_poker_hand(hand)
+    cards, hand_type = get_poker_hand(hand, board_state)
     hand_val = hand_type.value
     chips_sum = hand_val.chips
     mult_sum: float = hand_val.mult
@@ -75,9 +75,9 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             num_card_retriggers = 2 if isinstance(unplayed_card.seal, RedSeal) else 1
             mult_sum *= unplayed_card.get_multiplication() * num_card_retriggers
         for joker in board_state.jokers:
-            chips_sum += joker.get_chips_hand(cards, blind_state, hand_type)
-            mult_sum += joker.get_mult_hand(cards, blind_state, hand_type)
-            mult_sum *= joker.get_multiplication(cards, blind_state, hand_type)
+            chips_sum += joker.get_chips_hand(cards, blind_state, board_state, hand_type)
+            mult_sum += joker.get_mult_hand(cards, blind_state, board_state, hand_type)
+            mult_sum *= joker.get_multiplication(cards, blind_state, board_state, hand_type)
             money_sum += joker.get_money(blind_state)
             # TODO update joker. E.g. num hands played influences chips
     return chips_sum * mult_sum
@@ -122,17 +122,17 @@ def _extract_largest_set(hand: Sequence[PlayingCard], counts: Sequence[tuple[Ran
     return [card for card in hand if card.rank == mc_rank]
 
 
-def get_poker_hand(hand: Sequence[PlayingCard]) -> tuple[Sequence[PlayingCard], PokerHandType]:
+def get_poker_hand(hand: Sequence[PlayingCard], board: BoardState) -> tuple[Sequence[PlayingCard], PokerHandType]:
     """
     Order of poker hand precedence:
         Straight flush, straight, flush, five set, four set, flush house, full house, three set, two set, one set
     """
     counts = _get_max_rank(hand)
-    flush = len(get_flush(hand)) == 5
-    straight = len(get_straight(hand)) == 5
+    flush = len(get_flush(hand, board)) > 0
+    straight = len(get_straight(hand, board)) > 0
     is_full = _is_full_house(counts)
     is_two_pair = _is_two_pair(counts)
-    is_royal_res = is_royal(hand)
+    is_royal_res = is_royal(hand, board)
     max_set = _extract_largest_set(hand, counts)
 
     if is_royal_res and flush and straight:

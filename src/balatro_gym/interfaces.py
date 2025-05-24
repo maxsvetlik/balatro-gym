@@ -195,13 +195,15 @@ class JokerBase(HasCost):
     def set_edition(self, edition: Edition) -> None:
         self._edition = edition
 
-    def get_money(self, state: BlindState) -> int:
+    def get_money(self, blind: BlindState) -> int:
         return 0
 
-    def get_mult_card(self, card: PlayingCard, state: BlindState) -> int:
+    def get_mult_card(self, card: PlayingCard, blind: BlindState) -> int:
         return 0
 
-    def get_mult_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+    ) -> int:
         return 0
 
     def get_multiplication(
@@ -209,10 +211,12 @@ class JokerBase(HasCost):
     ) -> float:
         return 1.0
 
-    def get_chips_card(self, card: PlayingCard, state: BlindState) -> int:
+    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
         return 0
 
-    def get_chips_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+    def get_chips_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+    ) -> int:
         return 0
 
 

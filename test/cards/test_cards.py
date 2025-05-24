@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import (
     Optional,
 )
@@ -22,6 +23,7 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
+from balatro_gym.cards.joker import Joker
 from balatro_gym.game.scoring import get_poker_hand, score_hand
 
 
@@ -33,6 +35,12 @@ def _make_card(
     seal: Optional[Seal] = None,
 ) -> PlayingCard:
     return PlayingCard(rank, suit, enhancement, edition, seal)
+
+
+def _make_board(jokers: Sequence[Joker] = []) -> Mock:
+    board = Mock()
+    board.jokers = jokers
+    return board
 
 
 @pytest.mark.unit
@@ -77,7 +85,7 @@ def test_enhancement_glass_scoring() -> None:
     blind_mock.hand = []
     submitted_hand = [card]
     score = score_hand(submitted_hand, board_mock, blind_mock)
-    _, hand_type = get_poker_hand(submitted_hand)
+    _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
     # TODO MAX test card destruction
@@ -103,7 +111,7 @@ def test_enhancement_steel_scoring() -> None:
     blind_mock = Mock()
     blind_mock.hand = [held_card]
     score = score_hand(submitted_hand, board_mock, blind_mock)
-    _, hand_type = get_poker_hand(submitted_hand)
+    _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (
         (hand_type.value.chips + submitted_card.get_chips())
         * hand_type.value.mult
@@ -134,7 +142,7 @@ def test_enhancement_stone_scoring() -> None:
     blind_mock.hand = []
     submitted_hand = [card]
     score = score_hand(submitted_hand, board_mock, blind_mock)
-    _, hand_type = get_poker_hand(submitted_hand)
+    _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
 

@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from balatro_gym.cards.effect_joker import FourFingers
 from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
 from balatro_gym.cards.joker import (
     CleverJoker,
@@ -24,6 +25,7 @@ from balatro_gym.cards.joker import (
     WrathfulJoker,
     ZanyJoker,
 )
+from balatro_gym.cards.utils import get_flush, get_straight, is_royal
 from balatro_gym.constants import DEFAULT_JOKER_SLOTS
 from balatro_gym.interfaces import JokerBase, PokerHandType, Type
 
@@ -38,6 +40,12 @@ def _make_card(
     return PlayingCard(rank, suit, enhancement, edition, seal)
 
 
+def _make_board(jokers: Sequence[Joker] = []) -> Mock:
+    board = Mock()
+    board.jokers = jokers
+    return board
+
+
 @pytest.mark.unit
 def test_base_joker() -> None:
     # The base joker should return noop values as appropriate. E.g. 0 for additive, and 1 for multiplicative effects
@@ -45,9 +53,9 @@ def test_base_joker() -> None:
     assert j.base_cost == 0
     assert j.get_money(Mock()) == 0
     assert j.get_mult_card(Mock(), Mock()) == 0
-    assert j.get_chips_hand(Mock(), Mock(), Mock()) == 0
+    assert j.get_chips_hand(Mock(), Mock(), Mock(), Mock()) == 0
     assert j.get_multiplication(Mock(), Mock(), Mock(), Mock()) == 1.0
-    assert j.get_chips_card(Mock(), Mock()) == 0
+    assert j.get_chips_card(Mock(), Mock(), Mock()) == 0
 
 
 @pytest.mark.unit
@@ -232,7 +240,7 @@ def test_droll_joker(hand_type: PokerHandType, expected_score: int) -> None:
 def test_sly_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
     j = SlyJoker()
     assert j.joker_type == Type.CHIPS
-    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+    assert j.get_chips_hand(hand, Mock(), _make_board(), Mock()) == expected_chips
 
 
 @pytest.mark.unit
@@ -248,7 +256,7 @@ def test_sly_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
 def test_wily_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
     j = WilyJoker()
     assert j.joker_type == Type.CHIPS
-    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+    assert j.get_chips_hand(hand, Mock(), _make_board(), Mock()) == expected_chips
 
 
 @pytest.mark.unit
@@ -264,7 +272,7 @@ def test_wily_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
 def test_clever_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
     j = CleverJoker()
     assert j.joker_type == Type.CHIPS
-    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+    assert j.get_chips_hand(hand, Mock(), _make_board(), Mock()) == expected_chips
 
 
 @pytest.mark.unit
@@ -288,7 +296,7 @@ def test_clever_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
 def test_devious_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
     j = DeviousJoker()
     assert j.joker_type == Type.CHIPS
-    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+    assert j.get_chips_hand(hand, Mock(), _make_board(), Mock()) == expected_chips
 
 
 @pytest.mark.unit
@@ -298,14 +306,14 @@ def test_devious_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None
         [[_make_card(Rank.ACE)], 0],
         [[_make_card(Rank.ACE)] * 2, 0],
         [[_make_card(Rank.ACE)] * 3, 0],
-        [[_make_card(Rank.ACE)] * 4, 80],
+        [[_make_card(Rank.ACE)] * 4, 0],
         [[_make_card(Rank.ACE)] * 5, 80],
     ],
 )
 def test_crafty_joker(hand: Sequence[PlayingCard], expected_chips: int) -> None:
     j = CraftyJoker()
     assert j.joker_type == Type.CHIPS
-    assert j.get_chips_hand(hand, Mock(), Mock()) == expected_chips
+    assert j.get_chips_hand(hand, Mock(), _make_board(), Mock()) == expected_chips
 
 
 @pytest.mark.unit
@@ -339,3 +347,51 @@ def test_joker_stencil() -> None:
 
     joker.edition.is_negative.return_value = True
     assert j.get_multiplication(Mock(), Mock(), board, Mock()) == DEFAULT_JOKER_SLOTS
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_hand",
+    [
+        [[_make_card(Rank.ACE)] * 4, PokerHandType.FLUSH],
+        [
+            [
+                _make_card(Rank.TEN, suit=Suit.CLUBS),
+                _make_card(Rank.NINE),
+                _make_card(Rank.QUEEN),
+                _make_card(Rank.JACK),
+            ],
+            PokerHandType.STRAIGHT,
+        ],
+        [
+            [
+                _make_card(Rank.KING),
+                _make_card(Rank.QUEEN),
+                _make_card(Rank.JACK),
+                _make_card(Rank.TEN),
+            ],
+            PokerHandType.ROYAL_FLUSH,
+        ],
+        [
+            [_make_card(Rank.ACE), _make_card(Rank.KING), _make_card(Rank.QUEEN), _make_card(Rank.JACK)],
+            PokerHandType.ROYAL_FLUSH,
+        ],
+    ],
+)
+def test_four_fingers(hand: Sequence[PlayingCard], expected_hand: PokerHandType) -> None:
+    j = FourFingers()
+    assert j.joker_type == Type.EFFECT
+
+    board = Mock()
+    board.jokers = [j]
+    flush = get_flush(hand, board)
+    straight = get_straight(hand, board)
+    royal = is_royal(hand, board)
+    poker_hand: PokerHandType
+    if royal:
+        poker_hand = PokerHandType.ROYAL_FLUSH
+    elif len(straight) > 0:
+        poker_hand = PokerHandType.STRAIGHT
+    elif len(flush) > 0:
+        poker_hand = PokerHandType.FLUSH
+    assert expected_hand == poker_hand
