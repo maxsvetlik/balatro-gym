@@ -136,6 +136,10 @@ class PlanetCard(HasCost):
 
 
 class Tarot(HasCost):
+    def is_valid(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
+        """Check if the consumable can be applied"""
+        raise NotImplementedError
+
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
         """Returns true if the card was used successfully"""
         raise NotImplementedError

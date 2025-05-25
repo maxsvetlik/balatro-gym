@@ -98,6 +98,6 @@ class Hermit(Tarot):
         return True
 
 
-TAROT_CARDS: list[type[Tarot]] = [
+TAROT_CARDS: Sequence[type[Tarot]] = [
     Fool, Magician, HighPriestess, Empress, Emperor, Hierophant, Lovers, Chariot, Justice, Hermit
 ]

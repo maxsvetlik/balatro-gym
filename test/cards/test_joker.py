@@ -1,10 +1,9 @@
 from collections.abc import Sequence
-from typing import Optional
 from unittest.mock import Mock
 
 import pytest
 
-from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
+from balatro_gym.cards.interfaces import PlayingCard, Rank, Suit
 from balatro_gym.cards.joker import (
     CrazyJoker,
     GluttonousJoker,
@@ -17,16 +16,7 @@ from balatro_gym.cards.joker import (
     ZanyJoker,
 )
 from balatro_gym.interfaces import JokerBase, PokerHandType, Type
-
-
-def _make_card(
-    rank: Rank = Rank.ACE,
-    suit: Suit = Suit.HEARTS,
-    enhancement: Optional[Enhancement] = None,
-    edition: Optional[Edition] = None,
-    seal: Optional[Seal] = None,
-) -> PlayingCard:
-    return PlayingCard(rank, suit, enhancement, edition, seal)
+from test.utils import _make_card
 
 
 @pytest.mark.unit
