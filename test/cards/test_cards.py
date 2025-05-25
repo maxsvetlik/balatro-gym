@@ -1,3 +1,6 @@
+from typing import (
+    Sequence,
+)
 from unittest.mock import Mock, patch
 
 import pytest
@@ -15,7 +18,9 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
+from balatro_gym.cards.joker.joker import GreedyJoker
 from balatro_gym.cards.planet import Mercury, Pluto
+from balatro_gym.cards.voucher import ClearanceSale, Liquidation, Voucher
 from balatro_gym.game.scoring import get_poker_hand, score_hand
 from balatro_gym.interfaces import BoardState, PokerHand, PokerHandType
 from test.utils import _make_board, _make_card
@@ -212,3 +217,23 @@ def test_planet_cards() -> None:
     pluto.decrease_level(poker_hands)
     assert poker_hands[0].level == initial_level_high_card
     assert poker_hands[1].level == initial_level_pair
+
+
+@pytest.mark.unit
+def test_sell_and_cost_value() -> None:
+    cost = 5
+    joker = GreedyJoker()
+
+    vouchers: Sequence[Voucher] = []
+    assert joker.cost(vouchers) == cost == joker._cost
+    assert joker.sell_value(vouchers) == 5 // 2
+
+    vouchers = [ClearanceSale()]
+    # 25% off
+    assert joker.cost(vouchers) == 3
+    assert joker.sell_value(vouchers) == 1
+
+    vouchers = [ClearanceSale(), Liquidation()]
+    # 50% off
+    assert joker.cost(vouchers) == 5 // 2
+    assert joker.sell_value(vouchers) == 1

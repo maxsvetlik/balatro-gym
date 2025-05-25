@@ -18,6 +18,9 @@ from ..mixins import (
     HasReset,
     HasRetrigger,
 )
+from .voucher import ClearanceSale, Liquidation, Voucher
+
+__all__ = ["HasCost"]
 
 
 class Suit(Enum):
@@ -120,6 +123,9 @@ class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, HasIsDestroyed, Pr
     def get_suit(self, card: "PlayingCard") -> Sequence[Suit]:
         return [card.base_suit]
 
+    def __eq__(self, other: Any) -> bool:
+        return self.__class__.__name__ == other.__class__.__name__
+
 
 class BonusCard(Enhancement):
     def get_chips(self) -> int:
@@ -219,6 +225,22 @@ class PurpleSeal(Seal):
 @runtime_checkable
 class HasCost(Protocol):
     _cost: int = 1
+
+    def cost(self, vouchers: Sequence[Voucher]) -> int:
+        cost: float = self._cost
+        if any([isinstance(voucher, Liquidation) for voucher in vouchers]):
+            cost -= cost * 0.5
+        elif any([isinstance(voucher, ClearanceSale) for voucher in vouchers]):
+            cost -= cost * 0.25
+        return max(int(cost), 1)
+
+    def sell_value(self, vouchers: Sequence[Voucher]) -> int:
+        sell_value: float = self._cost
+        if any([isinstance(voucher, Liquidation) for voucher in vouchers]):
+            sell_value -= sell_value * 0.5
+        elif any([isinstance(voucher, ClearanceSale) for voucher in vouchers]):
+            sell_value -= sell_value * 0.25
+        return max(int(sell_value * 0.5), 1)
 
 
 class PlayingCard(HasChips, HasCost):

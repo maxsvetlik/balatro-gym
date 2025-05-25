@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import BaseEdition, Deck, Edition, HasCost, PlayingCard
+from .cards.voucher import Voucher
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_NUM_JOKER_SLOTS, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
@@ -21,6 +24,7 @@ __all__ = [
     "PokerHandType",
     "JokerBase",
     "PlanetCard",
+    "BoardState",
 ]
 
 
@@ -28,22 +32,7 @@ class Tag:
     pass
 
 
-@dataclasses.dataclass(frozen=True)
-class Voucher:
-    dependency: Optional["Voucher"]
-
-    def __hash__(self) -> int:
-        return hash(self.__class__.__name__)
-
-    def __eq__(self, obj: Any) -> bool:
-        return obj._class__.__name__ == self.__class__.__name__
-
-
 class Spectral(HasCost):
-    pass
-
-
-class Tarot(HasCost):
     pass
 
 
@@ -107,9 +96,6 @@ class PokerHandType(Enum):
     FLUSH_FIVE = PokerScale(16, 160, 3, 50)
 
 
-class ConsumableCardBase: ...
-
-
 @dataclasses.dataclass
 class PokerHand:
     hand_type: PokerHandType
@@ -149,6 +135,19 @@ class PlanetCard(HasCost):
         raise RuntimeError("Hand not found, could not change hand level. This should not happen.")
 
 
+class Tarot(HasCost):
+    def is_valid(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
+        """Check if the consumable can be applied"""
+        raise NotImplementedError
+
+    def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
+        """Returns true if the card was used successfully"""
+        raise NotImplementedError
+
+
+ConsumableCardBase = Union[PlanetCard, Tarot]
+
+
 @dataclasses.dataclass
 class BlindState:
     hand: Sequence[PlayingCard]
@@ -161,7 +160,7 @@ class BlindState:
 
 class ConsumableState(HasReset):
     num_slots: int
-    consumables: Sequence[ConsumableCardBase]
+    consumables: list[ConsumableCardBase]
 
     def __init__(self) -> None:
         self.reset()
@@ -191,9 +190,8 @@ class JokerBase(HasCost):
     def edition(self) -> Edition:
         return self._edition
 
-    def cost(self, vouchers: Sequence[Voucher]) -> int:
-        # TODO. Voucher impl doesn't exist yet, which may impact this.
-        return self._cost
+    # TODO: implement cost method that considers the edition to override the base implementation
+    # def cost(self, vouchers: Sequence[Vouchers]) -> int:
 
     @property
     def rarity(self) -> Rarity:
@@ -258,6 +256,8 @@ class BoardState(HasReset):
     """Shows all blinds that have been completed, ordered."""
     round_blinds: Sequence[BlindInfo]
     """Contains the three blinds for the round."""
+    last_used_consumable: Optional[ConsumableCardBase]
+    """Last tarot or planet card used."""
 
     def __init__(self) -> None:
         self.reset()
@@ -277,6 +277,37 @@ class BoardState(HasReset):
         self.poker_hands = {poker_hand_type.name: PokerHand(poker_hand_type, 1, 0) for poker_hand_type in PokerHandType}
         self.completed_blinds = []
         self.round_blinds = []
+        self.last_used_consumable = None
 
     def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
         return self.poker_hands[poker_hand_type.name]
+
+    def use_consumable(self, card: ConsumableCardBase, selected_cards: Sequence[PlayingCard]) -> bool:
+        assert isinstance(card, PlanetCard) or isinstance(card, Tarot)
+        if isinstance(card, Tarot) and card.apply(selected_cards, self):
+            self.last_used_consumable = card
+            # If the object is in the consumables list, we're using a consumable from the board and we need to remove it
+            if card in self.consumable.consumables:
+                self.remove_consumable(card)
+            return True
+        elif isinstance(card, PlanetCard):
+            self.last_used_consumable = card
+            card.increase_level(list(self.poker_hands.values()))
+            # If the object is in the consumables list, we're using a consumable from the board and we need to remove it
+            if card in self.consumable.consumables:
+                self.remove_consumable(card)
+            return True
+        return False
+
+    def remove_consumable(self, card: ConsumableCardBase) -> None:
+        # Needed to consume or sell a consumable
+        assert card in self.consumable.consumables
+        self.consumable.consumables.remove(card)
+
+    def acquire_consumable(self, card: ConsumableCardBase) -> None:
+        # Needed to buy or acquire a consumable
+        assert self.consumable.num_slots > len(self.consumable.consumables)
+        self.consumable.consumables.append(card)
+
+    def set_money(self, amount: int) -> None:
+        self.money = amount

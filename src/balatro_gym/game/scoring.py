@@ -17,7 +17,7 @@ def _process_joker_card(
     chips_sum = 0
     mult_sum = 0.0
     chips_sum += joker.get_chips_card(card, blind_state, board_state)
-    mult_sum += joker.get_mult_card(card, blind_state)
+    mult_sum += float(joker.get_mult_card(card, blind_state, board_state))
     return chips_sum, mult_sum
 
 
@@ -78,7 +78,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             mult_sum *= unplayed_card.get_multiplication() * num_card_retriggers
         for joker in board_state.jokers:
             chips_sum += joker.get_chips_hand(cards, blind_state, board_state, hand_type)
-            mult_sum += joker.get_mult_hand(cards, blind_state, hand_type)
+            mult_sum += float(joker.get_mult_hand(cards, blind_state, board_state, hand_type))
             mult_sum *= joker.get_multiplication(cards, blind_state, board_state, hand_type)
             money_sum += joker.get_money(blind_state)
             # TODO update joker. E.g. num hands played influences chips
