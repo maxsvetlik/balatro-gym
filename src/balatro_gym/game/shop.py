@@ -2,10 +2,21 @@ import dataclasses
 import random
 from typing import Sequence
 
-from balatro_gym.cards.booster_packs import BOOSTER_TO_PACK_INFO, BoosterType, PackType
+from balatro_gym.cards.booster_packs import (
+    BOOSTER_TO_PACK_INFO,
+    JOKER_SPECTRAL_PACK_INFO,
+    BoosterType,
+    BuffoonPack,
+    PackType,
+)
 from balatro_gym.cards.interfaces import HasCost
+from balatro_gym.cards.joker import JOKERS
+from balatro_gym.cards.planet import PLANET_CARDS
+from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.cards.voucher import ALL_VOUCHERS
 from balatro_gym.interfaces import Booster, Voucher
+
+__all__ = ["Shop"]
 
 
 @dataclasses.dataclass
@@ -31,7 +42,9 @@ class Shop:
     num_buyable_slots: int = 2,
     num_vouchers: int = 1,
     num_booster_packs: int = 2,
-    reroll_price: int = 5):
+    reroll_price: int = 5,
+    allow_duplicates: bool = False,
+                 ):
         self.num_buyable_slots = num_buyable_slots
         self.num_vouchers = num_vouchers
         self.num_booster_packs = num_booster_packs
@@ -39,6 +52,7 @@ class Shop:
         self.vouchers: Sequence[Voucher] = []
         self.bought_vouchers: set[Voucher] = set()
         self.current_state = None
+        self.allow_duplicates = allow_duplicates
 
     def increase_num_buyable_slots(self) -> None:
         self.num_vouchers += 1
@@ -73,11 +87,11 @@ class Shop:
             self.vouchers = self.voucher_generator()
         return ShopState(
             vouchers=self.vouchers,
-            buyable_cards=[],
-            booster_packs=self.generate_booster_packs(),
+            buyable_cards=self.generate_buyable_cards(),
+            booster_packs=self.generate_booster_packs(round),
         )
 
-    def generate_booster_packs(self) -> Sequence[Booster]:
+    def generate_booster_packs(self, round: int) -> Sequence[Booster]:
         potential_packs = []
         probabilities = []
         for pack_type in PackType:
@@ -87,4 +101,35 @@ class Shop:
                 potential_packs.append(booster_type.value(pack_info.cost, pack_info.n_cards, pack_info.n_choice))
                 probabilities.append(PROBABILITY_MAPPING[booster_type][pack_type])
 
+        # On the first round, one normal buffoon pack is guaranteed
+        if round == 1:
+            pack_info = JOKER_SPECTRAL_PACK_INFO[PackType.NORMAL]
+            random_booster = random.choices(potential_packs, weights=probabilities, k=self.num_booster_packs - 1)
+            return [BuffoonPack(pack_info.cost, pack_info.n_cards, pack_info.n_choice)] + random_booster
         return random.choices(potential_packs, weights=probabilities, k=self.num_booster_packs)
+
+    def generate_buyable_cards(self) -> Sequence[HasCost]:
+        sampled_cards: list[HasCost] = []
+        # Provide a copy of the lists
+        all_tarot_cards = [card for card in TAROT_CARDS]
+        all_planet_cards = [card for card in PLANET_CARDS]
+        all_joker_cards = [card for card in JOKERS]
+        card: type[HasCost]
+        for _ in range(self.num_buyable_slots):
+            rand = random.random()
+            # The probabilities are based on numbers provided by https://balatrogame.fandom.com/wiki/The_Shop
+            if rand < 1 / 7:
+                card = random.sample(all_tarot_cards, 1)[0]
+                if not self.allow_duplicates:
+                    all_tarot_cards.remove(card)
+            elif rand < 2 / 7:
+                card = random.sample(all_planet_cards, 1)[0]
+                if not self.allow_duplicates:
+                    all_planet_cards.remove(card)
+            else:
+                # TODO: Consider rarity when sampling jokers
+                card = random.sample(all_joker_cards, 1)[0]
+                if not self.allow_duplicates:
+                    all_joker_cards.remove(card)
+            sampled_cards.append(card())
+        return sampled_cards

@@ -60,7 +60,7 @@ class ArcanaPack(Booster):
     n_choice: int
 
     def sample(self) -> Sequence[HasCost]:
-        return random.sample(TAROT_CARDS, self.n_cards)
+        return [card() for card in random.sample(TAROT_CARDS, self.n_cards)]
 
 
 @dataclasses.dataclass
@@ -70,7 +70,7 @@ class CelestialPack(Booster):
     n_choice: int
 
     def sample(self) -> Sequence[HasCost]:
-        return random.sample(PLANET_CARDS, self.n_cards)
+        return [card() for card in random.sample(PLANET_CARDS, self.n_cards)]
 
 
 @dataclasses.dataclass
@@ -81,7 +81,7 @@ class BuffoonPack(Booster):
 
     def sample(self) -> Sequence[HasCost]:
         # TODO: add enhancements and consider joker rarity
-        return random.sample(JOKERS, self.n_cards)
+        return [card() for card in random.sample(JOKERS, self.n_cards)]
 
 
 @dataclasses.dataclass
@@ -91,7 +91,7 @@ class SpectralPack(Booster):
     n_choice: int
 
     def sample(self) -> Sequence[HasCost]:
-        return random.sample(SPECTRAL_CARDS, self.n_cards)
+        return [card() for card in random.sample(SPECTRAL_CARDS, self.n_cards)]
 
 
 class BoosterType(enum.Enum):

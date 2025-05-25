@@ -86,22 +86,24 @@ class Type(Enum):
 class PokerScale:
     mult: int
     chips: int
+    delta_mult: int
+    delta_chips: int
 
 
 class PokerHandType(Enum):
-    HIGH_CARD = PokerScale(1, 5)
-    PAIR = PokerScale(2, 10)
-    TWO_PAIR = PokerScale(2, 20)
-    THREE_SET = PokerScale(3, 30)
-    FULL_HOUSE = PokerScale(4, 40)
-    FLUSH_HOUSE = PokerScale(14, 140)
-    FOUR_SET = PokerScale(7, 60)
-    FIVE_SET = PokerScale(12, 120)
-    FLUSH = PokerScale(4, 35)
-    ROYAL_FLUSH = PokerScale(8, 100)
-    STRAIGHT = PokerScale(4, 30)
-    STRAIGHT_FLUSH = PokerScale(8, 100)
-    FLUSH_FIVE = PokerScale(16, 160)
+    HIGH_CARD = PokerScale(1, 5, 1, 10)
+    PAIR = PokerScale(2, 10, 1, 15)
+    TWO_PAIR = PokerScale(2, 20, 1, 20)
+    THREE_SET = PokerScale(3, 30, 2, 20)
+    FULL_HOUSE = PokerScale(4, 40, 2, 25)
+    FLUSH_HOUSE = PokerScale(14, 140, 4, 40)
+    FOUR_SET = PokerScale(7, 60, 3, 30)
+    FIVE_SET = PokerScale(12, 120, 3, 35)
+    FLUSH = PokerScale(4, 35, 2, 15)
+    ROYAL_FLUSH = PokerScale(8, 100, 4, 40)
+    STRAIGHT = PokerScale(4, 30, 3, 30)
+    STRAIGHT_FLUSH = PokerScale(8, 100, 4, 40)
+    FLUSH_FIVE = PokerScale(16, 160, 3, 50)
 
 
 class ConsumableCardBase: ...
@@ -114,15 +116,19 @@ class PokerHand:
     num_played: int
 
     @property
-    def base_score(self) -> PokerScale:
+    def score(self) -> PokerScale:
         return PokerScale(
-            self.hand_type.value.mult * self.level,
-            self.hand_type.value.chips * self.level,
+            self.hand_type.value.mult + self.hand_type.value.delta_mult * (self.level - 1),
+            self.hand_type.value.chips + self.hand_type.value.delta_chips * (self.level - 1),
+            self.hand_type.value.delta_mult,
+            self.hand_type.value.delta_chips,
         )
 
 
 class PlanetCard(HasCost):
-    _hand_type: PokerHandType
+    @property
+    def _hand_type(self) -> PokerHandType:
+        raise NotImplementedError
 
     def increase_level(self, poker_hands: Sequence[PokerHand]) -> PokerHand:
         for hand in poker_hands:
@@ -231,7 +237,7 @@ class BoardState(HasReset):
     num_discards: int
     hand_size: int
     vouchers: Sequence[Voucher]
-    poker_hands: Sequence[PokerHand]
+    poker_hands: dict[str, PokerHand]
     completed_blinds: Sequence[BlindInfo]
     """Shows all blinds that have been completed, ordered."""
     round_blinds: Sequence[BlindInfo]
@@ -251,6 +257,9 @@ class BoardState(HasReset):
         self.num_discards = 3
         self.hand_size = 8
         self.vouchers = []
-        self.poker_hands = []
+        self.poker_hands = {poker_hand_type.name: PokerHand(poker_hand_type, 1, 0) for poker_hand_type in PokerHandType}
         self.completed_blinds = []
         self.round_blinds = []
+
+    def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
+        return self.poker_hands[poker_hand_type.name]

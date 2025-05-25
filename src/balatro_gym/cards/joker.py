@@ -5,8 +5,6 @@ from balatro_gym.cards.utils import contains_one_pair, contains_three_set, conta
 from ..interfaces import BlindState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
 
-JOKERS: Sequence[JokerBase] = []
-
 
 class Joker(JokerBase):
     _cost: int = 2
@@ -153,3 +151,8 @@ class CrazyJoker(JokerBase):
         ):
             return 12
         return 0
+
+
+JOKERS: list[type[JokerBase]] = [
+    Joker, GreedyJoker, LustyJoker, WrathfulJoker, GluttonousJoker, JollyJoker, ZanyJoker
+]
