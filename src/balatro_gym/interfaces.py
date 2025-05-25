@@ -6,7 +6,8 @@ from enum import Enum, auto
 from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import BaseEdition, Deck, Edition, HasCost, PlayingCard
+from .cards.interfaces import Deck, HasCost, PlayingCard
+from .cards.voucher import Voucher
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
@@ -29,17 +30,6 @@ __all__ = [
 
 class Tag:
     pass
-
-
-@dataclasses.dataclass(frozen=True)
-class Voucher:
-    dependency: Optional["Voucher"]
-
-    def __hash__(self) -> int:
-        return hash(self.__class__.__name__)
-
-    def __eq__(self, obj: Any) -> bool:
-        return obj._class__.__name__ == self.__class__.__name__
 
 
 class Spectral(HasCost):
@@ -146,6 +136,10 @@ class PlanetCard(HasCost):
 
 
 class Tarot(HasCost):
+    def is_valid(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
+        """Check if the consumable can be applied"""
+        raise NotImplementedError
+
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
         """Returns true if the card was used successfully"""
         raise NotImplementedError
@@ -183,21 +177,16 @@ class ConsumableState(HasReset):
 
 @dataclasses.dataclass
 class JokerBase(HasCost):
-
-    _base_cost: int = 0
-    _edition: Edition = BaseEdition()
-
     @property
     def joker_type(self) -> Type:
         raise NotImplementedError
 
     @property
     def base_cost(self) -> int:
-        return self._base_cost
+        return self._cost
 
-    def cost(self, vouchers: Sequence[Voucher]) -> int:
-        # TODO. Voucher impl doesn't exist yet, which may impact this.
-        return self._base_cost
+    # TODO: implement cost method that considers the edition to override the base implementation
+    # def cost(self, vouchers: Sequence[Vouchers]) -> int:
 
     @property
     def rarity(self) -> Rarity:
@@ -211,23 +200,36 @@ class JokerBase(HasCost):
         self._edition = edition
 
     def get_money(self, state: BlindState) -> int:
+        """The money earned by the player from selling this Joker."""
         return 0
 
     def get_mult_card(self, card: PlayingCard, state: BlindState) -> int:
+        """Get any additional mult value of a given card based on the Joker's effects.
+        Note that mult is intended to be additive, so in the base case, return 0."""
         return 0
 
     def get_mult_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        """Get any additional mult value of a given hand based on the Joker's effects.
+        Note that mult is intended to be additive, so in the base case, return 0."""
+
         return 0
 
     def get_multiplication(
         self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType
     ) -> float:
+        """Get any additional multiplication value of a given hand based on the Joker's effects.
+        Note that multiplication is intended to be multiplicative, so in the base case, return 1."""
+
         return 1.0
 
     def get_chips_card(self, card: PlayingCard, state: BlindState) -> int:
+        """Get any additional chips value of a given card based on the Joker's effects.
+        Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
 
     def get_chips_hand(self, state: BlindState, scored_hand: PokerHandType) -> int:
+        """Get any additional chip value of a given hand based on the Joker's effects.
+        Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
 
 

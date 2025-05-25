@@ -23,7 +23,7 @@ from balatro_gym.cards.tarot import (
     Magician,
 )
 from balatro_gym.interfaces import BoardState, PlanetCard, Tarot
-from balatro_gym.testing_utils import make_card
+from test.utils import _make_card
 
 
 @pytest.mark.unit
@@ -56,7 +56,7 @@ def test_fool() -> None:
     [Justice(), 1, GlassCard()],
 ])
 def test_enhancement_tarot_cards(tarot: Tarot, max_selection: int, enhancement: Enhancement) -> None:
-    cards = [make_card() for _ in range(4)]
+    cards = [_make_card()] * 4
     board_state = BoardState()
     assert not tarot.apply([], board_state)
     assert not tarot.apply(cards, board_state)
