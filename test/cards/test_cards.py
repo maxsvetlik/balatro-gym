@@ -5,6 +5,7 @@ import pytest
 import balatro_gym.cards.interfaces
 from balatro_gym.cards.interfaces import (
     BonusCard,
+    Deck,
     GlassCard,
     GoldCard,
     LuckyCard,
@@ -14,7 +15,9 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
+from balatro_gym.cards.planet import Mercury, Pluto
 from balatro_gym.game.scoring import get_poker_hand, score_hand
+from balatro_gym.interfaces import BoardState, PokerHand, PokerHandType
 from test.utils import _make_board, _make_card
 
 
@@ -54,16 +57,37 @@ def test_enhancement_glass() -> None:
 def test_enhancement_glass_scoring() -> None:
     enhancement = GlassCard()
     card = _make_card(enhancement=enhancement)
-    board_mock = Mock()
-    board_mock.jokers = []
+    board = BoardState()
+    board.jokers = []
     blind_mock = Mock()
     blind_mock.hand = []
     submitted_hand = [card]
-    score = score_hand(submitted_hand, board_mock, blind_mock)
+    score = score_hand(submitted_hand, board, blind_mock)
     _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
-    # TODO MAX test card destruction
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("probability_modifier", [1, 2, 10])
+def test_enhancement_glass_destroy(probability_modifier: int) -> None:
+    enhancement = GlassCard()
+    card = _make_card(enhancement=enhancement)
+    deck = Deck([card])
+    submitted_hand = deck.deal(1)
+    assert card in deck.cards_played
+    board_mock = Mock()
+    board_mock.get_poker_hand.return_value = PokerHand(PokerHandType.HIGH_CARD, 1, 0)
+    board_mock.jokers = []  # TODO See #25. This can influence probabilities and should be tested.
+    board_mock.deck = deck
+    blind_mock = Mock()
+    blind_mock.hand = []
+    with patch.object(balatro_gym.cards.interfaces, "np") as mock:
+        random_mock = Mock()
+        mock.random.random = random_mock
+        random_mock.return_value = 0
+        score_hand(submitted_hand, board_mock, blind_mock)
+        assert card not in board_mock.deck.cards_played
 
 
 @pytest.mark.unit
@@ -81,11 +105,11 @@ def test_enhancement_steel_scoring() -> None:
     held_card = _make_card(enhancement=enhancement)
     submitted_card = _make_card()
     submitted_hand = [submitted_card]
-    board_mock = Mock()
-    board_mock.jokers = []
+    board = BoardState()
+    board.jokers = []
     blind_mock = Mock()
     blind_mock.hand = [held_card]
-    score = score_hand(submitted_hand, board_mock, blind_mock)
+    score = score_hand(submitted_hand, board, blind_mock)
     _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (
         (hand_type.value.chips + submitted_card.get_chips())
@@ -111,12 +135,12 @@ def test_enhancement_stone_scoring() -> None:
     # Submit a single stone card
     enhancement = StoneCard()
     card = _make_card(enhancement=enhancement)
-    board_mock = Mock()
-    board_mock.jokers = []
+    board = BoardState()
+    board.jokers = []
     blind_mock = Mock()
     blind_mock.hand = []
     submitted_hand = [card]
-    score = score_hand(submitted_hand, board_mock, blind_mock)
+    score = score_hand(submitted_hand, board, blind_mock)
     _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
@@ -163,3 +187,28 @@ def test_enhancement_lucky_modifiers(probability_modifier: int) -> None:
         assert enhancement.get_mult(probability_modifier) == 20
         random_mock.return_value = min(probability_modifier / 15, 1)
         assert enhancement.get_scored_money(probability_modifier) == 20
+
+
+@pytest.mark.unit
+def test_planet_cards() -> None:
+    pluto = Pluto()
+    initial_level_high_card = 2
+    initial_level_pair = 1
+    poker_hands = [
+        PokerHand(hand_type=PokerHandType.HIGH_CARD, level=initial_level_high_card, num_played=0),
+        PokerHand(hand_type=PokerHandType.PAIR, level=initial_level_pair, num_played=0),
+    ]
+    pluto.increase_level(poker_hands)
+
+    # Only increase the high card hand
+    assert poker_hands[0].level == initial_level_high_card + 1
+    assert poker_hands[1].level == initial_level_pair
+
+    mercury = Mercury()
+    mercury.decrease_level(poker_hands)
+    assert poker_hands[0].level == initial_level_high_card + 1
+    assert poker_hands[1].level == initial_level_pair
+
+    pluto.decrease_level(poker_hands)
+    assert poker_hands[0].level == initial_level_high_card
+    assert poker_hands[1].level == initial_level_pair

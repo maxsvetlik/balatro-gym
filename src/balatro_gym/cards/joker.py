@@ -1,16 +1,22 @@
 from collections.abc import Sequence
 
-from balatro_gym.cards.utils import contains_three_set, get_flush, get_num_pairs, get_straight
+from balatro_gym.cards.utils import (
+    contains_one_pair,
+    contains_three_set,
+    contains_two_pair,
+    get_flush,
+    get_max_rank,
+    get_num_pairs,
+    get_straight,
+)
 from balatro_gym.constants import DEFAULT_JOKER_SLOTS
 
 from ..interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
 from .interfaces import PlayingCard, Suit
 
-JOKERS: Sequence[JokerBase] = []
-
 
 class Joker(JokerBase):
-    _base_cost: int = 2
+    _cost: int = 2
 
     @property
     def joker_type(self) -> Type:
@@ -25,7 +31,7 @@ class Joker(JokerBase):
 
 
 class GreedyJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -40,7 +46,7 @@ class GreedyJoker(JokerBase):
 
 
 class LustyJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -55,7 +61,7 @@ class LustyJoker(JokerBase):
 
 
 class WrathfulJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -70,7 +76,7 @@ class WrathfulJoker(JokerBase):
 
 
 class GluttonousJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -85,7 +91,7 @@ class GluttonousJoker(JokerBase):
 
 
 class JollyJoker(JokerBase):
-    _base_cost: int = 3
+    _cost: int = 3
 
     @property
     def joker_type(self) -> Type:
@@ -95,14 +101,14 @@ class JollyJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
-        if scored_hand == PokerHandType.PAIR:
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        if contains_one_pair(get_max_rank(state.hand)):
             return 8
         return 0
 
 
 class ZanyJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -112,14 +118,14 @@ class ZanyJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
-        if scored_hand == PokerHandType.THREE_SET:
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        if contains_three_set(state.hand):
             return 12
         return 0
 
 
 class MadJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -129,8 +135,8 @@ class MadJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
-        if scored_hand == PokerHandType.TWO_PAIR:
+    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+        if contains_two_pair(get_max_rank(state.hand)):
             return 10
         return 0
 
@@ -295,3 +301,25 @@ class JokerStencil(JokerBase):
         num_negative = sum([joker.edition.is_negative() for joker in board.jokers])
         num_jokers = len(board.jokers)
         return DEFAULT_JOKER_SLOTS - num_jokers + num_negative
+
+
+# TODO MAX -- rectify this list with effect_joker module
+JOKERS: list[type[JokerBase]] = [
+    Joker,
+    GreedyJoker,
+    LustyJoker,
+    WrathfulJoker,
+    GluttonousJoker,
+    JollyJoker,
+    ZanyJoker,
+    MadJoker,
+    CraftyJoker,
+    DrollJoker,
+    SlyJoker,
+    WilyJoker,
+    CleverJoker,
+    DeviousJoker,
+    CraftyJoker,
+    HalfJoker,
+    JokerStencil,
+]

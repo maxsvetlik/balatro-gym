@@ -4,7 +4,7 @@ from typing import Sequence
 from balatro_gym.cards.effect_joker import Mime
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
 from balatro_gym.cards.joker import JokerBase
-from balatro_gym.cards.utils import get_flush, get_straight, is_royal
+from balatro_gym.cards.utils import contains_two_pair, get_flush, get_straight, is_royal
 from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
 
 
@@ -53,9 +53,9 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
                     4) subtract multiplication | round
     """
     cards, hand_type = get_poker_hand(hand, board_state)
-    hand_val = hand_type.value
-    chips_sum = hand_val.chips
-    mult_sum: float = hand_val.mult
+    poker_scale = board_state.get_poker_hand(hand_type).score
+    chips_sum = poker_scale.chips
+    mult_sum: float = poker_scale.mult
     money_sum = 0
 
     for card in cards:
@@ -64,8 +64,9 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
         mult_sum += card.get_mult() * num_card_retriggers
         mult_sum *= card.get_multiplication() * num_card_retriggers
         if isinstance(card.enhancement, LuckyCard):
-            money_sum += card.enhancement.get_scored_money()  # TODO this should be influenced by jokers
-        # TODO if card is glass, process the possible destruction
+            money_sum += card.enhancement.get_scored_money()  # TODO See #25. this should be influenced by jokers
+        if card.enhancement and card.enhancement.is_destroyed():  # TODO See #25. This should be influenced by jokers
+            board_state.deck.destroy([card])
 
         for joker in board_state.jokers:
             # TODO track retriggers on jokers
@@ -78,7 +79,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             mult_sum *= unplayed_card.get_multiplication() * num_card_retriggers
         for joker in board_state.jokers:
             chips_sum += joker.get_chips_hand(cards, blind_state, board_state, hand_type)
-            mult_sum += joker.get_mult_hand(cards, blind_state, board_state, hand_type)
+            mult_sum += joker.get_mult_hand(cards, blind_state, hand_type)
             mult_sum *= joker.get_multiplication(cards, blind_state, board_state, hand_type)
             money_sum += joker.get_money(blind_state)
             # TODO update joker. E.g. num hands played influences chips
@@ -106,19 +107,6 @@ def _is_full_house(counts: Sequence[tuple[Rank, int]]) -> bool:
     return False
 
 
-def _is_two_pair(counts: Sequence[tuple[Rank, int]]) -> bool:
-    if len(counts) < 2:
-        # Only a single card was played, so there aren't multiple counts
-        return False
-
-    mc_rank, mc_count = counts[0]
-    smc_rank, smc_count = counts[1]
-
-    if mc_count == 2 and smc_count == 2:
-        return True
-    return False
-
-
 def _extract_largest_set(hand: Sequence[PlayingCard], counts: Sequence[tuple[Rank, int]]) -> Sequence[PlayingCard]:
     mc_rank, mc_count = counts[0]
     return [card for card in hand if card.rank == mc_rank]
@@ -133,7 +121,7 @@ def get_poker_hand(hand: Sequence[PlayingCard], board: BoardState) -> tuple[Sequ
     flush = len(get_flush(hand, board)) > 0
     straight = len(get_straight(hand, board)) > 0
     is_full = _is_full_house(counts)
-    is_two_pair = _is_two_pair(counts)
+    is_two_pair = contains_two_pair(counts)
     is_royal_res = is_royal(hand, board)
     max_set = _extract_largest_set(hand, counts)
 
@@ -158,7 +146,11 @@ def get_poker_hand(hand: Sequence[PlayingCard], board: BoardState) -> tuple[Sequ
     elif len(max_set) == 3:
         return max_set, PokerHandType.THREE_SET
     elif is_two_pair:
-        return [card for card in hand if card.rank in set([counts[0][0], counts[1][0]])], PokerHandType.TWO_PAIR
+        if len(counts) == 1:
+            return [card for card in hand if card.rank in set([counts[0][0]])], PokerHandType.TWO_PAIR
+        else:
+            return [card for card in hand if card.rank in set([counts[0][0], counts[1][0]])], PokerHandType.TWO_PAIR
+
     elif len(max_set) == 2:
         return max_set, PokerHandType.PAIR
     else:
