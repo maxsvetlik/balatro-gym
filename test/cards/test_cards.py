@@ -213,7 +213,7 @@ def test_planet_cards() -> None:
     initial_level_pair = 1
     poker_hands = [
         PokerHand(hand_type=PokerHandType.HIGH_CARD, level=initial_level_high_card, num_played=0),
-        PokerHand(hand_type=PokerHandType.PAIR, level=initial_level_pair, num_played=0)
+        PokerHand(hand_type=PokerHandType.PAIR, level=initial_level_pair, num_played=0),
     ]
     pluto.increase_level(poker_hands)
 
