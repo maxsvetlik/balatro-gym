@@ -264,18 +264,20 @@ class BoardState(HasReset):
     def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
         return self.poker_hands[poker_hand_type.name]
 
-    def use_consumable(self, index: int, selected_cards: Sequence[PlayingCard]) -> bool:
-        assert len(self.consumable.consumables) > index
-        card = self.consumable.consumables[index]
+    def use_consumable(self, card: ConsumableCardBase, selected_cards: Sequence[PlayingCard]) -> bool:
         assert isinstance(card, PlanetCard) or isinstance(card, Tarot)
         if isinstance(card, Tarot) and card.apply(selected_cards, self):
             self.last_used_consumable = card
-            self.remove_consumable(card)
+            # If the object is in the consumables list, we're using a consumable from the board and we need to remove it
+            if card in self.consumable.consumables:
+                self.remove_consumable(card)
             return True
         elif isinstance(card, PlanetCard):
             self.last_used_consumable = card
             card.increase_level(list(self.poker_hands.values()))
-            self.remove_consumable(card)
+            # If the object is in the consumables list, we're using a consumable from the board and we need to remove it
+            if card in self.consumable.consumables:
+                self.remove_consumable(card)
             return True
         return False
 

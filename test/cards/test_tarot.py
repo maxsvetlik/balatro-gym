@@ -32,17 +32,16 @@ def test_fool() -> None:
     board_state = BoardState()
     # can't apply since no planet or tarot card used
     board_state.acquire_consumable(tarot)
-    assert not board_state.use_consumable(0, [])
+    assert not board_state.use_consumable(tarot, [])
     planet_card = Mercury()
     for consumable in [planet_card]:
         board_state.acquire_consumable(consumable)
-    # Use planet card
-    assert board_state.use_consumable(1, [])
+    assert board_state.use_consumable(planet_card, [])
     assert isinstance(board_state.last_used_consumable, Mercury)
     assert len(board_state.consumable.consumables) == 1
     # Use fool
     assert isinstance(board_state.consumable.consumables[0], Fool)
-    assert board_state.use_consumable(0, [])
+    assert board_state.use_consumable(tarot, [])
     assert len(board_state.consumable.consumables) == 1
     assert isinstance(board_state.consumable.consumables[0], Mercury)
 
@@ -70,7 +69,7 @@ def test_high_priestess() -> None:
     tarot = HighPriestess()
     board_state = BoardState()
     board_state.acquire_consumable(tarot)
-    board_state.use_consumable(0, [])
+    board_state.use_consumable(tarot, [])
     assert [isinstance(card, PlanetCard) for card in board_state.consumable.consumables]
     # Can't use high priestess since there are not slots free
     assert not tarot.apply([], board_state)
@@ -81,7 +80,7 @@ def test_emperor() -> None:
     tarot = Emperor()
     board_state = BoardState()
     board_state.acquire_consumable(tarot)
-    board_state.use_consumable(0, [])
+    board_state.use_consumable(tarot, [])
     assert [isinstance(card, Tarot) for card in board_state.consumable.consumables]
     assert not tarot.apply([], board_state)
 
@@ -92,8 +91,8 @@ def test_hermit() -> None:
     board_state = BoardState()
     initial_money = 20
     board_state.set_money(initial_money)
-    tarot.apply([], board_state)
+    board_state.use_consumable(tarot, [])
     assert board_state.money == initial_money * 2
     max_money_added = 20
-    tarot.apply([], board_state)
+    board_state.use_consumable(tarot, [])
     assert board_state.money == initial_money * 2 + max_money_added
