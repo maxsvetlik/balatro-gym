@@ -6,9 +6,9 @@ from enum import Enum, auto
 from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import Deck, HasCost, PlayingCard
+from .cards.interfaces import BaseEdition, Deck, Edition, HasCost, PlayingCard
 from .cards.voucher import Voucher
-from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_START_MONEY
+from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_NUM_JOKER_SLOTS, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
 
@@ -176,6 +176,8 @@ class ConsumableState(HasReset):
 
 
 class JokerBase(HasCost):
+    _edition: Edition = BaseEdition()
+
     @property
     def joker_type(self) -> Type:
         raise NotImplementedError
@@ -184,6 +186,10 @@ class JokerBase(HasCost):
     def base_cost(self) -> int:
         return self._cost
 
+    @property
+    def edition(self) -> Edition:
+        return self._edition
+
     # TODO: implement cost method that considers the edition to override the base implementation
     # def cost(self, vouchers: Sequence[Vouchers]) -> int:
 
@@ -191,35 +197,42 @@ class JokerBase(HasCost):
     def rarity(self) -> Rarity:
         raise NotImplementedError
 
+    def set_edition(self, edition: Edition) -> None:
+        self._edition = edition
+
     def get_money(self, state: BlindState) -> int:
         """The money earned by the player from selling this Joker."""
         return 0
 
-    def get_mult_card(self, card: PlayingCard, state: BlindState) -> int:
+    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
         """Get any additional mult value of a given card based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
         return 0
 
-    def get_mult_hand(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+    ) -> int:
         """Get any additional mult value of a given hand based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
 
         return 0
 
     def get_multiplication(
-        self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
     ) -> float:
         """Get any additional multiplication value of a given hand based on the Joker's effects.
         Note that multiplication is intended to be multiplicative, so in the base case, return 1."""
 
         return 1.0
 
-    def get_chips_card(self, card: PlayingCard, state: BlindState) -> int:
+    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
         """Get any additional chips value of a given card based on the Joker's effects.
         Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
 
-    def get_chips_hand(self, state: BlindState, scored_hand: PokerHandType) -> int:
+    def get_chips_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+    ) -> int:
         """Get any additional chip value of a given hand based on the Joker's effects.
         Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
@@ -236,6 +249,7 @@ class BoardState(HasReset):
     num_hands: int
     num_discards: int
     hand_size: int
+    num_joker_slots: int
     vouchers: Sequence[Voucher]
     poker_hands: dict[str, PokerHand]
     completed_blinds: Sequence[BlindInfo]
@@ -258,6 +272,7 @@ class BoardState(HasReset):
         self.num_hands = 4
         self.num_discards = 3
         self.hand_size = 8
+        self.num_joker_slots = DEFAULT_NUM_JOKER_SLOTS
         self.vouchers = []
         self.poker_hands = {poker_hand_type.name: PokerHand(poker_hand_type, 1, 0) for poker_hand_type in PokerHandType}
         self.completed_blinds = []

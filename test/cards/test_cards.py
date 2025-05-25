@@ -18,12 +18,12 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
-from balatro_gym.cards.joker import GreedyJoker
+from balatro_gym.cards.joker.joker import GreedyJoker
 from balatro_gym.cards.planet import Mercury, Pluto
 from balatro_gym.cards.voucher import ClearanceSale, Liquidation, Voucher
 from balatro_gym.game.scoring import get_poker_hand, score_hand
 from balatro_gym.interfaces import BoardState, PokerHand, PokerHandType
-from test.utils import _make_card
+from test.utils import _make_board, _make_card
 
 
 @pytest.mark.unit
@@ -68,7 +68,7 @@ def test_enhancement_glass_scoring() -> None:
     blind_mock.hand = []
     submitted_hand = [card]
     score = score_hand(submitted_hand, board, blind_mock)
-    _, hand_type = get_poker_hand(submitted_hand)
+    _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
 
@@ -115,7 +115,7 @@ def test_enhancement_steel_scoring() -> None:
     blind_mock = Mock()
     blind_mock.hand = [held_card]
     score = score_hand(submitted_hand, board, blind_mock)
-    _, hand_type = get_poker_hand(submitted_hand)
+    _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (
         (hand_type.value.chips + submitted_card.get_chips())
         * hand_type.value.mult
@@ -146,7 +146,7 @@ def test_enhancement_stone_scoring() -> None:
     blind_mock.hand = []
     submitted_hand = [card]
     score = score_hand(submitted_hand, board, blind_mock)
-    _, hand_type = get_poker_hand(submitted_hand)
+    _, hand_type = get_poker_hand(submitted_hand, _make_board())
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
 

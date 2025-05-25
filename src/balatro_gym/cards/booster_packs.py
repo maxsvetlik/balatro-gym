@@ -5,15 +5,13 @@ from typing import NamedTuple, Sequence
 
 from balatro_gym.cards.decks import STANDARD_DECK
 from balatro_gym.cards.interfaces import HasCost
-from balatro_gym.cards.joker import JOKERS
+from balatro_gym.cards.joker.constants import JOKERS
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.cards.spectral import SPECTRAL_CARDS
 from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.interfaces import Booster
 
-__all__ = [
-    "StandardPack", "ArcanaPack", "CelestialPack", "BuffoonPack", "SpectralPack"
-]
+__all__ = ["StandardPack", "ArcanaPack", "CelestialPack", "BuffoonPack", "SpectralPack"]
 
 
 class PackInfo(NamedTuple):
