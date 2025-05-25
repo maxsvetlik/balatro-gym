@@ -80,7 +80,6 @@ def test_enhancement_glass_scoring() -> None:
     _, hand_type = get_poker_hand(submitted_hand)
     expected_score = (hand_type.value.chips + card.get_chips()) * hand_type.value.mult * card.get_multiplication()
     assert score == expected_score
-    # TODO MAX test card destruction
 
 
 @pytest.mark.unit

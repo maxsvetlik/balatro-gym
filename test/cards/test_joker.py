@@ -169,8 +169,8 @@ def test_zany_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
     [
         [[_make_card()], 0],
         [[_make_card()] * 2, 0],  # Pair
-        [[_make_card()] * 4, 10],  # Four Set
-        [[_make_card()] * 5, 10],  # Flush Five Set
+        [[_make_card()] * 4, 0],  # Four Set
+        [[_make_card()] * 5, 0],  # Flush Five Set
         [
             [
                 _make_card(),
@@ -189,8 +189,18 @@ def test_zany_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
                 _make_card(suit=Suit.CLUBS),
                 _make_card(suit=Suit.CLUBS, rank=Rank.EIGHT),
             ],
+            0,
+        ],  # Flush, but with the same ranks
+        [
+            [
+                _make_card(rank=Rank.ACE),
+                _make_card(rank=Rank.ACE),
+                _make_card(rank=Rank.TEN),
+                _make_card(rank=Rank.KING),
+                _make_card(rank=Rank.KING),
+            ],
             10,
-        ],  # Flush
+        ],  # Flush, but with different ranks
     ],
 )
 def test_mad_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
