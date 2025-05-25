@@ -56,7 +56,7 @@ def test_fool() -> None:
     [Justice(), 1, GlassCard()],
 ])
 def test_enhancement_tarot_cards(tarot: Tarot, max_selection: int, enhancement: Enhancement) -> None:
-    cards = [make_card() for _ in range(4)]
+    cards = [make_card()] * 4
     board_state = BoardState()
     assert not tarot.apply([], board_state)
     assert not tarot.apply(cards, board_state)
