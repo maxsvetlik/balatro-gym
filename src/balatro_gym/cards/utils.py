@@ -6,11 +6,6 @@ from balatro_gym.cards.joker.effect_joker import FourFingers
 from balatro_gym.interfaces import BoardState
 
 
-def get_num_pairs(hand: Sequence[PlayingCard]) -> int:
-    counter = Counter(hand)
-    return sum(count // 2 for count in counter.values())
-
-
 def contains_three_set(hand: Sequence[PlayingCard]) -> int:
     counter = Counter(hand)
     return sum(count // 3 for count in counter.values()) == 1

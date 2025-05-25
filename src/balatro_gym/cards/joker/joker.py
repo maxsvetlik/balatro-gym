@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from unittest.mock import Mock
 
 from balatro_gym.cards.utils import (
     contains_one_pair,
@@ -6,7 +7,6 @@ from balatro_gym.cards.utils import (
     contains_two_pair,
     get_flush,
     get_max_rank,
-    get_num_pairs,
     get_straight,
 )
 from balatro_gym.constants import DEFAULT_JOKER_SLOTS
@@ -153,11 +153,9 @@ class CrazyJoker(JokerBase):
         return Rarity.COMMON
 
     def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
-        if (
-            scored_hand == PokerHandType.STRAIGHT
-            or scored_hand == PokerHandType.STRAIGHT_FLUSH
-            or scored_hand == PokerHandType.ROYAL_FLUSH
-        ):
+        board = Mock()
+        board.jokers = []
+        if len(get_straight(scored_cards, board)) > 0:
             return 12
         return 0
 
@@ -198,7 +196,7 @@ class SlyJoker(JokerBase):
     def get_chips_hand(
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        return 50 if get_num_pairs(scored_cards) >= 1 else 0
+        return 50 if contains_one_pair(get_max_rank(scored_cards)) >= 1 else 0
 
 
 class WilyJoker(JokerBase):
@@ -232,7 +230,7 @@ class CleverJoker(JokerBase):
     def get_chips_hand(
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        return 80 if get_num_pairs(scored_cards) >= 2 else 0
+        return 80 if contains_one_pair(get_max_rank(scored_cards)) else 0
 
 
 class DeviousJoker(JokerBase):
