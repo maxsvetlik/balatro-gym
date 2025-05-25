@@ -142,7 +142,7 @@ class MadJoker(JokerBase):
 
 
 class CrazyJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -163,7 +163,7 @@ class CrazyJoker(JokerBase):
 
 
 class DrollJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -185,7 +185,7 @@ class DrollJoker(JokerBase):
 
 
 class SlyJoker(JokerBase):
-    _base_cost: int = 3
+    _cost: int = 3
 
     @property
     def joker_type(self) -> Type:
@@ -202,7 +202,7 @@ class SlyJoker(JokerBase):
 
 
 class WilyJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -219,7 +219,7 @@ class WilyJoker(JokerBase):
 
 
 class CleverJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -236,7 +236,7 @@ class CleverJoker(JokerBase):
 
 
 class DeviousJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -253,7 +253,7 @@ class DeviousJoker(JokerBase):
 
 
 class CraftyJoker(JokerBase):
-    _base_cost: int = 4
+    _cost: int = 4
 
     @property
     def joker_type(self) -> Type:
@@ -270,7 +270,7 @@ class CraftyJoker(JokerBase):
 
 
 class HalfJoker(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
@@ -285,7 +285,7 @@ class HalfJoker(JokerBase):
 
 
 class JokerStencil(JokerBase):
-    _base_cost: int = 8
+    _cost: int = 8
 
     @property
     def joker_type(self) -> Type:

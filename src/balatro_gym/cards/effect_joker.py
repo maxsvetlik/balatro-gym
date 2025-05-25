@@ -6,7 +6,7 @@ imported, which otherwise may cause circular dependencies."""
 
 
 class FourFingers(JokerBase):
-    _base_cost: int = 7
+    _cost: int = 7
 
     @property
     def joker_type(self) -> Type:
@@ -18,7 +18,7 @@ class FourFingers(JokerBase):
 
 
 class Mime(JokerBase):
-    _base_cost: int = 5
+    _cost: int = 5
 
     @property
     def joker_type(self) -> Type:
