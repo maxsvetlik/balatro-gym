@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from unittest.mock import Mock
 
 from balatro_gym.cards.utils import (
     contains_one_pair,
@@ -9,7 +8,6 @@ from balatro_gym.cards.utils import (
     get_max_rank,
     get_straight,
 )
-from balatro_gym.constants import DEFAULT_JOKER_SLOTS
 
 from ...interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
 from ..interfaces import PlayingCard, Suit
@@ -26,7 +24,9 @@ class Joker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         return 4
 
 
@@ -41,7 +41,9 @@ class GreedyJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         return sum([3 if Suit.DIAMONDS in card.suit else 0 for card in scored_cards])
 
 
@@ -56,7 +58,9 @@ class LustyJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         return sum([3 if Suit.HEARTS in card.suit else 0 for card in scored_cards])
 
 
@@ -71,7 +75,9 @@ class WrathfulJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         return sum([3 if Suit.CLUBS in card.suit else 0 for card in scored_cards])
 
 
@@ -86,7 +92,9 @@ class GluttonousJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         return sum([3 if Suit.SPADES in card.suit else 0 for card in scored_cards])
 
 
@@ -101,7 +109,9 @@ class JollyJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], state: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         if contains_one_pair(get_max_rank(state.hand)):
             return 8
         return 0
@@ -118,7 +128,9 @@ class ZanyJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], state: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         if contains_three_set(state.hand):
             return 12
         return 0
@@ -135,8 +147,10 @@ class MadJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], state: BlindState, scored_hand: PokerHandType) -> int:
-        if contains_two_pair(get_max_rank(state.hand)):
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
+        if contains_two_pair(get_max_rank(blind.hand)):
             return 10
         return 0
 
@@ -152,9 +166,9 @@ class CrazyJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
-        board = Mock()
-        board.jokers = []
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         if len(get_straight(scored_cards, board)) > 0:
             return 12
         return 0
@@ -171,13 +185,10 @@ class DrollJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
-        if (
-            scored_hand == PokerHandType.FLUSH
-            or scored_hand == PokerHandType.FLUSH_FIVE
-            or scored_hand == PokerHandType.FLUSH_HOUSE
-            or scored_hand == PokerHandType.STRAIGHT_FLUSH
-        ):
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
+        if len(get_flush(scored_cards, board)) > 0:
             return 10
         return 0
 
@@ -230,7 +241,7 @@ class CleverJoker(JokerBase):
     def get_chips_hand(
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        return 80 if contains_one_pair(get_max_rank(scored_cards)) else 0
+        return 80 if contains_two_pair(get_max_rank(scored_cards)) else 0
 
 
 class DeviousJoker(JokerBase):
@@ -278,7 +289,9 @@ class HalfJoker(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult(self, scored_cards: Sequence[PlayingCard], blind: BlindState, scored_hand: PokerHandType) -> int:
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
         return 20 if len(scored_cards) <= 3 else 0
 
 
@@ -298,4 +311,4 @@ class JokerStencil(JokerBase):
     ) -> float:
         num_negative = sum([joker.edition.is_negative() for joker in board.jokers])
         num_jokers = len(board.jokers)
-        return DEFAULT_JOKER_SLOTS - num_jokers + num_negative
+        return board.num_joker_slots - num_jokers + num_negative

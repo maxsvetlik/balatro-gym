@@ -2,7 +2,7 @@ from collections.abc import Mapping
 
 DEFAULT_NUM_CONSUMABLE = 2
 DEFAULT_START_MONEY = 4
-DEFAULT_JOKER_SLOTS = 5
+DEFAULT_NUM_JOKER_SLOTS = 5
 
 BLIND_ANTE_TO_BASE: Mapping[int, float] = {
     0: 100,

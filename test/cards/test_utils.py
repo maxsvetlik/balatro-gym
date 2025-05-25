@@ -38,7 +38,7 @@ def test_get_flush(hand: Sequence[PlayingCard], expected_len: int) -> None:
 @pytest.mark.parametrize(
     "hand,expected_len",
     [
-        [[_make_card(Rank.ACE)], 1],
+        [[_make_card(Rank.ACE)], 0],
         [[_make_card(Rank.ACE)] * 2, 0],
         [[_make_card(Rank.ACE)] * 3, 0],
         [[_make_card(Rank.ACE)] * 4, 0],

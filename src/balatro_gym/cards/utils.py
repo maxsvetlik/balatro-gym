@@ -33,7 +33,7 @@ def get_flush(hand: Sequence[PlayingCard], board: BoardState) -> Sequence[Playin
 def get_straight(hand: Sequence[PlayingCard], board: BoardState) -> Sequence[PlayingCard]:
     req_length = 4 if any(isinstance(joker, FourFingers) for joker in board.jokers) else 5
     sorted_ranks = sorted([card.rank.value.order for card in hand])
-    if is_consecutive(sorted_ranks) or is_royal(hand, board) and len(sorted_ranks) >= req_length:
+    if (is_consecutive(sorted_ranks) or is_royal(hand, board)) and len(sorted_ranks) >= req_length:
         return hand
     return []
 
