@@ -1,5 +1,6 @@
 from typing import (
-    Optional, Sequence,
+    Optional,
+    Sequence,
 )
 from unittest.mock import Mock, patch
 
