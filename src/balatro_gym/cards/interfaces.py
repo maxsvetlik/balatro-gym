@@ -123,6 +123,9 @@ class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, HasIsDestroyed, Pr
     def get_suit(self, card: "PlayingCard") -> Sequence[Suit]:
         return [card.base_suit]
 
+    def __eq__(self, other: Any) -> bool:
+        return self.__class__.__name__ == other.__class__.__name__
+
 
 class BonusCard(Enhancement):
     def get_chips(self) -> int:

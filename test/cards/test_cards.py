@@ -1,5 +1,4 @@
 from typing import (
-    Optional,
     Sequence,
 )
 from unittest.mock import Mock, patch
@@ -10,15 +9,10 @@ import balatro_gym.cards.interfaces
 from balatro_gym.cards.interfaces import (
     BonusCard,
     Deck,
-    Edition,
-    Enhancement,
     GlassCard,
     GoldCard,
     LuckyCard,
     MultCard,
-    PlayingCard,
-    Rank,
-    Seal,
     SteelCard,
     StoneCard,
     Suit,
@@ -29,16 +23,7 @@ from balatro_gym.cards.planet import Mercury, Pluto
 from balatro_gym.cards.voucher import ClearanceSale, Liquidation, Voucher
 from balatro_gym.game.scoring import get_poker_hand, score_hand
 from balatro_gym.interfaces import BoardState, PokerHand, PokerHandType
-
-
-def _make_card(
-    rank: Rank = Rank.ACE,
-    suit: Suit = Suit.HEARTS,
-    enhancement: Optional[Enhancement] = None,
-    edition: Optional[Edition] = None,
-    seal: Optional[Seal] = None,
-) -> PlayingCard:
-    return PlayingCard(rank, suit, enhancement, edition, seal)
+from test.utils import _make_card
 
 
 @pytest.mark.unit
