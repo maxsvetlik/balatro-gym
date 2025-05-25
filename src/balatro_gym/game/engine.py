@@ -188,4 +188,5 @@ class Run:
 
         self._action_counter += 1
         return RunObservation(
-            self._game_state, self._board_state, self._shop_state, self._blind_state, self._action_counter, done)
+            self._game_state, self._board_state, self._shop_state, self._blind_state, self._action_counter, done
+        )

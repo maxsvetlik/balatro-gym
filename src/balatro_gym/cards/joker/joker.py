@@ -11,8 +11,8 @@ from balatro_gym.cards.utils import (
 )
 from balatro_gym.constants import DEFAULT_JOKER_SLOTS
 
-from ..interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
-from .interfaces import PlayingCard, Suit
+from ...interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
+from ..interfaces import PlayingCard, Suit
 
 
 class Joker(JokerBase):
@@ -301,25 +301,3 @@ class JokerStencil(JokerBase):
         num_negative = sum([joker.edition.is_negative() for joker in board.jokers])
         num_jokers = len(board.jokers)
         return DEFAULT_JOKER_SLOTS - num_jokers + num_negative
-
-
-# TODO MAX -- rectify this list with effect_joker module
-JOKERS: list[type[JokerBase]] = [
-    Joker,
-    GreedyJoker,
-    LustyJoker,
-    WrathfulJoker,
-    GluttonousJoker,
-    JollyJoker,
-    ZanyJoker,
-    MadJoker,
-    CraftyJoker,
-    DrollJoker,
-    SlyJoker,
-    WilyJoker,
-    CleverJoker,
-    DeviousJoker,
-    CraftyJoker,
-    HalfJoker,
-    JokerStencil,
-]

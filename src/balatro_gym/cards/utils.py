@@ -1,8 +1,8 @@
 from collections import Counter
 from collections.abc import Sequence
 
-from balatro_gym.cards.effect_joker import FourFingers
 from balatro_gym.cards.interfaces import PlayingCard, Rank
+from balatro_gym.cards.joker.effect_joker import FourFingers
 from balatro_gym.interfaces import BoardState
 
 

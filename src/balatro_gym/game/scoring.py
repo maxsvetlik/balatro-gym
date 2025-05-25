@@ -1,11 +1,10 @@
 from collections import Counter
 from typing import Sequence
 
-from balatro_gym.cards.effect_joker import Mime
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
-from balatro_gym.cards.joker import JokerBase
+from balatro_gym.cards.joker.effect_joker import Mime
 from balatro_gym.cards.utils import contains_two_pair, get_flush, get_straight, is_royal
-from balatro_gym.interfaces import BlindState, BoardState, PokerHandType
+from balatro_gym.interfaces import BlindState, BoardState, JokerBase, PokerHandType
 
 
 def _process_joker_card(

@@ -3,7 +3,7 @@ from typing import Optional
 from unittest.mock import Mock
 
 from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
-from balatro_gym.cards.joker import Joker
+from balatro_gym.cards.joker.joker import Joker
 
 
 def _make_card(

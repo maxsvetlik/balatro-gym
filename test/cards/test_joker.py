@@ -4,9 +4,9 @@ from unittest.mock import Mock
 
 import pytest
 
-from balatro_gym.cards.effect_joker import FourFingers
 from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
-from balatro_gym.cards.joker import (
+from balatro_gym.cards.joker.effect_joker import FourFingers
+from balatro_gym.cards.joker.joker import (
     CleverJoker,
     CraftyJoker,
     CrazyJoker,
