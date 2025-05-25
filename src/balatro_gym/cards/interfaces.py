@@ -20,8 +20,8 @@ from ..mixins import (
 )
 from .voucher import ClearanceSale, Liquidation, Voucher
 
-
 __all__ = ["HasCost"]
+
 
 class Suit(Enum):
     SPADES = auto()
