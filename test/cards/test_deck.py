@@ -49,7 +49,7 @@ def test_destroy() -> None:
     deck = Deck(initial_cards)
     deck.destroy([])
     assert len(initial_cards) == len(deck.cards_remaining)
-    destroy_cards = [ACE_HEART]
+    destroy_cards = deck.deal(1)
     deck.destroy(destroy_cards)
     assert len(initial_cards) == len(deck.cards_remaining) + len(destroy_cards)
 

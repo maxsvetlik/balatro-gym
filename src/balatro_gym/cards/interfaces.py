@@ -11,6 +11,7 @@ from ..mixins import (
     HasChips,
     HasCreatePlanet,
     HasCreateTarot,
+    HasIsDestroyed,
     HasMoney,
     HasMult,
     HasMultiplier,
@@ -115,7 +116,7 @@ class Negative(Edition):
 
 
 # Enhancements
-class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, Protocol):
+class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, HasIsDestroyed, Protocol):
     def get_suit(self, card: "PlayingCard") -> Sequence[Suit]:
         return [card.base_suit]
 
@@ -136,9 +137,16 @@ class WildCard(Enhancement):
 
 
 class GlassCard(Enhancement):
+    _base_destruction_probability: float = 1 / 4
+
     def get_multiplication(self) -> float:
         # When scored
         return 2.0
+
+    def is_destroyed(self, probability_modifier: int = 1) -> bool:
+        if np.random.random() <= min(self._base_destruction_probability * probability_modifier, 1):
+            return True
+        return False
 
 
 class SteelCard(Enhancement):
@@ -368,7 +376,10 @@ class Deck(HasReset):
     def destroy(self, cards: Sequence[PlayingCard]) -> None:
         """Destroyed cards are removed permanently. Though, this can only happen to cards in-play."""
         for card in cards:
-            self._cards_remaining.remove(card)
+            try:
+                self._cards_played.remove(card)
+            except ValueError:
+                print("Attempted to destroy card that wasn't played. This is unexpected.")
 
     def shuffle(self) -> None:
         cards = list(copy.deepcopy(self._cards_remaining))

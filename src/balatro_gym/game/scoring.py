@@ -63,8 +63,9 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
         mult_sum += card.get_mult() * num_card_retriggers
         mult_sum *= card.get_multiplication() * num_card_retriggers
         if isinstance(card.enhancement, LuckyCard):
-            money_sum += card.enhancement.get_scored_money()  # TODO this should be influenced by jokers
-        # TODO if card is glass, process the possible destruction
+            money_sum += card.enhancement.get_scored_money()  # TODO See #25. this should be influenced by jokers
+        if card.enhancement and card.enhancement.is_destroyed():  # TODO See #25. This should be influenced by jokers
+            board_state.deck.destroy([card])
 
         for joker in board_state.jokers:
             # TODO track retriggers on jokers
