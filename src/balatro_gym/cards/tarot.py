@@ -127,7 +127,20 @@ class WheelOfFortune(Tarot):
 
 
 class Strength(Tarot):
-    pass
+    def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
+        if len(selected_cards) > 2 or len(selected_cards) == 0:
+            return False
+
+        for card in selected_cards:
+            card.increase_rank()
+        return True
+
+
+class HangedMan(Tarot):
+    def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
+        if len(selected_cards) > 2 or len(selected_cards) == 0:
+            return False
+        return True
 
 
 TAROT_CARDS: list[type[Tarot]] = [

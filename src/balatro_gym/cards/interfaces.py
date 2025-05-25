@@ -318,6 +318,10 @@ class PlayingCard(HasChips, HasCost):
     def is_face_card(self) -> bool:
         return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK]
 
+    def increase_rank(self) -> None:
+        new_order = 1 if self._rank.value.order == 13 else self._rank.value.order + 1
+        self._rank = Rank.from_int(new_order)
+
     def __eq__(self, value: Any) -> bool:
         if isinstance(value, PlayingCard):
             return (
