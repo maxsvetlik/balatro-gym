@@ -6,7 +6,7 @@ from enum import Enum, auto
 from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import Deck, HasCost, PlayingCard
+from .cards.interfaces import BaseEdition, Deck, Edition, HasCost, PlayingCard
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
@@ -181,9 +181,11 @@ class ConsumableState(HasReset):
         return False
 
 
+@dataclasses.dataclass
 class JokerBase(HasCost):
 
     _base_cost: int = 0
+    _edition: Edition = BaseEdition()
 
     @property
     def joker_type(self) -> Type:
@@ -200,6 +202,13 @@ class JokerBase(HasCost):
     @property
     def rarity(self) -> Rarity:
         raise NotImplementedError
+
+    @property
+    def edition(self) -> Edition:
+        return self._edition
+
+    def set_edition(self, edition: Edition) -> None:
+        self._edition = edition
 
     def get_money(self, state: BlindState) -> int:
         return 0

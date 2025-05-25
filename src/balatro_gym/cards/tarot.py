@@ -1,7 +1,19 @@
 import random
 from typing import Sequence
 
-from balatro_gym.cards.interfaces import BonusCard, GlassCard, LuckyCard, MultCard, PlayingCard, SteelCard, WildCard
+from balatro_gym.cards.interfaces import (
+    BaseEdition,
+    BonusCard,
+    Foil,
+    GlassCard,
+    Holographic,
+    LuckyCard,
+    MultCard,
+    PlayingCard,
+    Polychrome,
+    SteelCard,
+    WildCard,
+)
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.interfaces import BoardState, Tarot
 
@@ -98,6 +110,26 @@ class Hermit(Tarot):
         return True
 
 
+class WheelOfFortune(Tarot):
+    def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
+        non_enhanced_jokers = [joker for joker in board_state.jokers if joker.edition != BaseEdition]
+        if len(non_enhanced_jokers) < 1:
+            return False
+
+        prob = random.random()
+        if prob < 0.25:
+            editions = [Foil(), Holographic(), Polychrome()]
+            probabilities = [0.5, 0.35, 0.15]
+            selected_edition = random.choices(editions, weights=probabilities, k=1)[0]
+            selected_joker = random.choice(non_enhanced_jokers)
+            selected_joker.set_edition(selected_edition)
+        return True
+
+
+class Strength(Tarot):
+    pass
+
+
 TAROT_CARDS: list[type[Tarot]] = [
-    Fool, Magician, HighPriestess, Empress, Emperor, Hierophant, Lovers, Chariot, Justice, Hermit
+    Fool, Magician, HighPriestess, Empress, Emperor, Hierophant, Lovers, Chariot, Justice, Hermit, WheelOfFortune
 ]
