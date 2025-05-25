@@ -1,10 +1,11 @@
 import dataclasses
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import Deck, HasCost, PlayingCard
+from .cards.voucher import Voucher
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
 from .mixins import HasReset
@@ -26,17 +27,6 @@ __all__ = [
 
 class Tag:
     pass
-
-
-@dataclasses.dataclass(frozen=True)
-class Voucher:
-    dependency: Optional["Voucher"]
-
-    def __hash__(self) -> int:
-        return hash(self.__class__.__name__)
-
-    def __eq__(self, obj: Any) -> bool:
-        return obj._class__.__name__ == self.__class__.__name__
 
 
 class Spectral(HasCost):
@@ -185,9 +175,8 @@ class JokerBase(HasCost):
     def base_cost(self) -> int:
         return self._cost
 
-    def cost(self, vouchers: Sequence[Voucher]) -> int:
-        # TODO. Voucher impl doesn't exist yet, which may impact this.
-        return self._cost
+    # TODO: implement cost method that considers the edition to override the base implementation
+    # def cost(self, vouchers: Sequence[Vouchers]) -> int:
 
     @property
     def rarity(self) -> Rarity:
