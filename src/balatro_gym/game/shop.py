@@ -10,7 +10,7 @@ from balatro_gym.cards.booster_packs import (
     PackType,
 )
 from balatro_gym.cards.interfaces import HasCost
-from balatro_gym.cards.joker import JOKERS
+from balatro_gym.cards.joker.constants import JOKERS
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.cards.tarot import TAROT_CARDS
 from balatro_gym.cards.voucher import ALL_VOUCHERS
@@ -28,23 +28,23 @@ class ShopState:
 
 # Based on the info at https://balatrogame.fandom.com/wiki/Booster_Packs
 PROBABILITY_MAPPING = {
-    BoosterType.StandardPack: {PackType.NORMAL: 4., PackType.JUMBO: 2., PackType.MEGA: 0.5},
-    BoosterType.ArcanaPack: {PackType.NORMAL: 4., PackType.JUMBO: 2., PackType.MEGA: 0.5},
-    BoosterType.CelestialPack: {PackType.NORMAL: 4., PackType.JUMBO: 2., PackType.MEGA: 0.5},
+    BoosterType.StandardPack: {PackType.NORMAL: 4.0, PackType.JUMBO: 2.0, PackType.MEGA: 0.5},
+    BoosterType.ArcanaPack: {PackType.NORMAL: 4.0, PackType.JUMBO: 2.0, PackType.MEGA: 0.5},
+    BoosterType.CelestialPack: {PackType.NORMAL: 4.0, PackType.JUMBO: 2.0, PackType.MEGA: 0.5},
     BoosterType.BuffoonPack: {PackType.NORMAL: 1.2, PackType.JUMBO: 0.6, PackType.MEGA: 0.15},
     BoosterType.SpectralPack: {PackType.NORMAL: 0.6, PackType.JUMBO: 0.3, PackType.MEGA: 0.07},
 }
 
 
 class Shop:
-
-    def __init__(self,
-    num_buyable_slots: int = 2,
-    num_vouchers: int = 1,
-    num_booster_packs: int = 2,
-    reroll_price: int = 5,
-    allow_duplicates: bool = False,
-                 ):
+    def __init__(
+        self,
+        num_buyable_slots: int = 2,
+        num_vouchers: int = 1,
+        num_booster_packs: int = 2,
+        reroll_price: int = 5,
+        allow_duplicates: bool = False,
+    ):
         self.num_buyable_slots = num_buyable_slots
         self.num_vouchers = num_vouchers
         self.num_booster_packs = num_booster_packs
