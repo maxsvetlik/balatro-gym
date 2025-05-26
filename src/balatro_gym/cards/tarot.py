@@ -218,7 +218,7 @@ class Judgement(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
         num_slots = board_state.num_joker_slots
         n_jokers = len(board_state.jokers)
-        if num_slots > n_jokers:
+        if num_slots <= n_jokers:
             return False
         # TODO: Sample based on rarity
         new_joker = random.choice(JOKERS)
