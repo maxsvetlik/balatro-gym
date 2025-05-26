@@ -1,8 +1,23 @@
 import random
 from typing import Sequence
 
-from balatro_gym.cards.interfaces import BonusCard, GlassCard, LuckyCard, MultCard, PlayingCard, SteelCard, WildCard, \
-    Foil, Holographic, Polychrome, BaseEdition, GoldCard, StoneCard, Suit
+from balatro_gym.cards.interfaces import (
+    BaseEdition,
+    BonusCard,
+    Foil,
+    GlassCard,
+    GoldCard,
+    Holographic,
+    LuckyCard,
+    MultCard,
+    PlayingCard,
+    Polychrome,
+    SteelCard,
+    StoneCard,
+    Suit,
+    WildCard,
+)
+from balatro_gym.cards.joker.constants import JOKERS
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.interfaces import BoardState, Tarot
 
@@ -201,13 +216,13 @@ class Sun(Tarot):
 
 class Judgement(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        num_slots = board_state.consumable.num_slots
-        n_consumables = len(board_state.consumable.consumables)
-        if num_slots > n_consumables:
+        num_slots = board_state.num_joker_slots
+        n_jokers = len(board_state.jokers)
+        if num_slots > n_jokers:
             return False
-        n_cards_to_generate = min(2, num_slots - n_consumables)
-        for tarot_card in random.sample(TAROT_CARDS, n_cards_to_generate):
-            board_state.acquire_consumable(tarot_card())
+        # TODO: Sample based on rarity
+        new_joker = random.choice(JOKERS)
+        board_state.acquire_joker(new_joker())
         return True
 
 
@@ -234,11 +249,13 @@ TAROT_CARDS: Sequence[type[Tarot]] = [
     WheelOfFortune,
     Strength,
     HangedMan,
+    Death,
     Temperance,
     Devil,
     Tower,
     Sun,
     Moon,
     Star,
+    Judgement,
     World,
 ]
