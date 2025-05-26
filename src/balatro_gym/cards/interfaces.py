@@ -272,9 +272,15 @@ class PlayingCard(HasChips, HasCost):
     def rank(self) -> Rank:
         return self._rank
 
+    def set_rank(self, rank: Rank) -> None:
+        self._rank = rank
+
     @property
     def base_suit(self) -> Suit:
         return self._base_suit
+
+    def set_base_suit(self, suit: Suit) -> None:
+        self._base_suit = suit
 
     @property
     def suit(self) -> Sequence[Suit]:
@@ -293,6 +299,10 @@ class PlayingCard(HasChips, HasCost):
     @property
     def seal(self) -> Optional[Seal]:
         return self._seal
+
+    @property
+    def added_chips(self) -> int:
+        return self._added_chips
 
     def get_chips(self) -> int:
         enhancement_chips = 0
@@ -350,6 +360,7 @@ class PlayingCard(HasChips, HasCost):
                 and self._base_suit == value._base_suit
                 and self._edition == value._edition
                 and self._seal == value._seal
+                and self._enhancement == value.enhancement
             )
         return False
 
@@ -400,8 +411,11 @@ class Deck(HasReset):
         return delt
 
     def destroy(self, cards: Sequence[PlayingCard]) -> None:
-        """Destroyed cards are removed permanently. Though, this can only happen to cards in-play."""
+        """Destroyed cards are removed permanently."""
         for card in cards:
+            # Required since cards can get destroyed via the HangedMan tarot card
+            if card in self._cards_remaining:
+                self._cards_remaining.remove(card)
             try:
                 self._cards_played.remove(card)
             except ValueError:
