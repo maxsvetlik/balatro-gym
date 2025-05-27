@@ -43,7 +43,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
                 score joker:
                     1) take chips | scored_hand
                     2) take mult | scored_hand
-                    3) take mulitiplcation | scored_hand
+                    3) take multiplication | scored_hand
                     4) take money | scored_hand
                 update joker:
                     1) add chips | scored_hand
@@ -51,13 +51,13 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
                     3) add multiplication | scored_hand
                     4) subtract multiplication | round
     """
-    cards, hand_type = get_poker_hand(hand, board_state)
+    played_cards, hand_type = get_poker_hand(hand, board_state)
     poker_scale = board_state.get_poker_hand(hand_type).score
     chips_sum = poker_scale.chips
     mult_sum: float = poker_scale.mult
     money_sum = 0
 
-    for card in cards:
+    for card in played_cards:
         num_card_retriggers = 2 if isinstance(card.seal, RedSeal) else 1
         chips_sum += card.get_chips() * num_card_retriggers
         mult_sum += card.get_mult() * num_card_retriggers
@@ -77,9 +77,9 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             num_card_retriggers += 1 if Mime() in board_state.jokers else 0
             mult_sum *= unplayed_card.get_multiplication() * num_card_retriggers
         for joker in board_state.jokers:
-            chips_sum += joker.get_chips_hand(cards, blind_state, board_state, hand_type)
-            mult_sum += float(joker.get_mult_hand(cards, blind_state, board_state, hand_type))
-            mult_sum *= joker.get_multiplication(cards, blind_state, board_state, hand_type)
+            chips_sum += joker.get_chips_hand(played_cards, blind_state, board_state, hand_type)
+            mult_sum += float(joker.get_mult_hand(played_cards, blind_state, board_state, hand_type))
+            mult_sum *= joker.get_multiplication(played_cards, blind_state, board_state, hand_type)
             money_sum += joker.get_money(blind_state)
             # TODO update joker. E.g. num hands played influences chips
     return chips_sum * mult_sum

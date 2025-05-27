@@ -1,11 +1,13 @@
 from typing import Sequence
+from unittest.mock import Mock
 
 import pytest
 
-from balatro_gym.cards.interfaces import PlayingCard, Suit
-from balatro_gym.game.scoring import get_poker_hand
-from balatro_gym.interfaces import PokerHandType
-from test.utils import _make_board
+from balatro_gym.cards.interfaces import PlayingCard, Rank, SteelCard, Suit
+from balatro_gym.cards.joker.joker import Joker
+from balatro_gym.game.scoring import _extract_largest_set, _get_max_rank, get_poker_hand, score_hand
+from balatro_gym.interfaces import BlindState, PokerHandType
+from test.utils import _make_board, _make_card
 
 STRAIGHT_FLUSH = [PlayingCard(i, Suit.HEARTS, None, None, None) for i in range(1, 6)]
 ROYAL_FLUSH = [PlayingCard(i, Suit.HEARTS, None, None, None) for i in [13, 12, 11, 10, 1]]
@@ -86,3 +88,69 @@ HIGH_CARD = [
 def test_hand_types(hand: Sequence[PlayingCard], expected_hand_type: PokerHandType) -> None:
     _, hand_type = get_poker_hand(hand, _make_board())
     assert hand_type == expected_hand_type
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_val",
+    [
+        [[_make_card()], [(Rank.ACE, 1)]],
+        [[_make_card()] * 2, [(Rank.ACE, 2)]],
+        [[_make_card()] * 3, [(Rank.ACE, 3)]],
+        [[_make_card()] * 4, [(Rank.ACE, 4)]],
+        [[_make_card()] * 5, [(Rank.ACE, 5)]],
+        [FULL_HOUSE, [(Rank.ACE, 3), (Rank.FOUR, 2)]],
+    ],
+)
+def test_get_max_rank(hand: Sequence[PlayingCard], expected_val: tuple[Rank, int]) -> None:
+    assert _get_max_rank(hand) == expected_val
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_val",
+    [
+        [[_make_card()], [_make_card()] * 1],
+        [[_make_card()] * 2, [_make_card()] * 2],
+        [[_make_card()] * 3, [_make_card()] * 3],
+        [[_make_card()] * 4, [_make_card()] * 4],
+        [[_make_card()] * 5, [_make_card()] * 5],
+        [
+            [
+                PlayingCard(1, Suit.HEARTS, None, None, None),
+                PlayingCard(1, Suit.SPADES, None, None, None),
+                PlayingCard(1, Suit.DIAMONDS, None, None, None),
+                PlayingCard(4, Suit.SPADES, None, None, None),
+                PlayingCard(4, Suit.HEARTS, None, None, None),
+            ],
+            [
+                PlayingCard(1, Suit.HEARTS, None, None, None),
+                PlayingCard(1, Suit.SPADES, None, None, None),
+                PlayingCard(1, Suit.DIAMONDS, None, None, None),
+            ],
+        ],
+    ],
+)
+def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence[PlayingCard]) -> None:
+    assert _extract_largest_set(hand, _get_max_rank(hand)) == expected_val
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "remaining_hand,played_hand,jokers,expected",
+    [
+        [
+            [_make_card(enhancement=SteelCard())],
+            [_make_card(rank=Rank.ACE)],
+            [Joker()],
+            88,
+        ],  # Check order of multiplication
+    ],
+)
+def test_score_hand(
+    remaining_hand: Sequence[PlayingCard], played_hand: Sequence[PlayingCard], jokers: Sequence[Joker], expected: float
+) -> None:
+    board = _make_board(jokers=[Joker()])
+    blind = Mock(BlindState)
+    blind.hand = remaining_hand
+    assert score_hand(played_hand, board, blind) == expected

@@ -1,9 +1,9 @@
 from collections.abc import Sequence
 from typing import Optional
-from unittest.mock import Mock
 
 from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
 from balatro_gym.cards.joker.joker import Joker
+from balatro_gym.interfaces import BoardState
 
 
 def _make_card(
@@ -16,7 +16,7 @@ def _make_card(
     return PlayingCard(rank, suit, enhancement, edition, seal)
 
 
-def _make_board(jokers: Sequence[Joker] = []) -> Mock:
-    board = Mock()
+def _make_board(jokers: Sequence[Joker] = []) -> BoardState:
+    board = BoardState()
     board.jokers = jokers
     return board
