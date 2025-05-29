@@ -10,20 +10,20 @@ from balatro_gym.interfaces import Booster
 @pytest.mark.unit
 def test_generate_shop_state() -> None:
     shop = Shop()
-    state = shop.generate_shop_state(1)
+    state = shop.generate_shop_state(1, [])
     voucher = state.vouchers[0]
     assert isinstance(state, ShopState)
     assert all([isinstance(pack, Booster) for pack in state.booster_packs])
     assert BuffoonPack(cost=4, n_cards=2, n_choice=1) in state.booster_packs
     assert len(state.booster_packs) == shop.num_booster_packs
-    state = shop.generate_shop_state(2)
+    state = shop.generate_shop_state(2, [])
     # Make sure we use the same voucher for the entire ante
     assert state.vouchers[0] == voucher
     shop.buy_voucher(voucher)
-    state = shop.generate_shop_state(3)
+    state = shop.generate_shop_state(3, [])
     assert len(state.vouchers) == 0
     # We should have a new voucher
-    assert any([shop.generate_shop_state(4).vouchers[0] != voucher for _ in range(5)])
+    assert any([shop.generate_shop_state(4, []).vouchers[0] != voucher for _ in range(5)])
     assert len(state.buyable_cards) == 2
     assert all([isinstance(card, HasCost) for card in state.buyable_cards])
 
@@ -34,6 +34,6 @@ def test_dependent_vouchers() -> None:
     vouchers_to_buy = set([v for v in ALL_VOUCHERS if v.dependency is None])
     for v in vouchers_to_buy:
         shop.buy_voucher(v)
-    state = shop.generate_shop_state(4)
+    state = shop.generate_shop_state(4, [])
     # Verify we don't include any of the vouchers that have been bought
     assert state.vouchers[0] not in vouchers_to_buy

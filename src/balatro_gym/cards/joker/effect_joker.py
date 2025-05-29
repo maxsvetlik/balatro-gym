@@ -27,3 +27,15 @@ class Mime(JokerBase):
     @property
     def rarity(self) -> Rarity:
         return Rarity.UNCOMMON
+
+
+class Showman(JokerBase):
+    _cost: int = 5
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.EFFECT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.UNCOMMON

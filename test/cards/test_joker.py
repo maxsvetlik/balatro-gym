@@ -25,7 +25,7 @@ from balatro_gym.cards.joker.joker import (
     WrathfulJoker,
     ZanyJoker,
 )
-from balatro_gym.cards.joker.utils import sample_joker
+from balatro_gym.cards.joker.utils import sample_jokers
 from balatro_gym.cards.utils import get_flush, get_straight, is_royal
 from balatro_gym.constants import DEFAULT_NUM_JOKER_SLOTS
 from balatro_gym.interfaces import JokerBase, PokerHandType, Rarity, Type
@@ -499,7 +499,7 @@ def test_sampler_joker() -> None:
     jokers = [Joker(), HalfJoker(), JokerStencil(), FourFingers(), DeviousJoker()]
     common_count, uncommon_count, rare_count = 0, 0, 0
     for _ in range(100):
-        joker = sample_joker(jokers=jokers, vouchers=[], allow_repeat=False)
+        joker = sample_jokers(jokers=jokers, vouchers=[], n_jokers=1)[0]
         assert joker.__class__ not in [j.__class__ for j in jokers]
         if joker.rarity == Rarity.COMMON:
             common_count += 1
