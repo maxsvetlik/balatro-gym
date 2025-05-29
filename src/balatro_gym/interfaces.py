@@ -6,7 +6,7 @@ from enum import Enum, auto
 from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import BaseEdition, Deck, Edition, HasCost, PlayingCard
+from .cards.interfaces import BaseEdition, Deck, Edition, Foil, HasCost, Holographic, Negative, PlayingCard, Polychrome
 from .cards.voucher import Voucher
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_NUM_JOKER_SLOTS, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
@@ -184,14 +184,18 @@ class JokerBase(HasCost):
 
     @property
     def base_cost(self) -> int:
-        return self._cost
+        edition_cost = 0
+        if isinstance(self.edition, Foil):
+            edition_cost = 2
+        elif isinstance(self.edition, Holographic):
+            edition_cost = 3
+        elif isinstance(self.edition, Polychrome) or isinstance(self.edition, Negative):
+            edition_cost = 5
+        return self._cost + edition_cost
 
     @property
     def edition(self) -> Edition:
         return self._edition
-
-    # TODO: implement cost method that considers the edition to override the base implementation
-    # def cost(self, vouchers: Sequence[Vouchers]) -> int:
 
     @property
     def rarity(self) -> Rarity:

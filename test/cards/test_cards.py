@@ -9,16 +9,21 @@ import balatro_gym.cards.interfaces
 from balatro_gym.cards.interfaces import (
     BonusCard,
     Deck,
+    Edition,
+    Foil,
     GlassCard,
     GoldCard,
+    Holographic,
     LuckyCard,
     MultCard,
+    Negative,
+    Polychrome,
     SteelCard,
     StoneCard,
     Suit,
     WildCard,
 )
-from balatro_gym.cards.joker.joker import GreedyJoker
+from balatro_gym.cards.joker.joker import GreedyJoker, Joker
 from balatro_gym.cards.planet import Mercury, Pluto
 from balatro_gym.cards.voucher import ClearanceSale, Liquidation, Voucher
 from balatro_gym.game.scoring import get_poker_hand, score_hand
@@ -225,7 +230,7 @@ def test_sell_and_cost_value() -> None:
     joker = GreedyJoker()
 
     vouchers: Sequence[Voucher] = []
-    assert joker.cost(vouchers) == cost == joker._cost
+    assert joker.cost(vouchers) == cost == joker.base_cost
     assert joker.sell_value(vouchers) == 5 // 2
 
     vouchers = [ClearanceSale()]
@@ -237,3 +242,23 @@ def test_sell_and_cost_value() -> None:
     # 50% off
     assert joker.cost(vouchers) == 5 // 2
     assert joker.sell_value(vouchers) == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "edition,edition_cost",
+    [
+        [Foil(), 2],
+        [Holographic(), 3],
+        [Polychrome(), 5],
+        [Negative(), 5],
+    ],
+)
+def test_sell_and_cost_joker_with_edition(edition: Edition, edition_cost: int) -> None:
+    joker = Joker()
+    base_cost = joker.base_cost
+    joker.set_edition(edition)
+    assert joker.cost([]) == base_cost + edition_cost
+    assert joker.sell_value([]) == (base_cost + edition_cost) // 2
+    assert joker.cost([Liquidation()]) == (base_cost + edition_cost) // 2
+    assert joker.sell_value([Liquidation()]) == min(1, (base_cost + edition_cost) // 4)
