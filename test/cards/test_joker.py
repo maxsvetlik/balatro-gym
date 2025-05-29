@@ -20,13 +20,15 @@ from balatro_gym.cards.joker.joker import (
     LustyJoker,
     MadJoker,
     SlyJoker,
+    TheDuo,
     WilyJoker,
     WrathfulJoker,
     ZanyJoker,
 )
+from balatro_gym.cards.joker.utils import sample_joker
 from balatro_gym.cards.utils import get_flush, get_straight, is_royal
 from balatro_gym.constants import DEFAULT_NUM_JOKER_SLOTS
-from balatro_gym.interfaces import JokerBase, PokerHandType, Type
+from balatro_gym.interfaces import JokerBase, PokerHandType, Rarity, Type
 from test.utils import _make_board, _make_card
 
 
@@ -119,9 +121,7 @@ def test_gluttonous_joker(num_suit: int) -> None:
 def test_jolly_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
     j = JollyJoker()
     assert j.joker_type == Type.ADDITIVE_MULT
-    blind = Mock()
-    blind.hand = hand
-    assert j.get_mult_hand(Mock(), blind, Mock(), Mock()) == expected_score
+    assert j.get_mult_hand(hand, Mock(), Mock(), Mock()) == expected_score
 
 
 @pytest.mark.unit
@@ -158,9 +158,7 @@ def test_jolly_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
 def test_zany_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
     j = ZanyJoker()
     assert j.joker_type == Type.ADDITIVE_MULT
-    blind = Mock()
-    blind.hand = hand
-    assert j.get_mult_hand(Mock(), blind, Mock(), Mock()) == expected_score
+    assert j.get_mult_hand(hand, Mock(), Mock(), Mock()) == expected_score
 
 
 @pytest.mark.unit
@@ -457,3 +455,57 @@ def test_four_fingers(hand: Sequence[PlayingCard], expected_hand: PokerHandType)
     else:
         assert False
     assert expected_hand == poker_hand
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_score",
+    [
+        [[_make_card()], 1],
+        [[_make_card()] * 2, 2],  # Pair
+        [[_make_card()] * 3, 2],  # Three Set
+        [[_make_card()] * 4, 2],  # Four Set
+        [[_make_card()] * 5, 2],  # Flush Five Set
+        [
+            [
+                _make_card(),
+                _make_card(),
+                _make_card(rank=Rank.KING),
+                _make_card(rank=Rank.KING),
+                _make_card(rank=Rank.KING),
+            ],
+            2,  # Full House
+        ],
+        [
+            [
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS),
+                _make_card(suit=Suit.CLUBS, rank=Rank.EIGHT),
+            ],
+            2,
+        ],  # Flush
+    ],
+)
+def test_the_duo(hand: Sequence[PlayingCard], expected_score: int) -> None:
+    j = TheDuo()
+    assert j.joker_type == Type.MULTIPLICATIVE
+    assert j.get_multiplication(hand, Mock(), Mock(), Mock()) == expected_score
+
+
+@pytest.mark.unit
+def test_sampler_joker() -> None:
+    jokers = [Joker(), HalfJoker(), JokerStencil(), FourFingers(), DeviousJoker()]
+    common_count, uncommon_count, rare_count = 0, 0, 0
+    for _ in range(100):
+        joker = sample_joker(jokers=jokers, vouchers=[], allow_repeat=False)
+        assert joker.__class__ not in [j.__class__ for j in jokers]
+        if joker.rarity == Rarity.COMMON:
+            common_count += 1
+        elif joker.rarity == Rarity.UNCOMMON:
+            uncommon_count += 1
+        else:
+            rare_count += 1
+
+    assert common_count > uncommon_count > rare_count
