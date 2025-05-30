@@ -46,7 +46,7 @@ class Booster(Protocol):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[HasCost]:
+    def sample(self, jokers: Sequence[JokerBase], vouchers: Sequence[Voucher]) -> Sequence[HasCost]:
         raise NotImplementedError
 
 
@@ -136,10 +136,6 @@ class PlanetCard(HasCost):
 
 
 class Tarot(HasCost):
-    def is_valid(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        """Check if the consumable can be applied"""
-        raise NotImplementedError
-
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
         """Returns true if the card was used successfully"""
         raise NotImplementedError
@@ -175,6 +171,7 @@ class ConsumableState(HasReset):
         return False
 
 
+@dataclasses.dataclass
 class JokerBase(HasCost):
     _edition: Edition = BaseEdition()
 
@@ -247,7 +244,7 @@ class BoardState(HasReset):
     consumable: ConsumableState
     deck: Deck
     money: int
-    jokers: Sequence[JokerBase]
+    jokers: list[JokerBase]
     ante_num: int
     round_num: int
     num_hands: int
@@ -312,6 +309,10 @@ class BoardState(HasReset):
         # Needed to buy or acquire a consumable
         assert self.consumable.num_slots > len(self.consumable.consumables)
         self.consumable.consumables.append(card)
+
+    def acquire_joker(self, joker: JokerBase) -> None:
+        assert self.num_joker_slots > len(self.jokers)
+        self.jokers.append(joker)
 
     def set_money(self, amount: int) -> None:
         self.money = amount
