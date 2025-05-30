@@ -17,7 +17,8 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
-from balatro_gym.cards.joker.joker import Joker
+from balatro_gym.cards.joker.effect_joker import OopsAll6s, FourFingers
+from balatro_gym.cards.joker.joker import Joker, TheDuo
 from balatro_gym.cards.planet import Mercury
 from balatro_gym.cards.tarot import (
     Chariot,
@@ -137,6 +138,20 @@ def test_wheel_of_fortune() -> None:
         isinstance(joker.edition, Polychrome)
     )
 
+    # Two oops guarantees an edition with a WheelOfFortune
+    board_state.jokers = [OopsAll6s(), OopsAll6s()]
+    assert (isinstance(board_state.jokers[0].edition, BaseEdition) or
+            isinstance(board_state.jokers[1].edition, BaseEdition))
+    board_state.use_consumable(tarot, [])
+    assert (
+        isinstance(board_state.jokers[0].edition, Foil) or
+        isinstance(board_state.jokers[0].edition, Holographic) or
+        isinstance(board_state.jokers[0].edition, Polychrome) or
+        isinstance(board_state.jokers[1].edition, Foil) or
+        isinstance(board_state.jokers[1].edition, Holographic) or
+        isinstance(board_state.jokers[1].edition, Polychrome)
+    )
+
 
 @pytest.mark.unit
 @pytest.mark.parametrize("rank,new_rank", [
@@ -209,6 +224,12 @@ def test_temperance() -> None:
         board_state.acquire_joker(Joker())
     board_state.use_consumable(tarot, [])
     assert board_state.money == joker.sell_value(board_state.vouchers) * len(board_state.jokers)
+
+    board_state.set_money(initial_money)
+    # Sell value > 50
+    board_state.jokers = [TheDuo()] * 15
+    board_state.use_consumable(tarot, [])
+    assert board_state.money == 50
 
 
 @pytest.mark.unit

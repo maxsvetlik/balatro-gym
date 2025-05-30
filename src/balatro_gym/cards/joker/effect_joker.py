@@ -39,3 +39,15 @@ class Showman(JokerBase):
     @property
     def rarity(self) -> Rarity:
         return Rarity.UNCOMMON
+
+
+class OopsAll6s(JokerBase):
+    _cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.EFFECT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.UNCOMMON

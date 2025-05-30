@@ -18,6 +18,8 @@ from balatro_gym.cards.interfaces import (
     WildCard,
 )
 from balatro_gym.cards.joker.constants import JOKERS
+from balatro_gym.cards.joker.effect_joker import OopsAll6s
+from balatro_gym.cards.joker.utils import sample_jokers
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.interfaces import BoardState, Tarot
 
@@ -33,7 +35,7 @@ class Fool(Tarot):
 
 class Magician(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 2 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2):
             return False
         for card in selected_cards:
             card.set_enhancement(LuckyCard())
@@ -55,7 +57,7 @@ class HighPriestess(Tarot):
 
 class Empress(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 2 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2):
             return False
         for card in selected_cards:
             card.set_enhancement(MultCard())
@@ -76,7 +78,7 @@ class Emperor(Tarot):
 
 class Hierophant(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 2 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2):
             return False
         for card in selected_cards:
             card.set_enhancement(BonusCard())
@@ -85,7 +87,7 @@ class Hierophant(Tarot):
 
 class Lovers(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 1 or len(selected_cards) == 0:
+        if len(selected_cards) != 1:
             return False
         selected_cards[0].set_enhancement(WildCard())
         return True
@@ -93,7 +95,7 @@ class Lovers(Tarot):
 
 class Chariot(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 1 or len(selected_cards) == 0:
+        if len(selected_cards) != 1:
             return False
         selected_cards[0].set_enhancement(SteelCard())
         return True
@@ -101,7 +103,7 @@ class Chariot(Tarot):
 
 class Justice(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 1 or len(selected_cards) == 0:
+        if len(selected_cards) != 1:
             return False
         selected_cards[0].set_enhancement(GlassCard())
         return True
@@ -121,7 +123,9 @@ class WheelOfFortune(Tarot):
             return False
 
         prob = random.random()
-        if prob < 0.25:
+        # OopsAll6s doubles probabilities
+        n_oops = len([isinstance(j, OopsAll6s) for j in board_state.jokers]) * 2
+        if prob < 0.25 * n_oops:
             editions = [Foil(), Holographic(), Polychrome()]
             probabilities = [0.5, 0.35, 0.15]
             selected_edition = random.choices(editions, weights=probabilities, k=1)[0]
@@ -132,7 +136,7 @@ class WheelOfFortune(Tarot):
 
 class Strength(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 2 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2):
             return False
 
         for card in selected_cards:
@@ -142,7 +146,7 @@ class Strength(Tarot):
 
 class HangedMan(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 2 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2):
             return False
 
         board_state.deck.destroy(selected_cards)
@@ -166,14 +170,14 @@ class Death(Tarot):
 
 class Temperance(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        joker_sell_value = sum([joker.sell_value(board_state.vouchers) for joker in board_state.jokers])
+        joker_sell_value = min(sum([joker.sell_value(board_state.vouchers) for joker in board_state.jokers]), 50)
         board_state.set_money(board_state.money + joker_sell_value)
         return True
 
 
 class Devil(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 1 or len(selected_cards) == 0:
+        if len(selected_cards) != 1:
             return False
         selected_cards[0].set_enhancement(GoldCard())
         return True
@@ -181,7 +185,7 @@ class Devil(Tarot):
 
 class Tower(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 1 or len(selected_cards) == 0:
+        if len(selected_cards) != 1:
             return False
         selected_cards[0].set_enhancement(StoneCard())
         return True
@@ -189,7 +193,7 @@ class Tower(Tarot):
 
 class Star(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 3 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2, 3):
             return False
         for card in selected_cards:
             card.set_base_suit(Suit.DIAMONDS)
@@ -198,7 +202,7 @@ class Star(Tarot):
 
 class Moon(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 3 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2, 3):
             return False
         for card in selected_cards:
             card.set_base_suit(Suit.CLUBS)
@@ -207,7 +211,7 @@ class Moon(Tarot):
 
 class Sun(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 3 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2, 3):
             return False
         for card in selected_cards:
             card.set_base_suit(Suit.HEARTS)
@@ -220,15 +224,14 @@ class Judgement(Tarot):
         n_jokers = len(board_state.jokers)
         if num_slots <= n_jokers:
             return False
-        # TODO: Sample based on rarity
-        new_joker = random.choice(JOKERS)
-        board_state.acquire_joker(new_joker())
+        new_joker = sample_jokers(board_state.jokers, board_state.vouchers, 1)[0]
+        board_state.acquire_joker(new_joker)
         return True
 
 
 class World(Tarot):
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        if len(selected_cards) > 3 or len(selected_cards) == 0:
+        if len(selected_cards) not in (1, 2, 3):
             return False
         for card in selected_cards:
             card.set_base_suit(Suit.SPADES)
