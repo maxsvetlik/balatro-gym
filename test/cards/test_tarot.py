@@ -17,7 +17,7 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
-from balatro_gym.cards.joker.effect_joker import OopsAll6s
+from balatro_gym.cards.joker.effect_joker import OopsAll6s, Showman
 from balatro_gym.cards.joker.joker import Joker, TheDuo
 from balatro_gym.cards.planet import Mercury
 from balatro_gym.cards.tarot import (
@@ -253,7 +253,9 @@ def test_judgement() -> None:
     tarot = Judgement()
     board_state = BoardState()
     assert len(board_state.jokers) == 0
-    for i in range(board_state.num_joker_slots):
+    # Allow duplicates
+    board_state.acquire_joker(Showman())
+    for i in range(1, board_state.num_joker_slots):
         assert board_state.use_consumable(tarot, [])
         assert len(board_state.jokers) == i + 1
     assert not board_state.use_consumable(tarot, [])

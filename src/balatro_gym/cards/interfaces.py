@@ -20,7 +20,7 @@ from ..mixins import (
 )
 from .voucher import ClearanceSale, Liquidation, Voucher
 
-__all__ = ["HasCost"]
+__all__ = ["HasCost", "Edition", "Foil", "Holographic", "Polychrome", "Negative"]
 
 
 class Suit(Enum):
@@ -226,8 +226,12 @@ class PurpleSeal(Seal):
 class HasCost(Protocol):
     _cost: int = 1
 
+    @property
+    def base_cost(self) -> int:
+        return self._cost
+
     def cost(self, vouchers: Sequence[Voucher]) -> int:
-        cost: float = self._cost
+        cost: float = self.base_cost
         if any([isinstance(voucher, Liquidation) for voucher in vouchers]):
             cost -= cost * 0.5
         elif any([isinstance(voucher, ClearanceSale) for voucher in vouchers]):
@@ -235,7 +239,7 @@ class HasCost(Protocol):
         return max(int(cost), 1)
 
     def sell_value(self, vouchers: Sequence[Voucher]) -> int:
-        sell_value: float = self._cost
+        sell_value: float = self.base_cost
         if any([isinstance(voucher, Liquidation) for voucher in vouchers]):
             sell_value -= sell_value * 0.5
         elif any([isinstance(voucher, ClearanceSale) for voucher in vouchers]):
