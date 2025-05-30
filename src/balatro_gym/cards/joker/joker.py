@@ -112,7 +112,7 @@ class JollyJoker(JokerBase):
     def get_mult_hand(
         self, scored_cards: Sequence[PlayingCard], state: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        if contains_one_pair(get_max_rank(state.hand)):
+        if contains_one_pair(get_max_rank(scored_cards)):
             return 8
         return 0
 
@@ -131,7 +131,7 @@ class ZanyJoker(JokerBase):
     def get_mult_hand(
         self, scored_cards: Sequence[PlayingCard], state: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        if contains_three_set(state.hand):
+        if contains_three_set(scored_cards):
             return 12
         return 0
 
@@ -312,3 +312,20 @@ class JokerStencil(JokerBase):
         num_negative = sum([joker.edition.is_negative() for joker in board.jokers])
         num_jokers = len(board.jokers)
         return board.num_joker_slots - num_jokers + num_negative
+
+
+class TheDuo(JokerBase):
+    _cost: int = 8
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.MULTIPLICATIVE
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.RARE
+
+    def get_multiplication(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> float:
+        return 2. if contains_one_pair(get_max_rank(scored_cards)) else 1.

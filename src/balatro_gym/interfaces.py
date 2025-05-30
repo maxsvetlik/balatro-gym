@@ -46,7 +46,7 @@ class Booster(Protocol):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[HasCost]:
+    def sample(self, jokers: Sequence[JokerBase], vouchers: Sequence[Voucher]) -> Sequence[HasCost]:
         raise NotImplementedError
 
 
