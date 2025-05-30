@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from balatro_gym.cards.interfaces import PlayingCard, Rank, SteelCard, Suit
+from balatro_gym.cards.interfaces import PlayingCard, Rank, RedSeal, SteelCard, Suit, WildCard
 from balatro_gym.cards.joker.joker import Joker
 from balatro_gym.game.scoring import _extract_largest_set, _get_max_rank, get_poker_hand, score_hand
 from balatro_gym.interfaces import BlindState, PokerHandType
@@ -64,6 +64,13 @@ HIGH_CARD = [
     PlayingCard(1, Suit.HEARTS, None, None, None),
     PlayingCard(11, Suit.SPADES, None, None, None),
 ]
+WILD_FLUSH = [
+    PlayingCard(10, Suit.HEARTS, WildCard(), None, None),
+    PlayingCard(7, Suit.HEARTS, WildCard(), None, None),
+    PlayingCard(5, Suit.HEARTS, WildCard(), None, None),
+    PlayingCard(5, Suit.HEARTS, WildCard(), None, None),
+    PlayingCard(7, Suit.HEARTS, WildCard(), None, None),
+]
 
 
 @pytest.mark.unit
@@ -83,6 +90,7 @@ HIGH_CARD = [
         [TWO_PAIR, PokerHandType.TWO_PAIR],
         [PAIR, PokerHandType.PAIR],
         [HIGH_CARD, PokerHandType.HIGH_CARD],
+        [WILD_FLUSH, PokerHandType.FLUSH],
     ],
 )
 def test_hand_types(hand: Sequence[PlayingCard], expected_hand_type: PokerHandType) -> None:
@@ -144,13 +152,29 @@ def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence
             [_make_card(rank=Rank.ACE)],
             [Joker()],
             88,
-        ],  # Check order of multiplication
+        ],  # Check order of multiplication and in-hand trigger
+        # 11+5 * ((1 * 1.5) + 4)
+        [
+            [_make_card(enhancement=SteelCard(), seal=RedSeal())],
+            [_make_card(rank=Rank.ACE)],
+            [Joker()],
+            100,
+        ],  # Check order of multiplication and in-hand trigger with retrigger
+        # 11+5 * ((1 * 1.5 * 1.5) + 4)
+        [
+            [],
+            WILD_FLUSH,
+            [],
+            276,
+        ],  # Check that wild cards get processed correctly as a whole
     ],
 )
 def test_score_hand(
     remaining_hand: Sequence[PlayingCard], played_hand: Sequence[PlayingCard], jokers: Sequence[Joker], expected: float
 ) -> None:
-    board = _make_board(jokers=[Joker()])
+    # A lot of the low level scoring of cards is captured elsewhere. In order to test the scoring ordering logic
+    # test a number of hands with known scores
+    board = _make_board(jokers=jokers)
     blind = Mock(BlindState)
     blind.hand = remaining_hand
     assert score_hand(played_hand, board, blind) == expected

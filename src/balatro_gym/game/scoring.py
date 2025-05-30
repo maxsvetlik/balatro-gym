@@ -67,15 +67,16 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
         if card.enhancement and card.enhancement.is_destroyed():  # TODO See #25. This should be influenced by jokers
             board_state.deck.destroy([card])
 
+        for unplayed_card in blind_state.hand:
+            num_card_retriggers = 2 if isinstance(unplayed_card.seal, RedSeal) else 1
+            num_card_retriggers += 1 if Mime() in board_state.jokers else 0
+            mult_sum *= unplayed_card.get_multiplication() ** num_card_retriggers
         for joker in board_state.jokers:
             # TODO track retriggers on jokers
             chips, mult = _process_joker_card(joker, card, hand_type, board_state, blind_state)
             chips_sum += chips
             mult_sum += mult
-        for unplayed_card in blind_state.hand:
-            num_card_retriggers = 2 if isinstance(unplayed_card.seal, RedSeal) else 1
-            num_card_retriggers += 1 if Mime() in board_state.jokers else 0
-            mult_sum *= unplayed_card.get_multiplication() * num_card_retriggers
+
         for joker in board_state.jokers:
             chips_sum += joker.get_chips_hand(played_cards, blind_state, board_state, hand_type)
             mult_sum += float(joker.get_mult_hand(played_cards, blind_state, board_state, hand_type))
@@ -107,6 +108,8 @@ def _is_full_house(counts: Sequence[tuple[Rank, int]]) -> bool:
 
 
 def _extract_largest_set(hand: Sequence[PlayingCard], counts: Sequence[tuple[Rank, int]]) -> Sequence[PlayingCard]:
+    if len(counts) == 0:
+        return []
     mc_rank, mc_count = counts[0]
     return [card for card in hand if card.rank == mc_rank]
 
