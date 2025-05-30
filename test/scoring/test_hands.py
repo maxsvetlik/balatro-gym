@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from balatro_gym.cards.interfaces import PlayingCard, Rank, RedSeal, SteelCard, Suit, WildCard
-from balatro_gym.cards.joker.joker import Joker
+from balatro_gym.cards.joker.joker import Joker, JollyJoker
 from balatro_gym.game.scoring import _extract_largest_set, _get_max_rank, get_poker_hand, score_hand
 from balatro_gym.interfaces import BlindState, PokerHandType
 from test.utils import _make_board, _make_card
@@ -167,6 +167,13 @@ def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence
             [],
             276,
         ],  # Check that wild cards get processed correctly as a whole
+        [
+            [],
+            [_make_card(rank=Rank.ACE), _make_card(rank=Rank.ACE)],
+            [JollyJoker()],
+            320,
+        ],  # Check order of multiplication for scored-hand based jokers
+        # 2,10 = 11 + 11 + 10 * (10+8)
     ],
 )
 def test_score_hand(

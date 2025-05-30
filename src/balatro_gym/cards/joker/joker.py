@@ -112,7 +112,7 @@ class JollyJoker(JokerBase):
     def get_mult_hand(
         self, scored_cards: Sequence[PlayingCard], state: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        if contains_one_pair(get_max_rank(state.hand)):
+        if contains_one_pair(get_max_rank(scored_cards)):
             return 8
         return 0
 
@@ -131,7 +131,7 @@ class ZanyJoker(JokerBase):
     def get_mult_hand(
         self, scored_cards: Sequence[PlayingCard], state: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        if contains_three_set(state.hand):
+        if contains_three_set(scored_cards):
             return 12
         return 0
 
@@ -150,7 +150,7 @@ class MadJoker(JokerBase):
     def get_mult_hand(
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        if contains_two_pair(get_max_rank(blind.hand)):
+        if contains_two_pair(get_max_rank(scored_cards)):
             return 10
         return 0
 
