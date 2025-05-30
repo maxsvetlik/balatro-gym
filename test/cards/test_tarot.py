@@ -17,7 +17,7 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
-from balatro_gym.cards.joker.effect_joker import OopsAll6s, FourFingers
+from balatro_gym.cards.joker.effect_joker import OopsAll6s
 from balatro_gym.cards.joker.joker import Joker, TheDuo
 from balatro_gym.cards.planet import Mercury
 from balatro_gym.cards.tarot import (

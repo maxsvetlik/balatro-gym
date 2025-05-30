@@ -17,7 +17,6 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
-from balatro_gym.cards.joker.constants import JOKERS
 from balatro_gym.cards.joker.effect_joker import OopsAll6s
 from balatro_gym.cards.joker.utils import sample_jokers
 from balatro_gym.cards.planet import PLANET_CARDS
