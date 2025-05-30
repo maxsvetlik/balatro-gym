@@ -123,7 +123,7 @@ class Run:
             else:
                 return None
         elif action.action_type == BoardAction.VIEW_SHOP:
-            self._shop_state = self._shop.generate_shop_state(self._board_state.round_num)
+            self._shop_state = self._shop.generate_shop_state(self._board_state.round_num, self._board_state.jokers)
             self._game_state = GameState.IN_SHOP
         elif action.action_type == BoardAction.NEXT_ROUND:
             self._game_state = GameState.IN_BLIND_SELECT
