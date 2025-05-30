@@ -28,6 +28,7 @@ JOKERS: Mapping[Rarity, Sequence[type[JokerBase]]] = {
         joker.JokerStencil,
         ejoker.FourFingers,
         ejoker.Mime,
+        ejoker.OopsAll6s,
     ],
     Rarity.RARE: [
         joker.TheDuo,
