@@ -71,6 +71,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             num_card_retriggers = 2 if isinstance(unplayed_card.seal, RedSeal) else 1
             num_card_retriggers += 1 if Mime() in board_state.jokers else 0
             mult_sum *= unplayed_card.get_multiplication() ** num_card_retriggers
+
         for joker in board_state.jokers:
             # TODO track retriggers on jokers
             chips, mult = _process_joker_card(joker, card, hand_type, board_state, blind_state)
@@ -78,11 +79,15 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             mult_sum += mult
 
     for joker in board_state.jokers:
-        print(float(joker.get_mult_hand(played_cards, blind_state, board_state, hand_type)))
         chips_sum += joker.get_chips_hand(played_cards, blind_state, board_state, hand_type)
         mult_sum += float(joker.get_mult_hand(played_cards, blind_state, board_state, hand_type))
         mult_sum *= joker.get_multiplication(played_cards, blind_state, board_state, hand_type)
         money_sum += joker.get_money(blind_state)
+
+        # Handle Edition, if any
+        mult_sum += joker.edition.get_mult()
+        chips_sum += joker.edition.get_chips()
+        mult_sum *= joker.edition.get_multiplication()
         # TODO update joker. E.g. num hands played influences chips
     return chips_sum * mult_sum
 

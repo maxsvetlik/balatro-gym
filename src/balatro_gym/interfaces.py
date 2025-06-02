@@ -176,7 +176,11 @@ class ConsumableState(HasReset):
 
 
 class JokerBase(HasCost):
-    _edition: Edition = BaseEdition()
+    _edition: Edition
+
+    def __init__(self, edition: Edition = BaseEdition()):
+        # This isn't strictly necessary, but is useful for testing
+        self._edition = edition
 
     @property
     def joker_type(self) -> Type:
