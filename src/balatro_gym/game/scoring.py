@@ -59,12 +59,13 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
 
     for card in played_cards:
         num_card_retriggers = 2 if isinstance(card.seal, RedSeal) else 1
-        chips_sum += card.get_chips() * num_card_retriggers
-        mult_sum += card.get_mult() * num_card_retriggers
-        mult_sum *= card.get_multiplication() * num_card_retriggers
+        for _ in range(num_card_retriggers):
+            chips_sum += card.get_chips() + card.edition.get_chips()
+            mult_sum += card.get_mult() + card.edition.get_mult()
+            mult_sum *= card.get_multiplication() ** card.get_multiplication()
         if isinstance(card.enhancement, LuckyCard):
             money_sum += card.enhancement.get_scored_money()  # TODO See #25. this should be influenced by jokers
-        if card.enhancement and card.enhancement.is_destroyed():  # TODO See #25. This should be influenced by jokers
+        if card.enhancement.is_destroyed():  # TODO See #25. This should be influenced by jokers
             board_state.deck.destroy([card])
 
         for unplayed_card in blind_state.hand:
@@ -80,7 +81,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
 
     for joker in board_state.jokers:
         chips_sum += joker.get_chips_hand(played_cards, blind_state, board_state, hand_type)
-        mult_sum += float(joker.get_mult_hand(played_cards, blind_state, board_state, hand_type))
+        mult_sum += joker.get_mult_hand(played_cards, blind_state, board_state, hand_type)
         mult_sum *= joker.get_multiplication(played_cards, blind_state, board_state, hand_type)
         money_sum += joker.get_money(blind_state)
 

@@ -200,10 +200,10 @@ def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence
             276,
         ],
         [
-            [],
+            [_make_card(enhancement=SteelCard())],
             [_make_card(rank=Rank.ACE, enhancement=MultCard(), edition=Holographic())],
             [Joker(edition=Polychrome())],
-            455,
+            636,
         ],
     ],
 )
