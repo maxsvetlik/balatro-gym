@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from balatro_gym.cards.interfaces import (
+    Holographic,
     MultCard,
     PlayingCard,
     Polychrome,
@@ -18,67 +19,67 @@ from balatro_gym.game.scoring import _extract_largest_set, _get_max_rank, get_po
 from balatro_gym.interfaces import BlindState, PokerHandType
 from test.utils import _make_board, _make_card
 
-STRAIGHT_FLUSH = [PlayingCard(i, Suit.HEARTS, None, None, None) for i in range(1, 6)]
-ROYAL_FLUSH = [PlayingCard(i, Suit.HEARTS, None, None, None) for i in [13, 12, 11, 10, 1]]
-FLUSH_FIVE = [PlayingCard(10, Suit.HEARTS, None, None, None) for _ in range(5)]
-FLUSH = [PlayingCard(i, Suit.SPADES, None, None, None) for i in [2, 5, 7, 11, 13]]
-FLUSH_HOUSE = [PlayingCard(1, Suit.SPADES, None, None, None)] * 2 + [PlayingCard(5, Suit.SPADES, None, None, None)] * 3
+STRAIGHT_FLUSH = [PlayingCard(i, Suit.HEARTS) for i in range(1, 6)]
+ROYAL_FLUSH = [PlayingCard(i, Suit.HEARTS) for i in [13, 12, 11, 10, 1]]
+FLUSH_FIVE = [PlayingCard(10, Suit.HEARTS) for _ in range(5)]
+FLUSH = [PlayingCard(i, Suit.SPADES) for i in [2, 5, 7, 11, 13]]
+FLUSH_HOUSE = [PlayingCard(1, Suit.SPADES)] * 2 + [PlayingCard(5, Suit.SPADES)] * 3
 STRAIGHT = [
-    PlayingCard(1, Suit.HEARTS, None, None, None),
-    PlayingCard(2, Suit.SPADES, None, None, None),
-    PlayingCard(3, Suit.DIAMONDS, None, None, None),
-    PlayingCard(4, Suit.SPADES, None, None, None),
-    PlayingCard(5, Suit.HEARTS, None, None, None),
+    PlayingCard(1, Suit.HEARTS),
+    PlayingCard(2, Suit.SPADES),
+    PlayingCard(3, Suit.DIAMONDS),
+    PlayingCard(4, Suit.SPADES),
+    PlayingCard(5, Suit.HEARTS),
 ]
 FIVE_SET = [
-    PlayingCard(1, Suit.HEARTS, None, None, None),
-    PlayingCard(1, Suit.SPADES, None, None, None),
-    PlayingCard(1, Suit.DIAMONDS, None, None, None),
-    PlayingCard(1, Suit.SPADES, None, None, None),
-    PlayingCard(1, Suit.HEARTS, None, None, None),
+    PlayingCard(1, Suit.HEARTS),
+    PlayingCard(1, Suit.SPADES),
+    PlayingCard(1, Suit.DIAMONDS),
+    PlayingCard(1, Suit.SPADES),
+    PlayingCard(1, Suit.HEARTS),
 ]
 FULL_HOUSE = [
-    PlayingCard(1, Suit.HEARTS, None, None, None),
-    PlayingCard(1, Suit.SPADES, None, None, None),
-    PlayingCard(1, Suit.DIAMONDS, None, None, None),
-    PlayingCard(4, Suit.SPADES, None, None, None),
-    PlayingCard(4, Suit.HEARTS, None, None, None),
+    PlayingCard(1, Suit.HEARTS),
+    PlayingCard(1, Suit.SPADES),
+    PlayingCard(1, Suit.DIAMONDS),
+    PlayingCard(4, Suit.SPADES),
+    PlayingCard(4, Suit.HEARTS),
 ]
 FOUR_SET = [
-    PlayingCard(2, Suit.HEARTS, None, None, None),
-    PlayingCard(2, Suit.SPADES, None, None, None),
-    PlayingCard(2, Suit.DIAMONDS, None, None, None),
-    PlayingCard(2, Suit.SPADES, None, None, None),
+    PlayingCard(2, Suit.HEARTS),
+    PlayingCard(2, Suit.SPADES),
+    PlayingCard(2, Suit.DIAMONDS),
+    PlayingCard(2, Suit.SPADES),
 ]
 THREE_SET = [
-    PlayingCard(2, Suit.HEARTS, None, None, None),
-    PlayingCard(2, Suit.SPADES, None, None, None),
-    PlayingCard(2, Suit.DIAMONDS, None, None, None),
+    PlayingCard(2, Suit.HEARTS),
+    PlayingCard(2, Suit.SPADES),
+    PlayingCard(2, Suit.DIAMONDS),
 ]
 TWO_PAIR = [
-    PlayingCard(2, Suit.HEARTS, None, None, None),
-    PlayingCard(2, Suit.SPADES, None, None, None),
-    PlayingCard(5, Suit.DIAMONDS, None, None, None),
-    PlayingCard(5, Suit.SPADES, None, None, None),
-    PlayingCard(6, Suit.HEARTS, None, None, None),
+    PlayingCard(2, Suit.HEARTS),
+    PlayingCard(2, Suit.SPADES),
+    PlayingCard(5, Suit.DIAMONDS),
+    PlayingCard(5, Suit.SPADES),
+    PlayingCard(6, Suit.HEARTS),
 ]
 PAIR = [
-    PlayingCard(2, Suit.HEARTS, None, None, None),
-    PlayingCard(2, Suit.SPADES, None, None, None),
-    PlayingCard(5, Suit.DIAMONDS, None, None, None),
-    PlayingCard(11, Suit.SPADES, None, None, None),
-    PlayingCard(6, Suit.HEARTS, None, None, None),
+    PlayingCard(2, Suit.HEARTS),
+    PlayingCard(2, Suit.SPADES),
+    PlayingCard(5, Suit.DIAMONDS),
+    PlayingCard(11, Suit.SPADES),
+    PlayingCard(6, Suit.HEARTS),
 ]
 HIGH_CARD = [
-    PlayingCard(1, Suit.HEARTS, None, None, None),
-    PlayingCard(11, Suit.SPADES, None, None, None),
+    PlayingCard(1, Suit.HEARTS),
+    PlayingCard(11, Suit.SPADES),
 ]
 WILD_FLUSH = [
-    PlayingCard(10, Suit.HEARTS, WildCard(), None, None),
-    PlayingCard(7, Suit.HEARTS, WildCard(), None, None),
-    PlayingCard(5, Suit.HEARTS, WildCard(), None, None),
-    PlayingCard(5, Suit.HEARTS, WildCard(), None, None),
-    PlayingCard(7, Suit.HEARTS, WildCard(), None, None),
+    PlayingCard(10, Suit.HEARTS, WildCard()),
+    PlayingCard(7, Suit.HEARTS, WildCard()),
+    PlayingCard(5, Suit.HEARTS, WildCard()),
+    PlayingCard(5, Suit.HEARTS, WildCard()),
+    PlayingCard(7, Suit.HEARTS, WildCard()),
 ]
 
 
@@ -134,16 +135,16 @@ def test_get_max_rank(hand: Sequence[PlayingCard], expected_val: tuple[Rank, int
         [[_make_card()] * 5, [_make_card()] * 5],
         [
             [
-                PlayingCard(1, Suit.HEARTS, None, None, None),
-                PlayingCard(1, Suit.SPADES, None, None, None),
-                PlayingCard(1, Suit.DIAMONDS, None, None, None),
-                PlayingCard(4, Suit.SPADES, None, None, None),
-                PlayingCard(4, Suit.HEARTS, None, None, None),
+                PlayingCard(1, Suit.HEARTS),
+                PlayingCard(1, Suit.SPADES),
+                PlayingCard(1, Suit.DIAMONDS),
+                PlayingCard(4, Suit.SPADES),
+                PlayingCard(4, Suit.HEARTS),
             ],
             [
-                PlayingCard(1, Suit.HEARTS, None, None, None),
-                PlayingCard(1, Suit.SPADES, None, None, None),
-                PlayingCard(1, Suit.DIAMONDS, None, None, None),
+                PlayingCard(1, Suit.HEARTS),
+                PlayingCard(1, Suit.SPADES),
+                PlayingCard(1, Suit.DIAMONDS),
             ],
         ],
     ],
@@ -197,6 +198,12 @@ def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence
             [_make_card(rank=Rank.ACE, enhancement=MultCard())],
             [Joker(edition=Polychrome())],
             276,
+        ],
+        [
+            [],
+            [_make_card(rank=Rank.ACE, enhancement=MultCard(), edition=Holographic())],
+            [Joker(edition=Polychrome())],
+            455,
         ],
     ],
 )

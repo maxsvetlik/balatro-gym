@@ -1,7 +1,16 @@
 from collections.abc import Sequence
-from typing import Optional
 
-from balatro_gym.cards.interfaces import Edition, Enhancement, PlayingCard, Rank, Seal, Suit
+from balatro_gym.cards.interfaces import (
+    BaseEdition,
+    BaseEnhancement,
+    BaseSeal,
+    Edition,
+    Enhancement,
+    PlayingCard,
+    Rank,
+    Seal,
+    Suit,
+)
 from balatro_gym.cards.joker.joker import Joker
 from balatro_gym.interfaces import BoardState
 
@@ -9,9 +18,9 @@ from balatro_gym.interfaces import BoardState
 def _make_card(
     rank: Rank = Rank.ACE,
     suit: Suit = Suit.HEARTS,
-    enhancement: Optional[Enhancement] = None,
-    edition: Optional[Edition] = None,
-    seal: Optional[Seal] = None,
+    enhancement: Enhancement = BaseEnhancement(),
+    edition: Edition = BaseEdition(),
+    seal: Seal = BaseSeal(),
 ) -> PlayingCard:
     return PlayingCard(rank, suit, enhancement, edition, seal)
 

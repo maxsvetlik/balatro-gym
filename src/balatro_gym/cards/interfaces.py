@@ -3,7 +3,7 @@ import random
 from collections import deque
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol, Union, runtime_checkable
+from typing import Any, Protocol, Union, runtime_checkable
 
 import numpy as np
 
@@ -127,6 +127,10 @@ class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, HasIsDestroyed, Pr
         return self.__class__.__name__ == other.__class__.__name__
 
 
+class BaseEnhancement(Enhancement):
+    pass
+
+
 class BonusCard(Enhancement):
     def get_chips(self) -> int:
         return 50
@@ -199,6 +203,11 @@ class Seal(HasMoney, HasRetrigger, HasCreatePlanet, HasCreateTarot):
     pass
 
 
+class BaseSeal(Seal):
+    # Added for parity with other "Base" types
+    pass
+
+
 class GoldSeal(Seal):
     def get_scored_money(self, probability_modifier: int = 1) -> int:
         return 3
@@ -246,9 +255,9 @@ class HasCost(Protocol):
 class PlayingCard(HasChips, HasCost):
     _rank: Rank
     _base_suit: Suit
-    _enhancement: Optional[Enhancement]
-    _edition: Optional[Edition]
-    _seal: Optional[Seal]
+    _enhancement: Enhancement
+    _edition: Edition
+    _seal: Seal
     _base_chips: int
     _added_chips: int
 
@@ -256,9 +265,9 @@ class PlayingCard(HasChips, HasCost):
         self,
         rank: Union[Rank, int],
         base_suit: Suit,
-        enhancement: Optional[Enhancement],
-        edition: Optional[Edition],
-        seal: Optional[Seal],
+        enhancement: Enhancement = BaseEnhancement(),
+        edition: Edition = BaseEdition(),
+        seal: Seal = BaseSeal(),
     ):
         self._rank = rank if isinstance(rank, Rank) else Rank.from_int(rank)
         self._base_suit = base_suit
@@ -283,15 +292,15 @@ class PlayingCard(HasChips, HasCost):
         return [self._base_suit]
 
     @property
-    def enhancement(self) -> Optional[Enhancement]:
+    def enhancement(self) -> Enhancement:
         return self._enhancement
 
     @property
-    def edition(self) -> Optional[Edition]:
+    def edition(self) -> Edition:
         return self._edition
 
     @property
-    def seal(self) -> Optional[Seal]:
+    def seal(self) -> Seal:
         return self._seal
 
     def get_chips(self) -> int:
@@ -322,13 +331,13 @@ class PlayingCard(HasChips, HasCost):
             return self.enhancement.get_end_money()
         return 0
 
-    def set_enhancement(self, enhancement: Optional[Enhancement]) -> None:
+    def set_enhancement(self, enhancement: Enhancement) -> None:
         self._enhancement = enhancement
 
-    def set_edition(self, edition: Optional[Edition]) -> None:
+    def set_edition(self, edition: Edition) -> None:
         self._edition = edition
 
-    def set_seal(self, seal: Optional[Seal]) -> None:
+    def set_seal(self, seal: Seal) -> None:
         self._seal = seal
 
     def add_chips(self, num_chips: int) -> None:
