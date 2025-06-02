@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from balatro_gym.cards.interfaces import (
+    GlassCard,
     Holographic,
     MultCard,
     PlayingCard,
@@ -218,6 +219,12 @@ def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence
             [],
             144,
         ],  # Check scoring of stone in a scored hand
+        [
+            [],
+            [_make_card(rank=Rank.SIX, enhancement=GlassCard()), _make_card(rank=Rank.SIX, enhancement=GlassCard())],
+            [],
+            176,
+        ],  # Check scoring of glass card
     ],
 )
 def test_score_hand(
