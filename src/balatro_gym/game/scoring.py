@@ -1,7 +1,7 @@
 from collections import Counter
 from typing import Sequence
 
-from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
+from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal, StoneCard
 from balatro_gym.cards.joker.effect_joker import Mime
 from balatro_gym.cards.utils import contains_two_pair, get_flush, get_straight, is_royal
 from balatro_gym.interfaces import BlindState, BoardState, JokerBase, PokerHandType
@@ -133,34 +133,42 @@ def get_poker_hand(hand: Sequence[PlayingCard], board: BoardState) -> tuple[Sequ
     is_two_pair = contains_two_pair(counts)
     is_royal_res = is_royal(hand, board)
     max_set = _extract_largest_set(hand, counts)
-
+    # Though not used in hands, stone cards should still be included in a played hand
+    base_hand: list[PlayingCard] = []
+    for card in hand:
+        if card.enhancement == StoneCard():
+            base_hand.append(card)
     if is_royal_res and flush and straight:
-        return hand, PokerHandType.ROYAL_FLUSH
+        return [*base_hand, *hand], PokerHandType.ROYAL_FLUSH
     elif flush and straight:
-        return hand, PokerHandType.STRAIGHT_FLUSH
+        return [*base_hand, *hand], PokerHandType.STRAIGHT_FLUSH
     elif flush and is_full:
-        return hand, PokerHandType.FLUSH_HOUSE
+        return [*base_hand, *hand], PokerHandType.FLUSH_HOUSE
     elif flush and len(max_set) == 5:
-        return hand, PokerHandType.FLUSH_FIVE
+        return [*base_hand, *hand], PokerHandType.FLUSH_FIVE
     elif straight:
-        return hand, PokerHandType.STRAIGHT
+        return [*base_hand, *hand], PokerHandType.STRAIGHT
     elif flush:
-        return hand, PokerHandType.FLUSH
+        return [*base_hand, *hand], PokerHandType.FLUSH
     elif len(max_set) == 5:
         return max_set, PokerHandType.FIVE_SET
     elif len(max_set) == 4:
-        return max_set, PokerHandType.FOUR_SET
+        return [*base_hand, *max_set], PokerHandType.FOUR_SET
     elif is_full:
         return hand, PokerHandType.FULL_HOUSE
     elif len(max_set) == 3:
-        return max_set, PokerHandType.THREE_SET
+        return [*base_hand, *max_set], PokerHandType.THREE_SET
     elif is_two_pair:
         if len(counts) == 1:
-            return [card for card in hand if card.rank in set([counts[0][0]])], PokerHandType.TWO_PAIR
+            return [*base_hand, *[card for card in hand if card.rank in set([counts[0][0]])]], PokerHandType.TWO_PAIR
         else:
-            return [card for card in hand if card.rank in set([counts[0][0], counts[1][0]])], PokerHandType.TWO_PAIR
+            return [
+                *base_hand,
+                *[card for card in hand if card.rank in set([counts[0][0], counts[1][0]])],
+            ], PokerHandType.TWO_PAIR
 
     elif len(max_set) == 2:
-        return max_set, PokerHandType.PAIR
+        return [*base_hand, *max_set], PokerHandType.PAIR
     else:
+        # N.B. stone card would already be included here, so don't extend `base_hand`
         return max_set, PokerHandType.HIGH_CARD

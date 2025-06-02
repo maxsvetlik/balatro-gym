@@ -11,6 +11,7 @@ from balatro_gym.cards.interfaces import (
     Rank,
     RedSeal,
     SteelCard,
+    StoneCard,
     Suit,
     WildCard,
 )
@@ -192,19 +193,31 @@ def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence
             [_make_card(rank=Rank.ACE, enhancement=MultCard())],
             [Joker()],
             184,
-        ],
+        ],  # Check order of joker and in-hand triggers
         [
             [_make_card(enhancement=SteelCard())],
             [_make_card(rank=Rank.ACE, enhancement=MultCard())],
             [Joker(edition=Polychrome())],
             276,
-        ],
+        ],  # Check order of joker effects, in-hand triggers and joker editions
         [
             [_make_card(enhancement=SteelCard())],
             [_make_card(rank=Rank.ACE, enhancement=MultCard(), edition=Holographic())],
             [Joker(edition=Polychrome())],
             636,
-        ],
+        ],  # Check order of joker effects, in-hand triggers, joker editions and playing card editions
+        [
+            [],
+            [_make_card(enhancement=StoneCard())],
+            [],
+            55,
+        ],  # Check scoring of stone
+        [
+            [],
+            [_make_card(enhancement=StoneCard()), _make_card(rank=Rank.SIX), _make_card(rank=Rank.SIX)],
+            [],
+            144,
+        ],  # Check scoring of stone in a scored hand
     ],
 )
 def test_score_hand(
