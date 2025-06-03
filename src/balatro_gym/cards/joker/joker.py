@@ -9,10 +9,10 @@ from balatro_gym.cards.utils import (
     get_max_rank,
     get_straight,
 )
-from .effect_joker import Pareidolia
 
 from ...interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
 from ..interfaces import PlayingCard, Rank, SteelCard, Suit
+from .effect_joker import Pareidolia
 
 
 class Joker(JokerBase):

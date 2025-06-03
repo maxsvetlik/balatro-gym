@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from balatro_gym.cards.interfaces import PlayingCard, Rank, Suit
-from balatro_gym.cards.joker.effect_joker import FourFingers, ChaosTheClown
+from balatro_gym.cards.joker.effect_joker import ChaosTheClown, FourFingers
 from balatro_gym.cards.joker.joker import (
     CleverJoker,
     CraftyJoker,
