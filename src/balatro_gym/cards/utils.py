@@ -39,6 +39,8 @@ def get_straight(hand: Sequence[PlayingCard], board: BoardState) -> Sequence[Pla
 
 
 def is_consecutive(ordered_ranks: Sequence[int]) -> bool:
+    if len(ordered_ranks) == 0:
+        return False
     prev_rank = ordered_ranks[0]
     for rank in ordered_ranks[1:]:
         if not (rank == prev_rank + 1):

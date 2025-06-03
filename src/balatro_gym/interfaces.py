@@ -74,7 +74,7 @@ class Type(Enum):
 
 @dataclasses.dataclass(frozen=True)
 class PokerScale:
-    mult: int
+    mult: float
     chips: int
     delta_mult: int
     delta_chips: int
@@ -173,7 +173,11 @@ class ConsumableState(HasReset):
 
 @dataclasses.dataclass
 class JokerBase(HasCost):
-    _edition: Edition = BaseEdition()
+    _edition: Edition
+
+    def __init__(self, edition: Edition = BaseEdition()):
+        # This isn't strictly necessary, but is useful for testing
+        self._edition = edition
 
     @property
     def joker_type(self) -> Type:
@@ -205,18 +209,18 @@ class JokerBase(HasCost):
         """The money earned by the player from selling this Joker."""
         return 0
 
-    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
+    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> float:
         """Get any additional mult value of a given card based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
-        return 0
+        return 0.0
 
     def get_mult_hand(
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
-    ) -> int:
+    ) -> float:
         """Get any additional mult value of a given hand based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
 
-        return 0
+        return 0.0
 
     def get_multiplication(
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType

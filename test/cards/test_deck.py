@@ -3,7 +3,7 @@ import pytest
 from balatro_gym.cards.decks import STANDARD_DECK
 from balatro_gym.cards.interfaces import Deck, PlayingCard, Rank, Suit
 
-ACE_HEART = PlayingCard(Rank.ACE, Suit.HEARTS, None, None, None)
+ACE_HEART = PlayingCard(Rank.ACE, Suit.HEARTS)
 
 
 @pytest.mark.unit

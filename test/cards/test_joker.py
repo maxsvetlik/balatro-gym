@@ -205,8 +205,7 @@ def test_mad_joker(hand: Sequence[PlayingCard], expected_score: int) -> None:
     j = MadJoker()
     assert j.joker_type == Type.ADDITIVE_MULT
     blind = Mock()
-    blind.hand = hand
-    assert j.get_mult_hand(Mock(), blind, Mock(), Mock()) == expected_score
+    assert j.get_mult_hand(hand, blind, Mock(), Mock()) == expected_score
 
 
 @pytest.mark.unit
