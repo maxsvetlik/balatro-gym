@@ -1,5 +1,3 @@
-from collections.abc import Sequence
-
 from balatro_gym.cards.interfaces import (
     BaseEdition,
     BaseEnhancement,
@@ -11,8 +9,7 @@ from balatro_gym.cards.interfaces import (
     Seal,
     Suit,
 )
-from balatro_gym.cards.joker.joker import Joker
-from balatro_gym.interfaces import BoardState
+from balatro_gym.interfaces import BoardState, JokerBase
 
 
 def _make_card(
@@ -25,7 +22,7 @@ def _make_card(
     return PlayingCard(rank, suit, enhancement, edition, seal)
 
 
-def _make_board(jokers: Sequence[Joker] = []) -> BoardState:
+def _make_board(jokers: list[JokerBase] = []) -> BoardState:
     board = BoardState()
     board.jokers = jokers
     return board

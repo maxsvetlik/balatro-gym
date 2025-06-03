@@ -312,3 +312,20 @@ class JokerStencil(JokerBase):
         num_negative = sum([joker.edition.is_negative() for joker in board.jokers])
         num_jokers = len(board.jokers)
         return board.num_joker_slots - num_jokers + num_negative
+
+
+class TheDuo(JokerBase):
+    _cost: int = 8
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.MULTIPLICATIVE
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.RARE
+
+    def get_multiplication(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> float:
+        return 2. if contains_one_pair(get_max_rank(scored_cards)) else 1.

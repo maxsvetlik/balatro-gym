@@ -5,11 +5,13 @@ from typing import NamedTuple, Sequence
 
 from balatro_gym.cards.decks import STANDARD_DECK
 from balatro_gym.cards.interfaces import HasCost
-from balatro_gym.cards.joker.constants import JOKERS
+from balatro_gym.cards.joker.effect_joker import Showman
+from balatro_gym.cards.joker.utils import sample_jokers
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.cards.spectral import SPECTRAL_CARDS
 from balatro_gym.cards.tarot import TAROT_CARDS
-from balatro_gym.interfaces import Booster
+from balatro_gym.cards.voucher import Voucher
+from balatro_gym.interfaces import Booster, JokerBase
 
 __all__ = ["StandardPack", "ArcanaPack", "CelestialPack", "BuffoonPack", "SpectralPack"]
 
@@ -46,7 +48,7 @@ class StandardPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[HasCost]:
+    def sample(self, jokers: Sequence[JokerBase], vouchers: Sequence[Voucher]) -> Sequence[HasCost]:
         # TODO: add enhancements
         return random.sample(STANDARD_DECK, self.n_cards)
 
@@ -57,8 +59,12 @@ class ArcanaPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[HasCost]:
-        return [card() for card in random.sample(TAROT_CARDS, self.n_cards)]
+    def sample(self, jokers: Sequence[JokerBase], vouchers: Sequence[Voucher]) -> Sequence[HasCost]:
+        allow_repeat = any([isinstance(j, Showman) for j in jokers])
+        if allow_repeat:
+            return [card() for card in random.choices(TAROT_CARDS, k=self.n_cards)]
+        else:
+            return [card() for card in random.sample(TAROT_CARDS, self.n_cards)]
 
 
 @dataclasses.dataclass
@@ -67,8 +73,12 @@ class CelestialPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[HasCost]:
-        return [card() for card in random.sample(PLANET_CARDS, self.n_cards)]
+    def sample(self, jokers: Sequence[JokerBase], vouchers: Sequence[Voucher]) -> Sequence[HasCost]:
+        allow_repeat = any([isinstance(j, Showman) for j in jokers])
+        if allow_repeat:
+            return [card() for card in random.choices(PLANET_CARDS, k=self.n_cards)]
+        else:
+            return [card() for card in random.sample(PLANET_CARDS, self.n_cards)]
 
 
 @dataclasses.dataclass
@@ -77,9 +87,8 @@ class BuffoonPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[HasCost]:
-        # TODO: add enhancements and consider joker rarity
-        return [card() for card in random.sample(JOKERS, self.n_cards)]
+    def sample(self, jokers: Sequence[JokerBase], vouchers: Sequence[Voucher]) -> Sequence[HasCost]:
+        return sample_jokers(jokers, vouchers, self.n_cards)
 
 
 @dataclasses.dataclass
@@ -88,8 +97,12 @@ class SpectralPack(Booster):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[HasCost]:
-        return [card() for card in random.sample(SPECTRAL_CARDS, self.n_cards)]
+    def sample(self, jokers: Sequence[JokerBase], vouchers: Sequence[Voucher]) -> Sequence[HasCost]:
+        allow_repeat = any([isinstance(j, Showman) for j in jokers])
+        if allow_repeat:
+            return [card() for card in random.choices(SPECTRAL_CARDS, k=self.n_cards)]
+        else:
+            return [card() for card in random.sample(SPECTRAL_CARDS, self.n_cards)]
 
 
 class BoosterType(enum.Enum):

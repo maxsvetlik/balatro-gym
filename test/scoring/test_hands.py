@@ -18,7 +18,7 @@ from balatro_gym.cards.interfaces import (
 )
 from balatro_gym.cards.joker.joker import Joker, JollyJoker
 from balatro_gym.game.scoring import _extract_largest_set, _get_max_rank, get_poker_hand, score_hand
-from balatro_gym.interfaces import BlindState, PokerHandType
+from balatro_gym.interfaces import BlindState, JokerBase, PokerHandType
 from test.utils import _make_board, _make_card
 
 STRAIGHT_FLUSH = [PlayingCard(i, Suit.HEARTS) for i in range(1, 6)]
@@ -228,11 +228,14 @@ def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence
     ],
 )
 def test_score_hand(
-    remaining_hand: Sequence[PlayingCard], played_hand: Sequence[PlayingCard], jokers: Sequence[Joker], expected: float
+    remaining_hand: Sequence[PlayingCard],
+    played_hand: Sequence[PlayingCard],
+    jokers: Sequence[JokerBase],
+    expected: float,
 ) -> None:
     # A lot of the low level scoring of cards is captured elsewhere. In order to test the scoring ordering logic
     # test a number of hands with known scores
-    board = _make_board(jokers=jokers)
+    board = _make_board(jokers=list(jokers))
     blind = Mock(BlindState)
     blind.hand = remaining_hand
     assert score_hand(played_hand, board, blind) == expected

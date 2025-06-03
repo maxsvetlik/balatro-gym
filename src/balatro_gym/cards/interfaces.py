@@ -20,7 +20,7 @@ from ..mixins import (
 )
 from .voucher import ClearanceSale, Liquidation, Voucher
 
-__all__ = ["HasCost"]
+__all__ = ["HasCost", "Edition", "Foil", "Holographic", "Polychrome", "Negative"]
 
 
 class Suit(Enum):
@@ -95,7 +95,13 @@ class Edition(HasChips, HasMult, HasMultiplier, Protocol):
 
 
 class BaseEdition(Edition):
-    pass
+    def __hash__(self) -> int:
+        return hash(None)
+
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, BaseEdition):
+            return True
+        return False
 
 
 class Foil(Edition):
@@ -128,7 +134,13 @@ class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, HasIsDestroyed, Pr
 
 
 class BaseEnhancement(Enhancement):
-    pass
+    def __hash__(self) -> int:
+        return hash(None)
+
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, BaseEnhancement):
+            return True
+        return False
 
 
 class BonusCard(Enhancement):
@@ -205,7 +217,13 @@ class Seal(HasMoney, HasRetrigger, HasCreatePlanet, HasCreateTarot):
 
 class BaseSeal(Seal):
     # Added for parity with other "Base" types
-    pass
+    def __hash__(self) -> int:
+        return hash(None)
+
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, BaseSeal):
+            return True
+        return False
 
 
 class GoldSeal(Seal):
@@ -235,8 +253,12 @@ class PurpleSeal(Seal):
 class HasCost(Protocol):
     _cost: int = 1
 
+    @property
+    def base_cost(self) -> int:
+        return self._cost
+
     def cost(self, vouchers: Sequence[Voucher]) -> int:
-        cost: float = self._cost
+        cost: float = self.base_cost
         if any([isinstance(voucher, Liquidation) for voucher in vouchers]):
             cost -= cost * 0.5
         elif any([isinstance(voucher, ClearanceSale) for voucher in vouchers]):
@@ -244,7 +266,7 @@ class HasCost(Protocol):
         return max(int(cost), 1)
 
     def sell_value(self, vouchers: Sequence[Voucher]) -> int:
-        sell_value: float = self._cost
+        sell_value: float = self.base_cost
         if any([isinstance(voucher, Liquidation) for voucher in vouchers]):
             sell_value -= sell_value * 0.5
         elif any([isinstance(voucher, ClearanceSale) for voucher in vouchers]):
@@ -281,9 +303,15 @@ class PlayingCard(HasChips, HasCost):
     def rank(self) -> Rank:
         return self._rank
 
+    def set_rank(self, rank: Rank) -> None:
+        self._rank = rank
+
     @property
     def base_suit(self) -> Suit:
         return self._base_suit
+
+    def set_base_suit(self, suit: Suit) -> None:
+        self._base_suit = suit
 
     @property
     def suit(self) -> Sequence[Suit]:
@@ -303,6 +331,10 @@ class PlayingCard(HasChips, HasCost):
     def seal(self) -> Seal:
         return self._seal
 
+    @property
+    def added_chips(self) -> int:
+        return self._added_chips
+
     def get_chips(self) -> int:
         enhancement_chips = 0
         if self._enhancement:
@@ -311,15 +343,15 @@ class PlayingCard(HasChips, HasCost):
             enhancement_chips += self._enhancement.get_chips()
         return self._base_chips + self._added_chips + enhancement_chips
 
-    def get_mult(self) -> int:
+    def get_mult(self) -> float:
         if isinstance(self.enhancement, HasMult):
             return self.enhancement.get_mult()
-        return 0
+        return 0.0
 
     def get_multiplication(self) -> float:
         if isinstance(self.enhancement, HasMultiplier):
             return self.enhancement.get_multiplication()
-        return 1
+        return 1.0
 
     def get_scored_money(self) -> int:
         if isinstance(self.enhancement, HasMoney):
@@ -346,6 +378,10 @@ class PlayingCard(HasChips, HasCost):
     def is_face_card(self) -> bool:
         return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK]
 
+    def increase_rank(self) -> None:
+        new_order = 1 if self._rank.value.order == 13 else self._rank.value.order + 1
+        self._rank = Rank.from_int(new_order)
+
     def __eq__(self, value: Any) -> bool:
         if isinstance(value, PlayingCard):
             return (
@@ -355,6 +391,7 @@ class PlayingCard(HasChips, HasCost):
                 and self._base_suit == value._base_suit
                 and self._edition == value._edition
                 and self._seal == value._seal
+                and self._enhancement == value.enhancement
             )
         return False
 
@@ -405,8 +442,11 @@ class Deck(HasReset):
         return delt
 
     def destroy(self, cards: Sequence[PlayingCard]) -> None:
-        """Destroyed cards are removed permanently. Though, this can only happen to cards in-play."""
+        """Destroyed cards are removed permanently."""
         for card in cards:
+            # Required since cards can get destroyed via the HangedMan tarot card
+            if card in self._cards_remaining:
+                self._cards_remaining.remove(card)
             try:
                 self._cards_played.remove(card)
             except ValueError:

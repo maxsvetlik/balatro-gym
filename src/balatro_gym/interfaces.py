@@ -6,7 +6,7 @@ from enum import Enum, auto
 from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
-from .cards.interfaces import BaseEdition, Deck, Edition, HasCost, PlayingCard
+from .cards.interfaces import BaseEdition, Deck, Edition, Foil, HasCost, Holographic, Negative, PlayingCard, Polychrome
 from .cards.voucher import Voucher
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_NUM_JOKER_SLOTS, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
@@ -46,7 +46,7 @@ class Booster(Protocol):
     n_cards: int
     n_choice: int
 
-    def sample(self) -> Sequence[HasCost]:
+    def sample(self, jokers: Sequence[JokerBase], vouchers: Sequence[Voucher]) -> Sequence[HasCost]:
         raise NotImplementedError
 
 
@@ -136,10 +136,6 @@ class PlanetCard(HasCost):
 
 
 class Tarot(HasCost):
-    def is_valid(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
-        """Check if the consumable can be applied"""
-        raise NotImplementedError
-
     def apply(self, selected_cards: Sequence[PlayingCard], board_state: BoardState) -> bool:
         """Returns true if the card was used successfully"""
         raise NotImplementedError
@@ -175,6 +171,7 @@ class ConsumableState(HasReset):
         return False
 
 
+@dataclasses.dataclass
 class JokerBase(HasCost):
     _edition: Edition
 
@@ -188,14 +185,18 @@ class JokerBase(HasCost):
 
     @property
     def base_cost(self) -> int:
-        return self._cost
+        edition_cost = 0
+        if isinstance(self.edition, Foil):
+            edition_cost = 2
+        elif isinstance(self.edition, Holographic):
+            edition_cost = 3
+        elif isinstance(self.edition, Polychrome) or isinstance(self.edition, Negative):
+            edition_cost = 5
+        return self._cost + edition_cost
 
     @property
     def edition(self) -> Edition:
         return self._edition
-
-    # TODO: implement cost method that considers the edition to override the base implementation
-    # def cost(self, vouchers: Sequence[Vouchers]) -> int:
 
     @property
     def rarity(self) -> Rarity:
@@ -247,7 +248,7 @@ class BoardState(HasReset):
     consumable: ConsumableState
     deck: Deck
     money: int
-    jokers: Sequence[JokerBase]
+    jokers: list[JokerBase]
     ante_num: int
     round_num: int
     num_hands: int
@@ -312,6 +313,10 @@ class BoardState(HasReset):
         # Needed to buy or acquire a consumable
         assert self.consumable.num_slots > len(self.consumable.consumables)
         self.consumable.consumables.append(card)
+
+    def acquire_joker(self, joker: JokerBase) -> None:
+        assert self.num_joker_slots > len(self.jokers)
+        self.jokers.append(joker)
 
     def set_money(self, amount: int) -> None:
         self.money = amount
