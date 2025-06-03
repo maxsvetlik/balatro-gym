@@ -7,6 +7,7 @@ from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 import numpy as np
 
+from ..interfaces import JokerBase
 from ..mixins import (
     HasChips,
     HasCreatePlanet,
@@ -18,6 +19,7 @@ from ..mixins import (
     HasReset,
     HasRetrigger,
 )
+from .joker.effect_joker import Pareidolia
 from .voucher import ClearanceSale, Liquidation, Voucher
 
 __all__ = ["HasCost", "Edition", "Foil", "Holographic", "Polychrome", "Negative"]
@@ -348,8 +350,9 @@ class PlayingCard(HasChips, HasCost):
     def add_chips(self, num_chips: int) -> None:
         self._added_chips += num_chips
 
-    def is_face_card(self) -> bool:
-        return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK]
+    def is_face_card(self, jokers: Sequence[JokerBase]) -> bool:
+        has_paraidolia = any([isinstance(j, Pareidolia) for j in jokers])
+        return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK] or has_paraidolia
 
     def increase_rank(self) -> None:
         new_order = 1 if self._rank.value.order == 13 else self._rank.value.order + 1
@@ -400,6 +403,10 @@ class Deck(HasReset):
     @property
     def cards_played(self) -> Sequence[PlayingCard]:
         return [*self._cards_played]
+
+    @property
+    def cards(self) -> Sequence[PlayingCard]:
+        return [*self._cards_remaining] + [*self._cards_played]
 
     def reset(self) -> None:
         self._cards_remaining = deque([*self._cards_remaining, *self._cards_played])

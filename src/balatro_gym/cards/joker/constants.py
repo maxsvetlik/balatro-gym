@@ -23,12 +23,15 @@ JOKERS: Mapping[Rarity, Sequence[type[JokerBase]]] = {
         joker.DeviousJoker,
         joker.CraftyJoker,
         joker.HalfJoker,
+        ejoker.ChaosTheClown,
     ],
     Rarity.UNCOMMON: [
         joker.JokerStencil,
         ejoker.FourFingers,
         ejoker.Mime,
         ejoker.OopsAll6s,
+        joker.Fibonacci,
+        joker.SteelJoker,
     ],
     Rarity.RARE: [
         joker.TheDuo,

@@ -10,7 +10,7 @@ from balatro_gym.cards.booster_packs import (
     PackType,
 )
 from balatro_gym.cards.interfaces import HasCost
-from balatro_gym.cards.joker.effect_joker import Showman
+from balatro_gym.cards.joker.effect_joker import ChaosTheClown, Showman
 from balatro_gym.cards.joker.utils import sample_jokers
 from balatro_gym.cards.planet import PLANET_CARDS
 from balatro_gym.cards.tarot import TAROT_CARDS
@@ -52,8 +52,18 @@ class Shop:
         self.reroll_price = reroll_price
         self.vouchers: Sequence[Voucher] = []
         self.bought_vouchers: set[Voucher] = set()
+        self.booster_packs: Sequence[Booster] = []
         self.current_state = None
         self.allow_duplicates = allow_duplicates
+        self.n_rerolls = 0
+
+    def get_reroll_price(self, jokers: Sequence[JokerBase]) -> int:
+        if self.n_rerolls == 0 and any([isinstance(j, ChaosTheClown) for j in jokers]):
+            return 0
+        return self.reroll_price + self.n_rerolls
+
+    def end_round_reset(self) -> None:
+        self.n_rerolls = 0
 
     def increase_num_buyable_slots(self) -> None:
         self.num_vouchers += 1
@@ -69,8 +79,9 @@ class Shop:
         if voucher in self.vouchers:
             self.vouchers = [v for v in self.vouchers if v != voucher]
 
-    def reroll(self) -> ShopState:
-        return ShopState([], self.vouchers, [])
+    def reroll(self, jokers: Sequence[JokerBase]) -> ShopState:
+        self.n_rerolls += 1
+        return ShopState(self.generate_buyable_cards(jokers), self.vouchers, self.booster_packs)
 
     def voucher_generator(self) -> Sequence[Voucher]:
         valid_vouchers = []
@@ -86,10 +97,11 @@ class Shop:
         # TODO: Generate a new voucher when a voucher tag is used
         if (round - 1) % 3 == 0:
             self.vouchers = self.voucher_generator()
+        self.booster_packs = self.generate_booster_packs(round)
         return ShopState(
             vouchers=self.vouchers,
             buyable_cards=self.generate_buyable_cards(jokers),
-            booster_packs=self.generate_booster_packs(round),
+            booster_packs=self.booster_packs,
         )
 
     def generate_booster_packs(self, round: int) -> Sequence[Booster]:

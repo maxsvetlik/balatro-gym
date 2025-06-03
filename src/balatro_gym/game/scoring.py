@@ -2,7 +2,7 @@ from collections import Counter
 from typing import Sequence
 
 from balatro_gym.cards.interfaces import LuckyCard, PlayingCard, Rank, RedSeal
-from balatro_gym.cards.joker.effect_joker import Mime
+from balatro_gym.cards.joker.effect_joker import Hack, Mime
 from balatro_gym.cards.utils import contains_two_pair, get_flush, get_straight, is_royal
 from balatro_gym.interfaces import BlindState, BoardState, JokerBase, PokerHandType
 
@@ -59,6 +59,9 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
 
     for card in cards:
         num_card_retriggers = 2 if isinstance(card.seal, RedSeal) else 1
+        if (any(isinstance(j, Hack) for j in board_state.jokers) and
+                card.rank in [Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE]):
+            num_card_retriggers += 1
         chips_sum += card.get_chips() * num_card_retriggers
         mult_sum += card.get_mult() * num_card_retriggers
         mult_sum *= card.get_multiplication() * num_card_retriggers
