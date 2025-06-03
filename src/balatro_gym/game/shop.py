@@ -58,8 +58,11 @@ class Shop:
         self.n_rerolls = 0
 
     def get_reroll_price(self, jokers: Sequence[JokerBase]) -> int:
-        if self.n_rerolls == 0 and any([isinstance(j, ChaosTheClown) for j in jokers]):
-            return 0
+        if any([isinstance(j, ChaosTheClown) for j in jokers]):
+            if self.n_rerolls == 0:
+                return 0
+            else:
+                return self.reroll_price + self.n_rerolls - 1
         return self.reroll_price + self.n_rerolls
 
     def end_round_reset(self) -> None:

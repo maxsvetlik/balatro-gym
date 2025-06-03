@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from balatro_gym.cards.interfaces import PlayingCard, Rank, Suit
-from balatro_gym.cards.joker.effect_joker import FourFingers
+from balatro_gym.cards.joker.effect_joker import FourFingers, ChaosTheClown
 from balatro_gym.cards.joker.joker import (
     CleverJoker,
     CraftyJoker,
@@ -28,6 +28,7 @@ from balatro_gym.cards.joker.joker import (
 from balatro_gym.cards.joker.utils import sample_jokers
 from balatro_gym.cards.utils import get_flush, get_straight, is_royal
 from balatro_gym.constants import DEFAULT_NUM_JOKER_SLOTS
+from balatro_gym.game.shop import Shop
 from balatro_gym.interfaces import JokerBase, PokerHandType, Rarity, Type
 from test.utils import _make_board, _make_card
 
@@ -455,6 +456,18 @@ def test_four_fingers(hand: Sequence[PlayingCard], expected_hand: PokerHandType)
     else:
         assert False
     assert expected_hand == poker_hand
+
+
+@pytest.mark.unit
+def test_chaos_the_clown() -> None:
+    j = ChaosTheClown()
+    shop = Shop()
+    assert shop.get_reroll_price([]) == 5
+    assert shop.get_reroll_price([j]) == 0
+    shop.reroll([j])
+    assert shop.get_reroll_price([j]) == 5
+    shop.reroll([j])
+    assert shop.get_reroll_price([j]) == 6
 
 
 @pytest.mark.unit

@@ -9,6 +9,7 @@ from balatro_gym.cards.utils import (
     get_max_rank,
     get_straight,
 )
+from .effect_joker import Pareidolia
 
 from ...interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
 from ..interfaces import PlayingCard, Rank, SteelCard, Suit
@@ -363,7 +364,8 @@ class ScaryFace(JokerBase):
     def get_chips_hand(
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        n_face_cards = len([card for card in scored_cards if card.is_face_card([])])
+        has_pareidolia = any([isinstance(j, Pareidolia) for j in board.jokers])
+        n_face_cards = len([card for card in scored_cards if card.is_face_card(has_pareidolia)])
         return n_face_cards * 30
 
 
