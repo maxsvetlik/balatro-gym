@@ -3,7 +3,7 @@ import random
 from collections import deque
 from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Any, Optional, Protocol, Union, runtime_checkable
+from typing import Any, Protocol, Union, runtime_checkable
 
 import numpy as np
 
@@ -95,7 +95,13 @@ class Edition(HasChips, HasMult, HasMultiplier, Protocol):
 
 
 class BaseEdition(Edition):
-    pass
+    def __hash__(self) -> int:
+        return hash(None)
+
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, BaseEdition):
+            return True
+        return False
 
 
 class Foil(Edition):
@@ -125,6 +131,16 @@ class Enhancement(HasChips, HasMult, HasMultiplier, HasMoney, HasIsDestroyed, Pr
 
     def __eq__(self, other: Any) -> bool:
         return self.__class__.__name__ == other.__class__.__name__
+
+
+class BaseEnhancement(Enhancement):
+    def __hash__(self) -> int:
+        return hash(None)
+
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, BaseEnhancement):
+            return True
+        return False
 
 
 class BonusCard(Enhancement):
@@ -199,6 +215,17 @@ class Seal(HasMoney, HasRetrigger, HasCreatePlanet, HasCreateTarot):
     pass
 
 
+class BaseSeal(Seal):
+    # Added for parity with other "Base" types
+    def __hash__(self) -> int:
+        return hash(None)
+
+    def __eq__(self, obj: Any) -> bool:
+        if isinstance(obj, BaseSeal):
+            return True
+        return False
+
+
 class GoldSeal(Seal):
     def get_scored_money(self, probability_modifier: int = 1) -> int:
         return 3
@@ -250,9 +277,9 @@ class HasCost(Protocol):
 class PlayingCard(HasChips, HasCost):
     _rank: Rank
     _base_suit: Suit
-    _enhancement: Optional[Enhancement]
-    _edition: Optional[Edition]
-    _seal: Optional[Seal]
+    _enhancement: Enhancement
+    _edition: Edition
+    _seal: Seal
     _base_chips: int
     _added_chips: int
 
@@ -260,9 +287,9 @@ class PlayingCard(HasChips, HasCost):
         self,
         rank: Union[Rank, int],
         base_suit: Suit,
-        enhancement: Optional[Enhancement],
-        edition: Optional[Edition],
-        seal: Optional[Seal],
+        enhancement: Enhancement = BaseEnhancement(),
+        edition: Edition = BaseEdition(),
+        seal: Seal = BaseSeal(),
     ):
         self._rank = rank if isinstance(rank, Rank) else Rank.from_int(rank)
         self._base_suit = base_suit
@@ -293,15 +320,15 @@ class PlayingCard(HasChips, HasCost):
         return [self._base_suit]
 
     @property
-    def enhancement(self) -> Optional[Enhancement]:
+    def enhancement(self) -> Enhancement:
         return self._enhancement
 
     @property
-    def edition(self) -> Optional[Edition]:
+    def edition(self) -> Edition:
         return self._edition
 
     @property
-    def seal(self) -> Optional[Seal]:
+    def seal(self) -> Seal:
         return self._seal
 
     @property
@@ -316,15 +343,15 @@ class PlayingCard(HasChips, HasCost):
             enhancement_chips += self._enhancement.get_chips()
         return self._base_chips + self._added_chips + enhancement_chips
 
-    def get_mult(self) -> int:
+    def get_mult(self) -> float:
         if isinstance(self.enhancement, HasMult):
             return self.enhancement.get_mult()
-        return 0
+        return 0.0
 
     def get_multiplication(self) -> float:
         if isinstance(self.enhancement, HasMultiplier):
             return self.enhancement.get_multiplication()
-        return 1
+        return 1.0
 
     def get_scored_money(self) -> int:
         if isinstance(self.enhancement, HasMoney):
@@ -336,13 +363,13 @@ class PlayingCard(HasChips, HasCost):
             return self.enhancement.get_end_money()
         return 0
 
-    def set_enhancement(self, enhancement: Optional[Enhancement]) -> None:
+    def set_enhancement(self, enhancement: Enhancement) -> None:
         self._enhancement = enhancement
 
-    def set_edition(self, edition: Optional[Edition]) -> None:
+    def set_edition(self, edition: Edition) -> None:
         self._edition = edition
 
-    def set_seal(self, seal: Optional[Seal]) -> None:
+    def set_seal(self, seal: Seal) -> None:
         self._seal = seal
 
     def add_chips(self, num_chips: int) -> None:

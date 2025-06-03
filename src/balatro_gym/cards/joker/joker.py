@@ -152,7 +152,7 @@ class MadJoker(JokerBase):
     def get_mult_hand(
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
-        if contains_two_pair(get_max_rank(blind.hand)):
+        if contains_two_pair(get_max_rank(scored_cards)):
             return 10
         return 0
 

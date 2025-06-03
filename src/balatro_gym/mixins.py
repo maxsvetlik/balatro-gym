@@ -15,9 +15,9 @@ class HasIsDestroyed(Protocol):
 
 @runtime_checkable
 class HasMult(Protocol):
-    def get_mult(self, probability_modifier: int = 1) -> int:
+    def get_mult(self, probability_modifier: int = 1) -> float:
         # This is expected to be actively added. Thus we return 0 in the base case.
-        return 0
+        return 0.0
 
 
 @runtime_checkable
