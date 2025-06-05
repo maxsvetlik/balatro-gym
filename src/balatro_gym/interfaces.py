@@ -209,6 +209,10 @@ class JokerBase(HasCost):
         """The money earned by the player from selling this Joker."""
         return 0
 
+    def get_end_of_round_money(self, blind: BlindState, board: "BoardState") -> int:
+        """The money earned from jokers at the end of a round."""
+        return 0
+
     def get_mult_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> float:
         """Get any additional mult value of a given card based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
