@@ -3,23 +3,30 @@ from unittest.mock import Mock
 
 import pytest
 
-from balatro_gym.cards.interfaces import PlayingCard, Rank, Suit
-from balatro_gym.cards.joker.effect_joker import ChaosTheClown, FourFingers
+from balatro_gym.cards.interfaces import PlayingCard, Rank, SteelCard, Suit
+from balatro_gym.cards.joker.effect_joker import ChaosTheClown, FourFingers, Pareidolia
 from balatro_gym.cards.joker.joker import (
+    AbstractJoker,
     CleverJoker,
     CraftyJoker,
     CrazyJoker,
+    DelayedGratification,
     DeviousJoker,
     DrollJoker,
+    EvenSteven,
+    Fibonacci,
     GluttonousJoker,
     GreedyJoker,
+    GrosMichel,
     HalfJoker,
     Joker,
     JokerStencil,
     JollyJoker,
     LustyJoker,
     MadJoker,
+    ScaryFace,
     SlyJoker,
+    SteelJoker,
     TheDuo,
     WilyJoker,
     WrathfulJoker,
@@ -467,6 +474,90 @@ def test_chaos_the_clown() -> None:
     assert shop.get_reroll_price([j]) == 5
     shop.reroll([j])
     assert shop.get_reroll_price([j]) == 6
+
+
+@pytest.mark.unit
+def test_fibonacci() -> None:
+    j = Fibonacci()
+    trigger_ranks = [Rank.ACE, Rank.TWO, Rank.THREE, Rank.FIVE, Rank.EIGHT]
+    for rank in range(1, 14):
+        if Rank.from_int(rank) in trigger_ranks:
+            assert j.get_mult_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock()) == 8
+        else:
+            assert j.get_mult_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock()) == 0
+
+
+@pytest.mark.unit
+def test_steel_joker() -> None:
+    j = SteelJoker()
+    for n_steels in range(5):
+        cards = [_make_card(enhancement=SteelCard())
+                 for _ in range(n_steels)] + [_make_card() for _ in range(5 - n_steels)]
+        board = Mock()
+        board.deck = Mock(cards=cards)
+        assert j.get_multiplication(Mock(), Mock(), board, Mock()) == 1 + 0.2 * n_steels
+
+
+@pytest.mark.unit
+def test_scary_face() -> None:
+    j = ScaryFace()
+    trigger_ranks = [Rank.KING, Rank.QUEEN, Rank.JACK]
+    for rank in range(1, 14):
+        if Rank.from_int(rank) in trigger_ranks:
+            assert j.get_chips_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[])) == 30
+        else:
+            assert j.get_chips_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[])) == 0
+
+
+@pytest.mark.unit
+def test_abstract_joker() -> None:
+    j = AbstractJoker()
+    for n_jokers in range(5):
+        board = Mock(jokers=[Joker()] * n_jokers)
+        assert j.get_mult_hand(Mock(), Mock(), board, Mock()) == 3 * n_jokers
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "num_discards,discards_left,expected_cash",
+    [
+        [5, 5, 10],
+        [5, 4, 0],
+        [2, 2, 4],
+    ],
+)
+def test_delayed_gratification(num_discards: int, discards_left: int, expected_cash: int) -> None:
+    j = DelayedGratification()
+    board = Mock(num_discards=num_discards)
+    blind = Mock(num_discards_remaining=discards_left)
+    assert j.get_end_of_round_money(blind, board) == expected_cash
+
+
+@pytest.mark.unit
+def test_pareidolia() -> None:
+    j = ScaryFace()
+    for rank in range(1, 14):
+        assert j.get_chips_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[Pareidolia()])) == 30
+
+
+@pytest.mark.unit
+def test_gros_michel() -> None:
+    j = GrosMichel()
+    board = Mock(jokers=[j])
+    while len(board.jokers):
+        assert j.get_mult_hand(Mock(), Mock(), board, Mock()) == 15
+    assert len(board.jokers) == 0
+
+
+@pytest.mark.unit
+def test_even_steven() -> None:
+    j = EvenSteven()
+    trigger_ranks = [Rank.TWO, Rank.FOUR, Rank.SIX, Rank.EIGHT, Rank.TEN]
+    for rank in range(1, 14):
+        if Rank.from_int(rank) in trigger_ranks:
+            assert j.get_mult_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[])) == 4
+        else:
+            assert j.get_mult_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[])) == 0
 
 
 @pytest.mark.unit

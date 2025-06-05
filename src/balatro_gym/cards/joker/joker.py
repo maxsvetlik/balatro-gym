@@ -361,12 +361,9 @@ class ScaryFace(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_chips_hand(
-        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
-    ) -> int:
+    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
         has_pareidolia = any([isinstance(j, Pareidolia) for j in board.jokers])
-        n_face_cards = len([card for card in scored_cards if card.is_face_card(has_pareidolia)])
-        return n_face_cards * 30
+        return 30 if card.is_face_card(has_pareidolia) else 0
 
 
 class AbstractJoker(JokerBase):
