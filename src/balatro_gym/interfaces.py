@@ -209,21 +209,21 @@ class JokerBase(HasCost):
         """The money earned by the player from selling this Joker."""
         return 0
 
-    def get_money_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
+    def get_money_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
         """Get money per scored card"""
         return 0
 
-    def get_end_of_round_money(self, blind: BlindState, board: "BoardState") -> int:
+    def get_end_of_round_money(self, blind: BlindState, board: BoardState) -> int:
         """The money earned from jokers at the end of a round."""
         return 0
 
-    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> float:
+    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> float:
         """Get any additional mult value of a given card based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
         return 0.0
 
     def get_mult_hand(
-        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> float:
         """Get any additional mult value of a given hand based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
@@ -231,24 +231,34 @@ class JokerBase(HasCost):
         return 0.0
 
     def get_multiplication(
-        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> float:
         """Get any additional multiplication value of a given hand based on the Joker's effects.
         Note that multiplication is intended to be multiplicative, so in the base case, return 1."""
 
         return 1.0
 
-    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
+    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
         """Get any additional chips value of a given card based on the Joker's effects.
         Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
 
     def get_chips_hand(
-        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
         """Get any additional chip value of a given hand based on the Joker's effects.
         Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
+
+    def on_hand_scored(
+        self,
+        scored_cards: Sequence[PlayingCard],
+        blind: BlindState,
+        board: BoardState,
+        scored_hand: PokerHandType
+    ) -> None:
+        """Called when a hand is scored, allowing the Joker to modify the state."""
+        pass
 
 
 @dataclasses.dataclass

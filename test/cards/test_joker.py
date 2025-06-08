@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from balatro_gym.cards.interfaces import PlayingCard, Rank, SteelCard, Suit
-from balatro_gym.cards.joker.effect_joker import ChaosTheClown, FourFingers, Pareidolia
+from balatro_gym.cards.joker.effect_joker import ChaosTheClown, FourFingers, Pareidolia, SpaceJoker
 from balatro_gym.cards.joker.joker import (
     AbstractJoker,
     BusinessCard,
@@ -41,7 +41,7 @@ from balatro_gym.cards.joker.utils import sample_jokers
 from balatro_gym.cards.utils import get_flush, get_straight, is_royal
 from balatro_gym.constants import DEFAULT_NUM_JOKER_SLOTS
 from balatro_gym.game.shop import Shop
-from balatro_gym.interfaces import JokerBase, PokerHandType, Rarity, Type
+from balatro_gym.interfaces import BoardState, JokerBase, PokerHandType, Rarity, Type
 from test.utils import _make_board, _make_card
 
 
@@ -636,6 +636,21 @@ def test_ride_the_bus() -> None:
     assert j.get_mult_hand(hand_with_face, blind, board, Mock()) == 0
     # No face card again, should increment from 1
     assert j.get_mult_hand(hand, blind, board, Mock()) == 1
+
+
+def test_space_joker_on_hand_scored_upgrade() -> None:
+    joker = SpaceJoker()
+    scored_hand = PokerHandType.FLUSH
+    board = BoardState()
+    # Patch random.random to never trigger upgrade
+    with patch("random.random", return_value=0.5):
+        joker.on_hand_scored([], Mock(), board, scored_hand)
+        assert board.poker_hands[scored_hand.name].level == 1
+
+    # Patch random.random to always trigger upgrade
+    with patch("random.random", return_value=0.1):
+        joker.on_hand_scored([], Mock(), board, scored_hand)
+        assert board.poker_hands[scored_hand.name].level == 2
 
 
 @pytest.mark.unit
