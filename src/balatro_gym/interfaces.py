@@ -209,6 +209,10 @@ class JokerBase(HasCost):
         """The money earned by the player from selling this Joker."""
         return 0
 
+    def get_money_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
+        """Get money per scored card"""
+        return 0
+
     def get_end_of_round_money(self, blind: BlindState, board: "BoardState") -> int:
         """The money earned from jokers at the end of a round."""
         return 0
@@ -267,6 +271,8 @@ class BoardState(HasReset):
     """Contains the three blinds for the round."""
     last_used_consumable: Optional[ConsumableCardBase]
     """Last tarot or planet card used."""
+    hand_type_scored: dict[PokerHandType, int]
+    """Counts how many times each hand type has been scored in the current run."""
 
     def __init__(self) -> None:
         self.reset()
@@ -287,6 +293,8 @@ class BoardState(HasReset):
         self.completed_blinds = []
         self.round_blinds = []
         self.last_used_consumable = None
+        self.hand_type_scored = {poker_hand_type: 0 for poker_hand_type in PokerHandType}
+        self.rounds_without_score_face = 0
 
     def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
         return self.poker_hands[poker_hand_type.name]
@@ -324,3 +332,9 @@ class BoardState(HasReset):
 
     def set_money(self, amount: int) -> None:
         self.money = amount
+
+    def increment_hand_scored(self, hand_type: PokerHandType) -> None:
+        self.hand_type_scored[hand_type] += 1
+
+    def get_amount_hand_scored(self, hand_type: PokerHandType) -> int:
+        return self.hand_type_scored[hand_type]

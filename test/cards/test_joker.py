@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -7,6 +7,7 @@ from balatro_gym.cards.interfaces import PlayingCard, Rank, SteelCard, Suit
 from balatro_gym.cards.joker.effect_joker import ChaosTheClown, FourFingers, Pareidolia
 from balatro_gym.cards.joker.joker import (
     AbstractJoker,
+    BusinessCard,
     CleverJoker,
     CraftyJoker,
     CrazyJoker,
@@ -24,9 +25,13 @@ from balatro_gym.cards.joker.joker import (
     JollyJoker,
     LustyJoker,
     MadJoker,
+    OddTodd,
+    RideTheBus,
     ScaryFace,
+    Scholar,
     SlyJoker,
     SteelJoker,
+    Supernova,
     TheDuo,
     WilyJoker,
     WrathfulJoker,
@@ -558,6 +563,79 @@ def test_even_steven() -> None:
             assert j.get_mult_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[])) == 4
         else:
             assert j.get_mult_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[])) == 0
+
+
+@pytest.mark.unit
+def test_odd_todd() -> None:
+    trigger_ranks = [Rank.ACE, Rank.NINE, Rank.SEVEN, Rank.FIVE, Rank.THREE]
+    j = OddTodd()
+    for rank in range(1, 14):
+        if Rank.from_int(rank) in trigger_ranks:
+            assert j.get_chips_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[])) == 31
+        else:
+            assert j.get_chips_card(_make_card(rank=Rank.from_int(rank)), Mock(), Mock(jokers=[])) == 0
+
+
+@pytest.mark.unit
+def test_scholar() -> None:
+    j = Scholar()
+    for rank in range(1, 14):
+        card = _make_card(rank=Rank.from_int(rank))
+        chips = j.get_chips_card(card, Mock(), Mock(jokers=[]))
+        mult = j.get_mult_card(card, Mock(), Mock(jokers=[]))
+        if Rank.from_int(rank) == Rank.ACE:
+            assert chips == 20
+            assert mult == 4
+        else:
+            assert chips == 0
+            assert mult == 0
+
+
+@pytest.mark.unit
+def test_business_card() -> None:
+    j = BusinessCard()
+    face_ranks = [Rank.JACK, Rank.QUEEN, Rank.KING]
+    # Patch random.random to control output
+    with patch("random.random", return_value=0.4):
+        for rank in face_ranks:
+            card = _make_card(rank=rank)
+            assert j.get_money_card(card, Mock(), Mock(jokers=[])) == 2
+    with patch("random.random", return_value=0.6):
+        for rank in face_ranks:
+            card = _make_card(rank=rank)
+            assert j.get_money_card(card, Mock(), Mock(jokers=[])) == 0
+    # Non-face cards never give money
+    for rank_idx in range(1, 11):
+        card = _make_card(rank=Rank.from_int(rank_idx))
+        assert j.get_money_card(card, Mock(), Mock(jokers=[])) == 0
+
+
+@pytest.mark.unit
+def test_supernova() -> None:
+    j = Supernova()
+    board = Mock()
+    # Simulate get_poker_hand returning (None, PokerHandType.FLUSH)
+    with patch("balatro_gym.cards.joker.joker.get_poker_hand", return_value=(None, PokerHandType.FLUSH)):
+        board.get_amount_hand_scored = {PokerHandType.FLUSH: 42}
+        result = j.get_mult_hand(Mock(), Mock(), board, Mock())
+        assert result == 42
+
+
+@pytest.mark.unit
+def test_ride_the_bus() -> None:
+    j = RideTheBus()
+    board = Mock()
+    board.jokers = []
+    blind = Mock()
+    # No face cards in hand
+    hand = [_make_card(rank=Rank.FOUR), _make_card(rank=Rank.FIVE)]
+    for i in range(1, 4):
+        assert j.get_mult_hand(hand, blind, board, Mock()) == i
+    # Add a face card, should reset
+    hand_with_face = [_make_card(rank=Rank.KING)]
+    assert j.get_mult_hand(hand_with_face, blind, board, Mock()) == 0
+    # No face card again, should increment from 1
+    assert j.get_mult_hand(hand, blind, board, Mock()) == 1
 
 
 @pytest.mark.unit
