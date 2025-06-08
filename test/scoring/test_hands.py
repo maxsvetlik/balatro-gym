@@ -16,6 +16,7 @@ from balatro_gym.cards.interfaces import (
     Suit,
     WildCard,
 )
+from balatro_gym.cards.joker.effect_joker import Hack
 from balatro_gym.cards.joker.joker import Joker, JollyJoker
 from balatro_gym.game.scoring import _extract_largest_set, _get_max_rank, get_poker_hand, score_hand
 from balatro_gym.interfaces import BlindState, JokerBase, PokerHandType
@@ -225,6 +226,12 @@ def test_extract_largest_set(hand: Sequence[PlayingCard], expected_val: Sequence
             [],
             176,
         ],  # Check scoring of glass card
+        [
+            [],
+            [_make_card(rank=Rank.TWO)],
+            [Hack()],
+            9,
+        ],
     ],
 )
 def test_score_hand(

@@ -375,8 +375,8 @@ class PlayingCard(HasChips, HasCost):
     def add_chips(self, num_chips: int) -> None:
         self._added_chips += num_chips
 
-    def is_face_card(self) -> bool:
-        return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK]
+    def is_face_card(self, has_pareidolia: bool) -> bool:
+        return self._rank in [Rank.KING, Rank.QUEEN, Rank.JACK] or has_pareidolia
 
     def increase_rank(self) -> None:
         new_order = 1 if self._rank.value.order == 13 else self._rank.value.order + 1
@@ -427,6 +427,10 @@ class Deck(HasReset):
     @property
     def cards_played(self) -> Sequence[PlayingCard]:
         return [*self._cards_played]
+
+    @property
+    def cards(self) -> Sequence[PlayingCard]:
+        return [*self._cards_remaining] + [*self._cards_played]
 
     def reset(self) -> None:
         self._cards_remaining = deque([*self._cards_remaining, *self._cards_played])
