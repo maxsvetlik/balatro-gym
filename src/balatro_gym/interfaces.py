@@ -7,7 +7,6 @@ from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import BaseEdition, Deck, Edition, Foil, HasCost, Holographic, Negative, PlayingCard, Polychrome
-from .cards.joker.effect_joker import Burglar
 from .cards.voucher import Voucher
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_NUM_JOKER_SLOTS, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
@@ -151,8 +150,19 @@ class BlindState:
     required_score: int
     current_score: int
     num_hands_remaining: int
-    num_discards_remaining: int
+    _num_discards_remaining: int
     reward: int
+
+    def num_discards_remaining(self, has_burglar: bool) -> int:
+        if has_burglar:
+            return 0
+        return self._num_discards_remaining
+
+    def decrement_discards(self) -> None:
+        if self._num_discards_remaining > 0:
+            self._num_discards_remaining -= 1
+        else:
+            raise RuntimeError("No discards remaining, cannot decrement.")
 
 
 class ConsumableState(HasReset):
@@ -314,9 +324,8 @@ class BoardState(HasReset):
     def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
         return self.poker_hands[poker_hand_type.name]
 
-    @property
-    def hand_size(self) -> int:
-        if any([isinstance(j, Burglar) for j in self.jokers]):
+    def hand_size(self, has_burglar: bool) -> int:
+        if has_burglar:
             return self._hand_size + 3
         return self._hand_size
 

@@ -14,7 +14,7 @@ from balatro_gym.cards.utils import (
 from ...game.scoring import get_poker_hand
 from ...interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
 from ..interfaces import PlayingCard, Rank, SteelCard, Suit
-from .effect_joker import Pareidolia
+from .effect_joker import Pareidolia, has_burglar
 
 
 class Joker(JokerBase):
@@ -397,7 +397,8 @@ class DelayedGratification(JokerBase):
         return Rarity.COMMON
 
     def get_end_of_round_money(self, blind: BlindState, board: BoardState) -> int:
-        return 2 * board.num_discards if blind.num_discards_remaining == board.num_discards else 0
+        return 2 * board.num_discards \
+            if blind.num_discards_remaining(has_burglar(board.jokers)) == board.num_discards else 0
 
 
 class GrosMichel(JokerBase):
@@ -582,6 +583,30 @@ class Blackboard(JokerBase):
         board: BoardState,
         scored_hand: PokerHandType
     ) -> float:
-        if all(card.suit in (Suit.SPADES, Suit.CLUBS) for card in scored_cards):
+        if all(suit in (Suit.SPADES, Suit.CLUBS) for card in scored_cards for suit in card.suit):
             return 3.0
         return 1.0
+
+
+class Runner(JokerBase):
+    _cost: int = 5
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_hand(
+        self,
+        scored_cards: TypingSequence[PlayingCard],
+        blind: BlindState,
+        board: BoardState,
+        scored_hand: PokerHandType
+    ) -> int:
+        # +15 Chips if hand contains a Straight
+        if len(get_straight(scored_cards, board)) == 5:
+            return 15
+        return 0

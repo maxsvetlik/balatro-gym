@@ -6,7 +6,7 @@ from balatro_gym.game.scoring import score_hand
 
 from ..cards.decks import discard
 from ..cards.interfaces import PlayingCard
-from ..cards.joker.effect_joker import Burglar
+from ..cards.joker.effect_joker import has_burglar
 from ..interfaces import BlindState, BoardState
 from .blinds import BlindInfo, generate_run_blinds, get_blind_required_score
 from .shop import Shop, ShopState
@@ -140,11 +140,11 @@ class Run:
         if self._game_state is GameState.IN_ANTE:
             assert self._blind_state is not None
             if action.action_type == HandAction.DISCARD:
-                if self._blind_state.num_discards_remaining == 0:
+                if self._blind_state.num_discards_remaining(has_burglar(self._board_state.jokers)) == 0:
                     return False
                 new_cards = self._board_state.deck.deal(len(action.selected_playing))
                 self._blind_state.hand = discard(self._blind_state.hand, action.selected_playing, new_cards)
-                self._blind_state.num_discards_remaining -= 1
+                self._blind_state.decrement_discards()
 
             if action.action_type == HandAction.SCORE_HAND:
                 hand_score = score_hand(action.selected_playing, self._board_state, self._blind_state)
@@ -172,15 +172,13 @@ class Run:
 
     def _setup_round(self) -> None:
         self._board_state.round_num += 1
-        initial_hand = self._board_state.deck.deal(self._board_state.hand_size)
+        initial_hand = self._board_state.deck.deal(self._board_state.hand_size(has_burglar(self._board_state.jokers)))
         req_score = get_blind_required_score(self._board_state.round_num)
         money_reward = self.blinds[self._board_state.round_num].reward
         self._blind_state = BlindState(
             initial_hand, req_score, 0, self._board_state.num_hands, self._board_state.num_discards, money_reward
         )
         self._shop_state = None
-        if any([isinstance(j, Burglar) for j in self._board_state.jokers]):
-            self._blind_state.num_discards_remaining = 0
 
     def _setup_ante(self) -> None:
         self._board_state.ante_num += 1

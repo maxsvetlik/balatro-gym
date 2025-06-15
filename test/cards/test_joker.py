@@ -4,7 +4,14 @@ from unittest.mock import Mock, patch
 import pytest
 
 from balatro_gym.cards.interfaces import PlayingCard, Rank, SteelCard, Suit
-from balatro_gym.cards.joker.effect_joker import ChaosTheClown, FourFingers, Pareidolia, SpaceJoker
+from balatro_gym.cards.joker.effect_joker import (
+    Burglar,
+    ChaosTheClown,
+    FourFingers,
+    Pareidolia,
+    SpaceJoker,
+    has_burglar,
+)
 from balatro_gym.cards.joker.joker import (
     AbstractJoker,
     Blackboard,
@@ -29,6 +36,7 @@ from balatro_gym.cards.joker.joker import (
     MadJoker,
     OddTodd,
     RideTheBus,
+    Runner,
     ScaryFace,
     Scholar,
     SlyJoker,
@@ -43,7 +51,7 @@ from balatro_gym.cards.joker.utils import sample_jokers
 from balatro_gym.cards.utils import get_flush, get_straight, is_royal
 from balatro_gym.constants import DEFAULT_NUM_JOKER_SLOTS
 from balatro_gym.game.shop import Shop
-from balatro_gym.interfaces import BoardState, JokerBase, PokerHandType, Rarity, Type
+from balatro_gym.interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
 from test.utils import _make_board, _make_card
 
 
@@ -535,8 +543,9 @@ def test_abstract_joker() -> None:
 )
 def test_delayed_gratification(num_discards: int, discards_left: int, expected_cash: int) -> None:
     j = DelayedGratification()
-    board = Mock(num_discards=num_discards)
-    blind = Mock(num_discards_remaining=discards_left)
+    board = BoardState()
+    board.num_discards = num_discards
+    blind = BlindState([], 0, 0, 3, discards_left, 0)
     assert j.get_end_of_round_money(blind, board) == expected_cash
 
 
@@ -615,10 +624,10 @@ def test_business_card() -> None:
 @pytest.mark.unit
 def test_supernova() -> None:
     j = Supernova()
-    board = Mock()
+    board = BoardState()
     # Simulate get_poker_hand returning (None, PokerHandType.FLUSH)
     with patch("balatro_gym.cards.joker.joker.get_poker_hand", return_value=(None, PokerHandType.FLUSH)):
-        board.get_amount_hand_scored = {PokerHandType.FLUSH: 42}
+        board.hand_type_scored = {PokerHandType.FLUSH: 42}
         result = j.get_mult_hand(Mock(), Mock(), board, Mock())
         assert result == 42
 
@@ -685,6 +694,19 @@ def test_blackboard(cards: list[PlayingCard], expected: float) -> None:
 
 
 @pytest.mark.unit
+def test_burglar() -> None:
+    jokers: list[JokerBase] = []
+    hand_size = _make_board().hand_size(has_burglar(jokers))
+    num_discards = 3
+    blind_state = BlindState([], 0, 0, 3, num_discards, 0)
+    assert blind_state.num_discards_remaining(has_burglar(jokers)) == num_discards
+    jokers = [Burglar()]
+    board: BoardState = _make_board(jokers=jokers)
+    assert board.hand_size(has_burglar(jokers)) == hand_size + 3
+    assert blind_state.num_discards_remaining(has_burglar(jokers)) == 0
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "hand,expected_score",
     [
@@ -736,3 +758,41 @@ def test_sampler_joker() -> None:
             rare_count += 1
 
     assert common_count > uncommon_count > rare_count
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "hand,expected_chips",
+    [
+        # Straight: 2,3,4,5,6
+        ([
+            _make_card(rank=Rank.TWO),
+            _make_card(rank=Rank.THREE),
+            _make_card(rank=Rank.FOUR),
+            _make_card(rank=Rank.FIVE),
+            _make_card(rank=Rank.SIX)
+        ], 15),
+        # Not a straight
+        ([
+            _make_card(rank=Rank.TWO),
+            _make_card(rank=Rank.THREE),
+            _make_card(rank=Rank.FOUR),
+            _make_card(rank=Rank.FIVE),
+            _make_card(rank=Rank.EIGHT)
+        ], 0),
+        # Straight: 10,J,Q,K,A
+        ([
+            _make_card(rank=Rank.TEN),
+            _make_card(rank=Rank.JACK),
+            _make_card(rank=Rank.QUEEN),
+            _make_card(rank=Rank.KING),
+            _make_card(rank=Rank.ACE)
+        ], 15),
+    ]
+)
+def test_runner(hand: list[PlayingCard], expected_chips: int) -> None:
+    board: BoardState = _make_board()
+    blind: Mock = Mock()
+    scored_hand: PokerHandType = PokerHandType.STRAIGHT
+    joker: Runner = Runner()
+    assert joker.get_chips_hand(hand, blind, board, scored_hand) == expected_chips

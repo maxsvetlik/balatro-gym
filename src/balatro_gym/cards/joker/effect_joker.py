@@ -117,6 +117,10 @@ class SpaceJoker(JokerBase):
             hand.level += 1
 
 
+def has_burglar(jokers: Sequence[JokerBase]) -> bool:
+    return any(isinstance(joker, Burglar) for joker in jokers)
+
+
 class Burglar(JokerBase):
     _cost: int = 6
 
