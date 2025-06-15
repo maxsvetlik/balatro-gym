@@ -260,6 +260,10 @@ class JokerBase(HasCost):
         """Called when a hand is scored, allowing the Joker to modify the state."""
         pass
 
+    def on_round_end(self, board: BoardState) -> None:
+        """Called when a hand is scored, allowing the Joker to modify the state."""
+        pass
+
 
 @dataclasses.dataclass
 class BoardState(HasReset):

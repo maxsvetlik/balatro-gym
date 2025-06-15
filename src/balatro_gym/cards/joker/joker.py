@@ -546,3 +546,18 @@ class TheDuo(JokerBase):
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> float:
         return 2. if contains_one_pair(get_max_rank(scored_cards)) else 1.
+
+
+class Egg(JokerBase):
+    _cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ECONOMY
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def on_round_end(self, board: BoardState) -> None:
+        self.set_cost(self.base_cost + 3)

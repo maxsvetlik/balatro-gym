@@ -107,6 +107,11 @@ class Run:
 
     def _end_round(self) -> None:
         # Call at the end of the round
+        for j in self._board_state.jokers:
+            j.on_round_end(self._board_state)
+            assert self._blind_state
+            money_gained = j.get_end_of_round_money(self._blind_state, self._board_state)
+            self._board_state.set_money(self._board_state.money + money_gained)
         self._blind_state = None
 
     def _end_ante(self) -> None:

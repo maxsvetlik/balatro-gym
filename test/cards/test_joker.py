@@ -14,6 +14,7 @@ from balatro_gym.cards.joker.joker import (
     DelayedGratification,
     DeviousJoker,
     DrollJoker,
+    Egg,
     EvenSteven,
     Fibonacci,
     GluttonousJoker,
@@ -651,6 +652,17 @@ def test_space_joker_on_hand_scored_upgrade() -> None:
     with patch("random.random", return_value=0.1):
         joker.on_hand_scored([], Mock(), board, scored_hand)
         assert board.poker_hands[scored_hand.name].level == 2
+
+
+def test_egg_on_round_end_increases_sell_value() -> None:
+    board = _make_board()
+    egg = Egg()
+    assert egg.base_cost == 4
+    # Simulate end of round
+    egg.on_round_end(board)
+    assert egg.base_cost == 7
+    egg.on_round_end(board)
+    assert egg.base_cost == 10
 
 
 @pytest.mark.unit
