@@ -257,6 +257,9 @@ class HasCost(Protocol):
     def base_cost(self) -> int:
         return self._cost
 
+    def set_cost(self, cost: int) -> None:
+        self._cost = cost
+
     def cost(self, vouchers: Sequence[Voucher]) -> int:
         cost: float = self.base_cost
         if any([isinstance(voucher, Liquidation) for voucher in vouchers]):

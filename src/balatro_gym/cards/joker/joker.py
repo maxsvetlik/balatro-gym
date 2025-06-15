@@ -1,5 +1,6 @@
 import random
 from collections.abc import Sequence
+from typing import Sequence as TypingSequence
 
 from balatro_gym.cards.utils import (
     contains_one_pair,
@@ -10,9 +11,10 @@ from balatro_gym.cards.utils import (
     get_straight,
 )
 
+from ...game.scoring import get_poker_hand
 from ...interfaces import BlindState, BoardState, JokerBase, PokerHandType, Rarity, Type
 from ..interfaces import PlayingCard, Rank, SteelCard, Suit
-from .effect_joker import Pareidolia
+from .effect_joker import Pareidolia, has_burglar
 
 
 class Joker(JokerBase):
@@ -327,7 +329,7 @@ class Fibonacci(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.UNCOMMON
 
-    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
+    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
         target_ranks = [Rank.ACE, Rank.TWO, Rank.THREE, Rank.FIVE, Rank.EIGHT]
         return 8 if card.rank in target_ranks else 0
 
@@ -361,7 +363,7 @@ class ScaryFace(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
+    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
         has_pareidolia = any([isinstance(j, Pareidolia) for j in board.jokers])
         return 30 if card.is_face_card(has_pareidolia) else 0
 
@@ -394,8 +396,9 @@ class DelayedGratification(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_end_of_round_money(self, blind: BlindState, board: "BoardState") -> int:
-        return 2 * board.num_discards if blind.num_discards_remaining == board.num_discards else 0
+    def get_end_of_round_money(self, blind: BlindState, board: BoardState) -> int:
+        return 2 * board.num_discards \
+            if blind.num_discards_remaining(has_burglar(board.jokers)) == board.num_discards else 0
 
 
 class GrosMichel(JokerBase):
@@ -429,9 +432,105 @@ class EvenSteven(JokerBase):
     def rarity(self) -> Rarity:
         return Rarity.COMMON
 
-    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
+    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
         target_rank = [Rank.TWO, Rank.FOUR, Rank.SIX, Rank.EIGHT, Rank.TEN]
         return 4 if card.rank in target_rank else 0
+
+
+class OddTodd(JokerBase):
+    _cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
+        target_ranks = [Rank.ACE, Rank.NINE, Rank.SEVEN, Rank.FIVE, Rank.THREE]
+        return 31 if card.rank in target_ranks else 0
+
+
+class Scholar(JokerBase):
+    _cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS  # or Type.ADDITIVE_MULT if you want to categorize differently
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
+        return 20 if card.rank == Rank.ACE else 0
+
+    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
+        return 4 if card.rank == Rank.ACE else 0
+
+
+class BusinessCard(JokerBase):
+    _cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ECONOMY
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_money_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
+        has_pareidolia = any([isinstance(j, Pareidolia) for j in board.jokers])
+        if card.is_face_card(has_pareidolia):
+            return 2 if random.random() < 0.5 else 0
+        return 0
+
+
+class Supernova(JokerBase):
+    _cost: int = 5
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ADDITIVE_MULT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
+        _, hand_type = get_poker_hand(scored_cards, board)
+        return board.get_amount_hand_scored(hand_type)
+
+
+class RideTheBus(JokerBase):
+    _cost: int = 6
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.rounds_without_score_face: int = 0
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ADDITIVE_MULT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_mult_hand(
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
+    ) -> int:
+        has_pareidolia = any([isinstance(j, Pareidolia) for j in board.jokers])
+        if any([card.is_face_card(has_pareidolia) for card in scored_cards]):
+            self.rounds_without_score_face = 0
+        else:
+            self.rounds_without_score_face += 1
+        return self.rounds_without_score_face
 
 
 class TheDuo(JokerBase):
@@ -449,3 +548,65 @@ class TheDuo(JokerBase):
         self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> float:
         return 2. if contains_one_pair(get_max_rank(scored_cards)) else 1.
+
+
+class Egg(JokerBase):
+    _cost: int = 4
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.ECONOMY
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def on_round_end(self, board: BoardState) -> None:
+        self.set_cost(self.base_cost + 3)
+
+
+class Blackboard(JokerBase):
+    _cost: int = 6
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.MULTIPLICATIVE
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.UNCOMMON
+
+    def get_multiplication(
+        self,
+        scored_cards: TypingSequence[PlayingCard],
+        blind: BlindState,
+        board: BoardState,
+        scored_hand: PokerHandType
+    ) -> float:
+        if all(suit in (Suit.SPADES, Suit.CLUBS) for card in scored_cards for suit in card.suit):
+            return 3.0
+        return 1.0
+
+
+class Runner(JokerBase):
+    _cost: int = 5
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.CHIPS
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.COMMON
+
+    def get_chips_hand(
+        self,
+        scored_cards: TypingSequence[PlayingCard],
+        blind: BlindState,
+        board: BoardState,
+        scored_hand: PokerHandType
+    ) -> int:
+        # +15 Chips if hand contains a Straight
+        if len(get_straight(scored_cards, board)) == 5:
+            return 15
+        return 0

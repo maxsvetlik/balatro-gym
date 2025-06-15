@@ -150,8 +150,19 @@ class BlindState:
     required_score: int
     current_score: int
     num_hands_remaining: int
-    num_discards_remaining: int
+    _num_discards_remaining: int
     reward: int
+
+    def num_discards_remaining(self, has_burglar: bool) -> int:
+        if has_burglar:
+            return 0
+        return self._num_discards_remaining
+
+    def decrement_discards(self) -> None:
+        if self._num_discards_remaining > 0:
+            self._num_discards_remaining -= 1
+        else:
+            raise RuntimeError("No discards remaining, cannot decrement.")
 
 
 class ConsumableState(HasReset):
@@ -209,17 +220,21 @@ class JokerBase(HasCost):
         """The money earned by the player from selling this Joker."""
         return 0
 
-    def get_end_of_round_money(self, blind: BlindState, board: "BoardState") -> int:
+    def get_money_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
+        """Get money per scored card"""
+        return 0
+
+    def get_end_of_round_money(self, blind: BlindState, board: BoardState) -> int:
         """The money earned from jokers at the end of a round."""
         return 0
 
-    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> float:
+    def get_mult_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> float:
         """Get any additional mult value of a given card based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
         return 0.0
 
     def get_mult_hand(
-        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> float:
         """Get any additional mult value of a given hand based on the Joker's effects.
         Note that mult is intended to be additive, so in the base case, return 0."""
@@ -227,24 +242,38 @@ class JokerBase(HasCost):
         return 0.0
 
     def get_multiplication(
-        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> float:
         """Get any additional multiplication value of a given hand based on the Joker's effects.
         Note that multiplication is intended to be multiplicative, so in the base case, return 1."""
 
         return 1.0
 
-    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: "BoardState") -> int:
+    def get_chips_card(self, card: PlayingCard, blind: BlindState, board: BoardState) -> int:
         """Get any additional chips value of a given card based on the Joker's effects.
         Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
 
     def get_chips_hand(
-        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: "BoardState", scored_hand: PokerHandType
+        self, scored_cards: Sequence[PlayingCard], blind: BlindState, board: BoardState, scored_hand: PokerHandType
     ) -> int:
         """Get any additional chip value of a given hand based on the Joker's effects.
         Note that chips are intended to be additive, so in the base case, return 0."""
         return 0
+
+    def on_hand_scored(
+        self,
+        scored_cards: Sequence[PlayingCard],
+        blind: BlindState,
+        board: BoardState,
+        scored_hand: PokerHandType
+    ) -> None:
+        """Called when a hand is scored, allowing the Joker to modify the state."""
+        pass
+
+    def on_round_end(self, board: BoardState) -> None:
+        """Called when a hand is scored, allowing the Joker to modify the state."""
+        pass
 
 
 @dataclasses.dataclass
@@ -257,7 +286,7 @@ class BoardState(HasReset):
     round_num: int
     num_hands: int
     num_discards: int
-    hand_size: int
+    _hand_size: int
     num_joker_slots: int
     vouchers: Sequence[Voucher]
     poker_hands: dict[str, PokerHand]
@@ -267,6 +296,8 @@ class BoardState(HasReset):
     """Contains the three blinds for the round."""
     last_used_consumable: Optional[ConsumableCardBase]
     """Last tarot or planet card used."""
+    hand_type_scored: dict[PokerHandType, int]
+    """Counts how many times each hand type has been scored in the current run."""
 
     def __init__(self) -> None:
         self.reset()
@@ -280,16 +311,23 @@ class BoardState(HasReset):
         self.round_num = 0
         self.num_hands = 4
         self.num_discards = 3
-        self.hand_size = 8
+        self._hand_size = 8
         self.num_joker_slots = DEFAULT_NUM_JOKER_SLOTS
         self.vouchers = []
         self.poker_hands = {poker_hand_type.name: PokerHand(poker_hand_type, 1, 0) for poker_hand_type in PokerHandType}
         self.completed_blinds = []
         self.round_blinds = []
         self.last_used_consumable = None
+        self.hand_type_scored = {poker_hand_type: 0 for poker_hand_type in PokerHandType}
+        self.rounds_without_score_face = 0
 
     def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
         return self.poker_hands[poker_hand_type.name]
+
+    def hand_size(self, has_burglar: bool) -> int:
+        if has_burglar:
+            return self._hand_size + 3
+        return self._hand_size
 
     def use_consumable(self, card: ConsumableCardBase, selected_cards: Sequence[PlayingCard]) -> bool:
         assert isinstance(card, PlanetCard) or isinstance(card, Tarot)
@@ -324,3 +362,9 @@ class BoardState(HasReset):
 
     def set_money(self, amount: int) -> None:
         self.money = amount
+
+    def increment_hand_scored(self, hand_type: PokerHandType) -> None:
+        self.hand_type_scored[hand_type] += 1
+
+    def get_amount_hand_scored(self, hand_type: PokerHandType) -> int:
+        return self.hand_type_scored[hand_type]

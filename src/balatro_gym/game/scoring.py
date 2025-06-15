@@ -80,6 +80,7 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
             chips, mult = _process_joker_card(joker, card, hand_type, board_state, blind_state)
             chips_sum += chips
             mult_sum += mult
+            money_sum += joker.get_money_card(card, blind_state, board_state)
 
     for joker in board_state.jokers:
         chips_sum += joker.get_chips_hand(played_cards, blind_state, board_state, hand_type)
@@ -91,7 +92,9 @@ def score_hand(hand: Sequence[PlayingCard], board_state: BoardState, blind_state
         mult_sum += joker.edition.get_mult()
         chips_sum += joker.edition.get_chips()
         mult_sum *= joker.edition.get_multiplication()
+        joker.on_hand_scored(played_cards, blind_state, board_state, hand_type)
         # TODO update joker. E.g. num hands played influences chips
+    board_state.increment_hand_scored(hand_type)
     return chips_sum * mult_sum
 
 
