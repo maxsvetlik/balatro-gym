@@ -34,6 +34,7 @@ JOKERS: Mapping[Rarity, Sequence[type[JokerBase]]] = {
         joker.BusinessCard,
         joker.Supernova,
         joker.RideTheBus,
+        joker.Egg,
     ],
     Rarity.UNCOMMON: [
         joker.JokerStencil,
@@ -45,6 +46,8 @@ JOKERS: Mapping[Rarity, Sequence[type[JokerBase]]] = {
         ejoker.Hack,
         joker.Pareidolia,
         ejoker.SpaceJoker,
+        ejoker.Burglar,
+        joker.Blackboard,
     ],
     Rarity.RARE: [
         joker.TheDuo,

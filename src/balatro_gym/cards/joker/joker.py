@@ -1,5 +1,6 @@
 import random
 from collections.abc import Sequence
+from typing import Sequence as TypingSequence
 
 from balatro_gym.cards.utils import (
     contains_one_pair,
@@ -561,3 +562,26 @@ class Egg(JokerBase):
 
     def on_round_end(self, board: BoardState) -> None:
         self.set_cost(self.base_cost + 3)
+
+
+class Blackboard(JokerBase):
+    _cost: int = 6
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.MULTIPLICATIVE
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.UNCOMMON
+
+    def get_multiplication(
+        self,
+        scored_cards: TypingSequence[PlayingCard],
+        blind: BlindState,
+        board: BoardState,
+        scored_hand: PokerHandType
+    ) -> float:
+        if all(card.suit in (Suit.SPADES, Suit.CLUBS) for card in scored_cards):
+            return 3.0
+        return 1.0

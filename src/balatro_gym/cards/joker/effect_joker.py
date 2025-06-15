@@ -115,3 +115,15 @@ class SpaceJoker(JokerBase):
         if random.random() < 0.25:
             hand = board.poker_hands[scored_hand.name]
             hand.level += 1
+
+
+class Burglar(JokerBase):
+    _cost: int = 6
+
+    @property
+    def joker_type(self) -> Type:
+        return Type.EFFECT
+
+    @property
+    def rarity(self) -> Rarity:
+        return Rarity.UNCOMMON

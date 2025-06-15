@@ -7,6 +7,7 @@ from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 from .cards.decks import STANDARD_DECK
 from .cards.interfaces import BaseEdition, Deck, Edition, Foil, HasCost, Holographic, Negative, PlayingCard, Polychrome
+from .cards.joker.effect_joker import Burglar
 from .cards.voucher import Voucher
 from .constants import DEFAULT_NUM_CONSUMABLE, DEFAULT_NUM_JOKER_SLOTS, DEFAULT_START_MONEY
 from .game.blinds import BlindInfo
@@ -275,7 +276,7 @@ class BoardState(HasReset):
     round_num: int
     num_hands: int
     num_discards: int
-    hand_size: int
+    _hand_size: int
     num_joker_slots: int
     vouchers: Sequence[Voucher]
     poker_hands: dict[str, PokerHand]
@@ -300,7 +301,7 @@ class BoardState(HasReset):
         self.round_num = 0
         self.num_hands = 4
         self.num_discards = 3
-        self.hand_size = 8
+        self._hand_size = 8
         self.num_joker_slots = DEFAULT_NUM_JOKER_SLOTS
         self.vouchers = []
         self.poker_hands = {poker_hand_type.name: PokerHand(poker_hand_type, 1, 0) for poker_hand_type in PokerHandType}
@@ -312,6 +313,12 @@ class BoardState(HasReset):
 
     def get_poker_hand(self, poker_hand_type: PokerHandType) -> PokerHand:
         return self.poker_hands[poker_hand_type.name]
+
+    @property
+    def hand_size(self) -> int:
+        if any([isinstance(j, Burglar) for j in self.jokers]):
+            return self._hand_size + 3
+        return self._hand_size
 
     def use_consumable(self, card: ConsumableCardBase, selected_cards: Sequence[PlayingCard]) -> bool:
         assert isinstance(card, PlanetCard) or isinstance(card, Tarot)

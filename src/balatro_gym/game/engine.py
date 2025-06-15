@@ -6,6 +6,7 @@ from balatro_gym.game.scoring import score_hand
 
 from ..cards.decks import discard
 from ..cards.interfaces import PlayingCard
+from ..cards.joker.effect_joker import Burglar
 from ..interfaces import BlindState, BoardState
 from .blinds import BlindInfo, generate_run_blinds, get_blind_required_score
 from .shop import Shop, ShopState
@@ -178,6 +179,8 @@ class Run:
             initial_hand, req_score, 0, self._board_state.num_hands, self._board_state.num_discards, money_reward
         )
         self._shop_state = None
+        if any([isinstance(j, Burglar) for j in self._board_state.jokers]):
+            self._blind_state.num_discards_remaining = 0
 
     def _setup_ante(self) -> None:
         self._board_state.ante_num += 1

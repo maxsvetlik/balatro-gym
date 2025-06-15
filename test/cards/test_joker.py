@@ -7,6 +7,7 @@ from balatro_gym.cards.interfaces import PlayingCard, Rank, SteelCard, Suit
 from balatro_gym.cards.joker.effect_joker import ChaosTheClown, FourFingers, Pareidolia, SpaceJoker
 from balatro_gym.cards.joker.joker import (
     AbstractJoker,
+    Blackboard,
     BusinessCard,
     CleverJoker,
     CraftyJoker,
@@ -663,6 +664,24 @@ def test_egg_on_round_end_increases_sell_value() -> None:
     assert egg.base_cost == 7
     egg.on_round_end(board)
     assert egg.base_cost == 10
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "cards,expected",
+    [
+        ([_make_card(suit=Suit.SPADES) for _ in range(5)], 3.0),
+        ([_make_card(suit=Suit.CLUBS) for _ in range(5)], 3.0),
+        ([_make_card(suit=Suit.SPADES), _make_card(suit=Suit.CLUBS)] * 2 + [_make_card(suit=Suit.SPADES)], 3.0),
+        ([_make_card(suit=Suit.SPADES), _make_card(suit=Suit.HEARTS)], 1.0),
+    ]
+)
+def test_blackboard(cards: list[PlayingCard], expected: float) -> None:
+    board: BoardState = _make_board()
+    blind: Mock = Mock()
+    scored_hand: PokerHandType = PokerHandType.FLUSH
+    joker: Blackboard = Blackboard()
+    assert joker.get_multiplication(cards, blind, board, scored_hand) == expected
 
 
 @pytest.mark.unit
